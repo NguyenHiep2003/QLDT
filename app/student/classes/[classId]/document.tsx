@@ -11,8 +11,8 @@ export default function Index() {
                 alignItems: 'center',
             }}
         >
-            <Text>Edit app/index.tsx to edit this screen. Hiệp mo</Text>
-            <Link href={"/student"}>Press here</Link>
+            <Text>Document Tab</Text>
+            <Link href={'/student'}>Press here</Link>
         </View>
     );
 }
