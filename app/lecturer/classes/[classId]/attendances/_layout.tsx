@@ -1,3 +1,4 @@
+// app/(top-tabs)/_layout.tsx
 import {
     MaterialTopTabNavigationEventMap,
     MaterialTopTabNavigationOptions,
@@ -15,11 +16,11 @@ import {
     MaterialTopTabNavigationEventMap
   >(Navigator);
   
-  export default function TopTabLayout() {
+  export default function TabLayout() {
     return (
       <MaterialTopTabs>
-        <MaterialTopTabs.Screen name="document" options={{ title: "Tài liệu" }} />
-        <MaterialTopTabs.Screen name="assignment" options={{ title: "Bài tập" }} />
+        <MaterialTopTabs.Screen name="index" options={{ title: "Điểm danh" }} />
+        <MaterialTopTabs.Screen name="history" options={{ title: "Lịch sử điểm danh" }} />
       </MaterialTopTabs>
     );
   }

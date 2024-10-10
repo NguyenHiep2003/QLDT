@@ -12,7 +12,9 @@ export default function Index() {
             }}
         >
             <Text>Edit app/index.tsx to edit this screen. Hiệp mo</Text>
-            <Link href={"/student"}>Press here</Link>
+            <Link href={"/student"}>Press here to go to student tab</Link>
+            <Link href={"/lecturer"}>Press here to go to lecturer tab</Link>
+
         </View>
     );
 }

@@ -2,7 +2,7 @@ import { Link, Redirect } from 'expo-router';
 import { useState } from 'react';
 import { Button, Text, View } from 'react-native';
 
-export default function Index() {
+export default function AssignmentInfo() {
     return (
         <View
             style={{
@@ -11,8 +11,7 @@ export default function Index() {
                 alignItems: 'center',
             }}
         >
-            <Text>Assignment Tab</Text>
-            <Link href={"/student"}>Press here</Link>
+            <Text>Display info of assignment</Text>
         </View>
     );
 }

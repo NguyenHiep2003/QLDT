@@ -1,7 +1,6 @@
-import { Link } from 'expo-router';
-import {  Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
-export default function SignInScreen() {
+export default function CreateClassScreen() {
     return (
         <View
             style={{
@@ -10,8 +9,7 @@ export default function SignInScreen() {
                 alignItems: 'center',
             }}
         >
-            <Text>Sign in page</Text>
-
+            <Text>Create class screen of lecture</Text>
         </View>
     );
 }
