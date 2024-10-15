@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, SafeAreaView, ScrollView } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
+import {Link} from "expo-router";
 
 const CreateClassScreen = () => {
     const [className, setClassName] = useState('');
@@ -134,6 +135,9 @@ const CreateClassScreen = () => {
                 <TouchableOpacity style={styles.button} onPress={handleCreateClass}>
                     <Text style={styles.buttonText}>Tạo lớp học</Text>
                 </TouchableOpacity>
+
+                <Link href={"/student"} style={styles.classOpen}>Thông tin danh sách lớp mở</Link>
+
             </ScrollView>
         </SafeAreaView>
     );
@@ -193,7 +197,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: 10,
         marginBottom: 20,
-        zIndex: -1
+        zIndex: -1,
+        width: "50%",
+        alignSelf: 'center',
     },
     buttonText: {
         color: 'white',
@@ -204,6 +210,11 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         zIndex: -1
     },
+    classOpen: {
+        color: '#c21c1c',
+        zIndex: -1,
+        textAlign: "center"
+    }
 });
 
 export default CreateClassScreen;

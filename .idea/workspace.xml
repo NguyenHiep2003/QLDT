@@ -5,9 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d0865d62-49a4-4b34-9fa5-8417e28b156e" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/lecturer/(tabs)/class-management/[classId].tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/lecturer/(tabs)/class-management/[classId].tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/lecturer/(tabs)/class-management/create-class.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/lecturer/(tabs)/class-management/create-class.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,23 +41,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "feature-create-edit-class",
-    "last_opened_file_path": "D:/MyProgram/IT4788 - Cross platform/QLDT",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "npm.android.executor": "Run",
-    "npm.start.executor": "Run",
-    "settings.editor.selected.configurable": "reference.settings.ide.settings.web.browsers",
-    "ts.external.directory.path": "D:\\MyProgram\\IT4788 - Cross platform\\QLDT\\node_modules\\typescript\\lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feature-create-edit-class&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/MyProgram/IT4788 - Cross platform/QLDT&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;npm.android.executor&quot;: &quot;Run&quot;,
+    &quot;npm.start.executor&quot;: &quot;Run&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settings.ide.settings.web.browsers&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;D:\\MyProgram\\IT4788 - Cross platform\\QLDT\\node_modules\\typescript\\lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="npm.start">
     <configuration name="android" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
       <package-json value="$PROJECT_DIR$/package.json" />
@@ -108,7 +108,13 @@
       <workItem from="1728371687328" duration="1481000" />
       <workItem from="1728487748043" duration="2642000" />
       <workItem from="1728749550566" duration="1997000" />
-      <workItem from="1728805582772" duration="15172000" />
+      <workItem from="1728805582772" duration="15266000" />
+      <workItem from="1728889821160" duration="866000" />
+      <workItem from="1728924653377" duration="1793000" />
+      <workItem from="1728950370213" duration="135000" />
+      <workItem from="1728952664339" duration="56000" />
+      <workItem from="1728953804444" duration="178000" />
+      <workItem from="1728960816443" duration="514000" />
     </task>
     <servers />
   </component>
