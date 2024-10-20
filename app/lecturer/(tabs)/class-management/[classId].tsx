@@ -2,16 +2,27 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, SafeAreaView, ScrollView } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import {Link} from "expo-router";
+import {ClassInfo} from "@/app/type/class-info";
 
 const CreateClassScreen = () => {
+    const data: ClassInfo = {
+        classId: '147000',
+        additionalClassId: '147001',
+        subjectId: 'IT4441',
+        classType: 'LT',
+        startPeriod: 'Tiết 1',
+        endPeriod: 'Tiết 4',
+        maxStudents: '90'
+    }
+
     const [className, setClassName] = useState('');
-    const [classId, setClassId] = useState('');
-    const [additionalClassId, setAdditionalClassId] = useState('');
-    const [subjectId, setSubjectId] = useState('');
-    const [classType, setClassType] = useState(null);
-    const [startPeriod, setStartPeriod] = useState(null);
-    const [endPeriod, setEndPeriod] = useState(null);
-    const [maxStudents, setMaxStudents] = useState('');
+    const [classId, setClassId] = useState(data.classId);
+    const [additionalClassId, setAdditionalClassId] = useState(data.additionalClassId);
+    const [subjectId, setSubjectId] = useState(data.subjectId);
+    const [classType, setClassType] = useState(data.classType);
+    const [startPeriod, setStartPeriod] = useState(data.startPeriod);
+    const [endPeriod, setEndPeriod] = useState(data.endPeriod);
+    const [maxStudents, setMaxStudents] = useState(data.maxStudents);
     const [errorMessage, setErrorMessage] = useState('');
 
     const [openClassType, setOpenClassType] = useState(false);
@@ -55,12 +66,14 @@ const CreateClassScreen = () => {
                     style={styles.input}
                     placeholder="Mã lớp*"
                     value={classId}
+                    defaultValue={data.classId}
                     onChangeText={setClassId}
                 />
                 <TextInput
                     style={styles.input}
                     placeholder="Mã lớp kèm*"
                     value={additionalClassId}
+                    defaultValue={data.additionalClassId}
                     onChangeText={setAdditionalClassId}
                 />
                 <TextInput

@@ -5,14 +5,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d0865d62-49a4-4b34-9fa5-8417e28b156e" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/app/type/class-info.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/lecturer/(tabs)/class-management/[classId].tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/lecturer/(tabs)/class-management/[classId].tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/lecturer/(tabs)/class-management/create-class.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/lecturer/(tabs)/class-management/create-class.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/lecturer/(tabs)/class-management/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/lecturer/(tabs)/class-management/index.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="TypeScript File" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -114,7 +122,11 @@
       <workItem from="1728950370213" duration="135000" />
       <workItem from="1728952664339" duration="56000" />
       <workItem from="1728953804444" duration="178000" />
-      <workItem from="1728960816443" duration="514000" />
+      <workItem from="1728960816443" duration="820000" />
+      <workItem from="1728962390404" duration="998000" />
+      <workItem from="1728976976336" duration="2379000" />
+      <workItem from="1729096958066" duration="609000" />
+      <workItem from="1729173370745" duration="1203000" />
     </task>
     <servers />
   </component>
