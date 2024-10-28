@@ -341,20 +341,25 @@ import {
     TouchableOpacity,
 } from "react-native";
 
-const ClassRegister = () => {
+const CreateClass = () => {
     // Mock data
     const headers = ["Mã lớp", "Mã lớp kèm", "Tên lớp"];
     const [classCode, setClassCode] = useState("");
     const [registeredClasses, setRegisteredClasses] = useState([
-        { id: 1, data: ["John Doe", "30", "New York"] },
         {
-            id: 2,
-            data: ["Jane Smith", "28", "San Francisco"],
+            code: "IT4788",
+            combinedCode: "IT4788",
+            name: "Phát triển ứng dụng đa nền tảng",
         },
-        { id: 3, data: ["Bob Johnson", "35", "Chicago"] },
         {
-            id: 4,
-            data: ["Alice Brown", "32", "Los Angeles"],
+            code: "IT4000",
+            combinedCode: "IT4000",
+            name: "Lập trình hướng đối tượng",
+        },
+        {
+            code: "IT3080",
+            combinedCode: "IT3080",
+            name: "Cấu trúc dữ liệu và giải thuật",
         },
     ]);
     const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
@@ -362,8 +367,9 @@ const ClassRegister = () => {
     const handleRegister = () => {
         if (classCode) {
             const newClass = {
-                id: 5,
-                data: [`${classCode}`, "301", "New York2"],
+                code: classCode,
+                combinedCode: `${classCode}-ABC`,
+                name: `New Class ${classCode}`,
             };
             setRegisteredClasses([...registeredClasses, newClass]);
             setClassCode("");
@@ -380,7 +386,7 @@ const ClassRegister = () => {
 
     const handleRemoveSelected = () => {
         const filteredClasses = registeredClasses.filter(
-            (item) => !selectedClasses.includes(item.data[0])
+            (item) => !selectedClasses.includes(item.code)
         );
         setRegisteredClasses(filteredClasses);
         setSelectedClasses([]);
@@ -416,13 +422,35 @@ const ClassRegister = () => {
 
                     {/* Table Body */}
                     <ScrollView style={styles.verticalScroll}>
-                        {registeredClasses.map((row) => (
-                            <View key={row.id} style={styles.row}>
-                                {row.data.map((cell, cellIndex) => (
-                                    <View key={cellIndex} style={styles.cell}>
-                                        <Text>{cell}</Text>
-                                    </View>
-                                ))}
+                        {registeredClasses.map((item, index) => (
+                            <View key={index} style={styles.classRow}>
+                                <View style={styles.cell}>
+                                    <Text style={styles.classCode}>
+                                        {item.code}
+                                    </Text>
+                                </View>
+                                <View style={styles.cell}>
+                                    <Text style={styles.classCode}>
+                                        {item.combinedCode}
+                                    </Text>
+                                </View>
+                                <View style={styles.cell}>
+                                    <Text style={styles.classCode}>
+                                        {item.name}
+                                    </Text>
+                                </View>
+                                <View style={styles.CheckboxCell}>
+                                    <Checkbox
+                                        color={"#B71C1C"}
+                                        value={selectedClasses.includes(
+                                            item.code
+                                        )}
+                                        onValueChange={() =>
+                                            toggleSelectClass(item.code)
+                                        }
+                                        style={styles.checkbox}
+                                    />
+                                </View>
                             </View>
                         ))}
                     </ScrollView>
@@ -435,9 +463,9 @@ const ClassRegister = () => {
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.removeButton}
-                    // onPress={handleRemoveSelected}
+                    onPress={handleRemoveSelected}
                 >
-                    <Text style={styles.buttonText}>Xóa lớp</Text>{" "}
+                    <Text style={styles.buttonText}>Xóa</Text>{" "}
                 </TouchableOpacity>
             </View>
 
@@ -508,10 +536,11 @@ const styles = StyleSheet.create({
         backgroundColor: "#B71C1C",
     },
     headerCell: {
-        width: 120,
+        width: 160,
         padding: 16,
         borderWidth: 1,
         borderColor: "#fff",
+        alignItems: "center",
     },
     headerText: {
         color: "#fff",
@@ -522,11 +551,11 @@ const styles = StyleSheet.create({
         flexDirection: "row",
     },
     cell: {
-        width: 120,
+        width: 160,
+        height: 60,
         padding: 16,
         borderWidth: 1,
         borderColor: "#ddd",
-        alignItems: "center",
     },
 
     bottomFooter: {
@@ -556,10 +585,25 @@ const styles = StyleSheet.create({
     checkbox: {
         width: 20,
         height: 20,
+    },
+
+    CheckboxCell: {
+        width: 60,
+        height: 60,
+        padding: 16,
         borderWidth: 1,
-        borderColor: "#ccc",
-        marginRight: 10,
+        borderColor: "#ddd",
+        alignItems: "center",
+    },
+
+    classRow: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+
+    classCode: {
+        flexWrap: "wrap",
     },
 });
 
-export default ClassRegister;
+export default CreateClass;
