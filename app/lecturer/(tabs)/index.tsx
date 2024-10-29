@@ -66,7 +66,7 @@ export default function Index() {
                     <ClassCard
                         data={item}
                         onPress={() =>
-                            router.push(`/student/classes/${item.classId}`)
+                            router.push(`/lecturer/classes/${item.classId}`)
                         }
                     />
                 )}
