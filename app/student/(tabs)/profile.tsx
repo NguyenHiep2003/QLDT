@@ -21,11 +21,9 @@ export default function Profile() {
                     <View>
                         <Avatar
                             size={80}
-                            source={{
-                                uri:
-                                    data.avatar ??
-                                    '.././assets/images/avatar-default.jpg',
-                            }}
+                            source={data.avatar ? {
+                                uri: data.avatar,
+                            } : require('@assets/images/avatar-default.jpg')}
                         >
                             <Avatar.Accessory size={20}></Avatar.Accessory>
                         </Avatar>
