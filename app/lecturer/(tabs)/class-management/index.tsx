@@ -1,6 +1,6 @@
-import Checkbox from "expo-checkbox";
-import { Link } from "expo-router";
-import React, { useState } from "react";
+import Checkbox from 'expo-checkbox';
+import { Link, router } from 'expo-router';
+import React, { useState } from 'react';
 import {
     View,
     Text,
@@ -9,17 +9,17 @@ import {
     Dimensions,
     TextInput,
     TouchableOpacity,
-} from "react-native";
+} from 'react-native';
 
 const CreateClass = () => {
     // Mock data
-    const headers = ["Mã lớp", "Mã lớp kèm", "Tên lớp"];
-    const [classCode, setClassCode] = useState("");
+    const headers = ['Mã lớp', 'Mã lớp kèm', 'Tên lớp'];
+    const [classCode, setClassCode] = useState('');
     const [registeredClasses, setRegisteredClasses] = useState([
         {
-            code: "IT4788",
-            combinedCode: "IT4788",
-            name: "Phát triển ứng dụng đa nền tảng",
+            code: 'IT4788',
+            combinedCode: 'IT4788',
+            name: 'Phát triển ứng dụng đa nền tảng',
         },
     ]);
     const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
@@ -32,7 +32,7 @@ const CreateClass = () => {
                 name: `New Class ${classCode}`,
             };
             setRegisteredClasses([...registeredClasses, newClass]);
-            setClassCode("");
+            setClassCode('');
         }
     };
 
@@ -101,7 +101,7 @@ const CreateClass = () => {
                                 </View>
                                 <View style={styles.CheckboxCell}>
                                     <Checkbox
-                                        color={"#B71C1C"}
+                                        color={'#B71C1C'}
                                         value={selectedClasses.includes(
                                             item.code
                                         )}
@@ -118,7 +118,14 @@ const CreateClass = () => {
             </ScrollView>
 
             <View style={styles.bottomFooter}>
-                <TouchableOpacity style={styles.sendButton}>
+                <TouchableOpacity
+                    style={styles.sendButton}
+                    onPress={() =>
+                        router.push(
+                            '/lecturer/(tabs)/class-management/create-class'
+                        )
+                    }
+                >
                     <Text style={styles.buttonText}>Tạo lớp học</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -130,7 +137,7 @@ const CreateClass = () => {
             </View>
 
             {/* Footer */}
-            <Link href={"/"} style={styles.footerText}>
+            <Link href={'/'} style={styles.footerText}>
                 Thông tin danh sách các lớp mở
             </Link>
         </View>
@@ -141,22 +148,22 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 16,
-        backgroundColor: "#fff",
+        backgroundColor: '#fff',
     },
 
     inputContainer: {
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
         marginTop: 40,
         marginBottom: 20,
     },
 
     input: {
         flex: 2,
-        color: "#c21c1c",
+        color: '#c21c1c',
         borderWidth: 1,
-        borderColor: "#c21c1c",
+        borderColor: '#c21c1c',
         padding: 10,
         borderRadius: 5,
         marginRight: 10,
@@ -165,80 +172,80 @@ const styles = StyleSheet.create({
 
     registerButton: {
         flex: 1,
-        backgroundColor: "#c21c1c",
+        backgroundColor: '#c21c1c',
         padding: 10,
         borderRadius: 5,
     },
     buttonText: {
-        color: "#fff",
-        textAlign: "center",
+        color: '#fff',
+        textAlign: 'center',
         fontSize: 18,
-        fontStyle: "italic",
-        fontWeight: "bold",
+        fontStyle: 'italic',
+        fontWeight: 'bold',
     },
     title: {
         fontSize: 20,
-        fontWeight: "bold",
+        fontWeight: 'bold',
         marginBottom: 16,
     },
     horizontalScroll: {
         flex: 1,
         maxHeight: 460,
-        borderColor: "#B71C1C",
+        borderColor: '#B71C1C',
         borderWidth: 1,
         borderRadius: 10,
     },
     verticalScroll: {
-        maxHeight: Dimensions.get("window").height * 0.6,
+        maxHeight: Dimensions.get('window').height * 0.6,
     },
     headerRow: {
-        flexDirection: "row",
-        backgroundColor: "#B71C1C",
+        flexDirection: 'row',
+        backgroundColor: '#B71C1C',
     },
     headerCell: {
         width: 160,
         padding: 16,
         borderWidth: 1,
-        borderColor: "#fff",
-        alignItems: "center",
+        borderColor: '#fff',
+        alignItems: 'center',
     },
     headerText: {
-        color: "#fff",
-        fontWeight: "bold",
-        textAlign: "center",
+        color: '#fff',
+        fontWeight: 'bold',
+        textAlign: 'center',
     },
     row: {
-        flexDirection: "row",
+        flexDirection: 'row',
     },
     cell: {
         width: 160,
         height: 60,
         padding: 16,
         borderWidth: 1,
-        borderColor: "#ddd",
+        borderColor: '#ddd',
     },
 
     bottomFooter: {
-        flexDirection: "row",
-        justifyContent: "space-between",
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         marginBottom: 10,
         marginTop: 10,
     },
     sendButton: {
-        backgroundColor: "#B71C1C",
+        backgroundColor: '#B71C1C',
         padding: 10,
         borderRadius: 5,
     },
     removeButton: {
-        backgroundColor: "#B71C1C",
+        backgroundColor: '#B71C1C',
         padding: 10,
         borderRadius: 5,
     },
     footerText: {
         marginTop: 20,
-        textAlign: "center",
-        color: "#B71C1C",
-        fontStyle: "italic",
+        textAlign: 'center',
+        color: '#B71C1C',
+        fontStyle: 'italic',
         fontSize: 18,
     },
 
@@ -252,17 +259,17 @@ const styles = StyleSheet.create({
         height: 60,
         padding: 16,
         borderWidth: 1,
-        borderColor: "#ddd",
-        alignItems: "center",
+        borderColor: '#ddd',
+        alignItems: 'center',
     },
 
     classRow: {
-        flexDirection: "row",
-        alignItems: "center",
+        flexDirection: 'row',
+        alignItems: 'center',
     },
 
     classCode: {
-        flexWrap: "wrap",
+        flexWrap: 'wrap',
     },
 });
 
