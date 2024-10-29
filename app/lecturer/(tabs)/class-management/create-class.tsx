@@ -19,14 +19,14 @@ const CreateClassScreen = () => {
     const [openEndPeriod, setOpenEndPeriod] = useState(false);
 
     const classTypeItems = [
-        { label: 'LT', value: 'LT' },
-        { label: 'BT', value: 'BT' },
-        { label: 'LT+BT', value: 'LTBT' },
-        { label: 'TN', value: 'TN' },
-        { label: 'DA', value: 'DA' },
+        {label: 'LT', value: 'LT'},
+        {label: 'BT', value: 'BT'},
+        {label: 'LT+BT', value: 'LTBT'},
+        {label: 'TN', value: 'TN'},
+        {label: 'DA', value: 'DA'},
     ];
 
-    const periodItems = Array.from({ length: 12 }, (_, i) => ({
+    const periodItems = Array.from({length: 12}, (_, i) => ({
         label: `Tiết ${i + 1}`,
         value: `${i + 1}`,
     }));
@@ -44,7 +44,6 @@ const CreateClassScreen = () => {
     };
 
     const handleNumberInput = (text: string) => {
-        // Allow only numbers
         const numericValue = text.replace(/[^0-9]/g, "");
         setMaxStudents(numericValue);
     };
@@ -54,7 +53,11 @@ const CreateClassScreen = () => {
             <View style={styles.headerContainer}>
                 <Text style={styles.header}>CREATE CLASS</Text>
             </View>
-            <ScrollView style={styles.container}>
+            <ScrollView
+                style={styles.container}
+                nestedScrollEnabled={true}
+                contentContainerStyle={{paddingBottom: 50}}
+            >
                 <TextInput
                     style={styles.input}
                     placeholder="Mã lớp*"
@@ -79,7 +82,9 @@ const CreateClassScreen = () => {
                     value={subjectId}
                     onChangeText={setSubjectId}
                 />
-                <View style={styles.dropdownSection}>
+
+                {/* Class Type Dropdown */}
+                <View style={{zIndex: 3000, marginBottom: openClassType ? 120 : 0}}>
                     <DropDownPicker
                         open={openClassType}
                         value={classType}
@@ -87,14 +92,22 @@ const CreateClassScreen = () => {
                         setOpen={setOpenClassType}
                         setValue={setClassType}
                         placeholder="Loại lớp"
-                        style={styles.dropdown}
+                        style={[styles.dropdown, {marginBottom: 10, zIndex: 1000}]}
                         textStyle={styles.dropdownText}
-                        dropDownContainerStyle={styles.dropdownContainer}
-                        zIndex={3000}
+                        dropDownContainerStyle={[
+                            styles.dropdownContainer,
+                            {elevation: 5, shadowColor: '#000', shadowOpacity: 0.2}
+                        ]}
+                        listMode="MODAL"
                     />
                 </View>
-                <View style={styles.rowContainer}>
-                    <View style={[styles.dropdownSection, styles.halfWidth]}>
+
+                <View style={[styles.rowContainer]}>
+                    {/* Start Period Dropdown */}
+                    <View style={[
+                        styles.halfWidth,
+                        {zIndex: 2000, marginBottom: openStartPeriod ? 120 : 0}
+                    ]}>
                         <DropDownPicker
                             open={openStartPeriod}
                             value={startPeriod}
@@ -102,13 +115,21 @@ const CreateClassScreen = () => {
                             setOpen={setOpenStartPeriod}
                             setValue={setStartPeriod}
                             placeholder="Tiết bắt đầu"
-                            style={styles.dropdown}
+                            style={[styles.dropdown, {marginBottom: 10, zIndex: 900}]}
                             textStyle={styles.dropdownText}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                            zIndex={10}
+                            dropDownContainerStyle={[
+                                styles.dropdownContainer,
+                                {elevation: 5, shadowColor: '#000', shadowOpacity: 0.2}
+                            ]}
+                            listMode="MODAL"
                         />
                     </View>
-                    <View style={[styles.dropdownSection, styles.halfWidth]}>
+
+                    {/* End Period Dropdown */}
+                    <View style={[
+                        styles.halfWidth,
+                        {zIndex: 1000, marginBottom: openEndPeriod ? 120 : 0}
+                    ]}>
                         <DropDownPicker
                             open={openEndPeriod}
                             value={endPeriod}
@@ -116,14 +137,17 @@ const CreateClassScreen = () => {
                             setOpen={setOpenEndPeriod}
                             setValue={setEndPeriod}
                             placeholder="Tiết kết thúc"
-                            style={styles.dropdown}
+                            style={[styles.dropdown, {marginBottom: 10, zIndex: 900}]}
                             textStyle={styles.dropdownText}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                            zIndex={10}
+                            dropDownContainerStyle={[
+                                styles.dropdownContainer,
+                                {elevation: 5, shadowColor: '#000', shadowOpacity: 0.2}
+                            ]}
+                            listMode="MODAL"
                         />
                     </View>
-
                 </View>
+
                 <TextInput
                     style={styles.input}
                     placeholder="Số lượng sinh viên tối đa*"
@@ -136,12 +160,13 @@ const CreateClassScreen = () => {
                     <Text style={styles.buttonText}>Tạo lớp học</Text>
                 </TouchableOpacity>
 
-                <Link href={"/student"} style={styles.classOpen}>Thông tin danh sách lớp mở</Link>
-
+                <Link href={"/student"} style={styles.classOpen}>
+                    Thông tin danh sách lớp mở
+                </Link>
             </ScrollView>
         </SafeAreaView>
-    );
-};
+    )
+}
 
 const styles = StyleSheet.create({
     safeArea: {
@@ -172,21 +197,12 @@ const styles = StyleSheet.create({
     },
     dropdownSection: {
         marginBottom: 10,
-        zIndex: 3000,
     },
-    dropdown: {
-        borderColor: '#c21c1c',
-    },
+
     dropdownText: {
         color: '#c21c1c',
     },
-    dropdownContainer: {
-        borderColor: '#c21c1c',
-    },
-    rowContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
+
     halfWidth: {
         width: '48%',
     },
@@ -214,7 +230,24 @@ const styles = StyleSheet.create({
         color: '#c21c1c',
         zIndex: -1,
         textAlign: "center"
-    }
+    },
+    rowContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 15,
+    },
+    dropdown: {
+        borderColor: '#c21c1c',
+        borderWidth: 1,
+        borderRadius: 5,
+        backgroundColor: 'white',
+        borderStyle: 'solid',
+    },
+    dropdownContainer: {
+        borderColor: '#ccc',
+        backgroundColor: '#c21c1c',
+        borderRadius: 5,
+    },
 });
 
 export default CreateClassScreen;
