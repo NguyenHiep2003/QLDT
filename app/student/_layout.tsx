@@ -16,13 +16,14 @@ export default function StudentLayout() {
                 },
                 headerTitleAlign:"center",
                 headerTitle: (props) => <Header />,
+                // animation:'slide_from_right'
             }}
         >
             {/* <Stack.Screen
-                name="index"
-            />
-            <Stack.Screen
-                name="student/(tabs)"
+                name="index" options={{animation:'ios'}}
+            /> */}
+            {/* <Stack.Screen
+                name="student/classes"
             ></Stack.Screen> */}
         </Stack>
     );

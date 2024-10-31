@@ -6,38 +6,71 @@ import {
     StyleSheet,
     Text,
     StatusBar,
-    Pressable,
+    TouchableOpacity,
 } from 'react-native';
-const DATA = [
+import { ClassInfo } from '@/types/generalClassInfor';
+import { ClassCard } from '@/components/ClassCard';
+
+const DATA: ClassInfo[] = [
     {
-        id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-        title: 'First Item Lecture',
+        classId: '156700',
+        className: 'Phát triển ứng dụng đa nền tảng',
+        courseId: 'IT3000',
+        lecturer: 'Nguyễn Tiến Thành',
     },
     {
-        id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-        title: 'Second Item',
+        classId: '156708',
+        className: 'Phát triển ứng dụng đa nền tảng',
+        courseId: 'IT3000',
+        lecturer: 'Nguyễn Tiến Thành',
     },
     {
-        id: '58694a0f-3da1-471f-bd96-145571e29d72',
-        title: 'Third Item',
+        classId: '156709',
+        className: 'Phát triển ứng dụng đa nền tảng',
+        courseId: 'IT3000',
+        lecturer: 'Nguyễn Tiến Thành',
+    },
+    {
+        classId: '156701',
+        className: 'Phát triển ứng dụng đa nền tảng',
+        courseId: 'IT3000',
+        lecturer: 'Nguyễn Tiến Thành',
+    },
+    {
+        classId: '156702',
+        className: 'Phát triển ứng dụng đa nền tảng',
+        courseId: 'IT3000',
+        lecturer: 'Nguyễn Tiến Thành',
+    },
+    {
+        classId: '156703',
+        className: 'Phát triển ứng dụng đa nền tảng',
+        courseId: 'IT3000',
+        lecturer: 'Nguyễn Tiến Thành',
+    },
+    {
+        classId: '156704',
+        className: 'Phát triển ứng dụng đa nền tảng',
+        courseId: 'IT3000',
+        lecturer: 'Nguyễn Tiến Thành',
     },
 ];
-type ItemProps = { title: string; id: string };
 
-const Item = ({ title,id }: ItemProps) => (
-    <Pressable onPress={() => router.push(`/lecturer/classes/${id}`)}>
-        <View style={styles.item}>
-            <Text style={styles.title}>{title}</Text>
-        </View>
-    </Pressable>
-);
-export default function LecturerHomeScreen() {
+export default function Index() {
     return (
         <SafeAreaView style={styles.container}>
+            <Text style={styles.title}>Danh sách lớp giảng dạy</Text>
             <FlatList
                 data={DATA}
-                renderItem={({ item }) => <Item title={item.title} id={item.id} />}
-                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                    <ClassCard
+                        data={item}
+                        onPress={() =>
+                            router.push(`/lecturer/classes/${item.classId}`)
+                        }
+                    />
+                )}
+                keyExtractor={(item) => item.classId}
             />
         </SafeAreaView>
     );
@@ -45,15 +78,12 @@ export default function LecturerHomeScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        marginTop: StatusBar.currentHeight || 8,
-    },
-    item: {
-        backgroundColor: '#f9c2ff',
-        padding: 20,
-        marginVertical: 8,
-        marginHorizontal: 16,
+        marginTop: StatusBar.currentHeight || 16,
     },
     title: {
-        fontSize: 32,
+        marginLeft: 16,
+        marginBottom: 16,
+        fontSize: 20,
+        fontWeight: 'bold',
     },
 });
