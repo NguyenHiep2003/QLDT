@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from "react-native";
-import { Picker } from "@react-native-picker/picker"; // Import đúng thư viện
+import DropDownPicker from "react-native-dropdown-picker";
 
 const SignUpScreen: React.FC = () => {
   const [ho, setHo] = useState<string>("");
   const [ten, setTen] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [role, setRole] = useState<string>("");
+  const [role, setRole] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
 
   const handleSignUp = () => {
     console.log("Đăng ký");
@@ -24,7 +25,7 @@ const SignUpScreen: React.FC = () => {
         placeholderTextColor="#d3d3d3"
         value={ho}
         onChangeText={setHo}
-        autoCapitalize="none"
+        autoCapitalize="words"
       />
 
       <TextInput
@@ -33,7 +34,7 @@ const SignUpScreen: React.FC = () => {
         placeholderTextColor="#d3d3d3"
         value={ten}
         onChangeText={setTen}
-        autoCapitalize="none"
+        autoCapitalize="words"
       />
 
       <TextInput
@@ -55,25 +56,28 @@ const SignUpScreen: React.FC = () => {
         secureTextEntry={true}
       />
 
-      {/* Dropdown Role with Picker */}
-      
-        <Picker
-          selectedValue={role}
-          style={styles.picker}
-          onValueChange={(itemValue) => setRole(itemValue)}
-        >
-          <Picker.Item label="Chọn vai trò..." value="" color="#d3d3d3" />
-          <Picker.Item label="Giảng viên (Lecturer)" value="lecturer" />
-          <Picker.Item label="Sinh viên (Student)" value="student" />
-        </Picker>
-      
+      <DropDownPicker
+        open={open}
+        value={role}
+        items={[
+          { label: "Sinh viên (Student)", value: "student" },
+          { label: "Giảng viên (Lecturer)", value: "lecturer" },
+        ]}
+        setOpen={setOpen}
+        setValue={setRole}
+        placeholder="Chọn vai trò..."
+        placeholderStyle={styles.placeholderStyle}
+        textStyle={styles.textStyle}
+        style={styles.dropdown}
+        dropDownContainerStyle={styles.dropdownContainer}
+      />
 
       <TouchableOpacity onPress={handleSignUp} style={styles.loginButton}>
         <Text style={styles.loginButtonText}>SIGN UP</Text>
       </TouchableOpacity>
 
       <TouchableOpacity>
-        <Text style={styles.forgotPasswordText}>Hoặc đăng nhập với username/password</Text>
+        <Text style={styles.loginWithUsername}>Hoặc đăng nhập với username/password</Text>
       </TouchableOpacity>
     </View>
   );
@@ -110,17 +114,27 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     marginBottom: 20,
   },
-  picker: {
-    color: "#d3d3d3",
+  dropdown: {
     width: "100%",
     height: 70,
     backgroundColor: "#a2131b",
     borderColor: "#FFFFFF",
     borderWidth: 1,
     borderRadius: 32,
-    justifyContent: "center",
-    marginBottom: 20,
     paddingHorizontal: 15,
+    marginBottom: 20,
+  },
+  dropdownContainer: {
+    borderColor: "#FFFFFF",
+    backgroundColor: "#a2131b",
+    borderWidth: 1,
+    borderRadius: 16,
+  },
+  placeholderStyle: {
+    color: "#d3d3d3",
+  },
+  textStyle: {
+    color: "#FFFFFF",
     fontSize: 16,
   },
   loginButton: {
@@ -136,7 +150,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
-  forgotPasswordText: {
+  loginWithUsername: {
     color: "#FFFFFF",
     fontSize: 14,
     marginTop: 20,
