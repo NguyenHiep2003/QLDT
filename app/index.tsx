@@ -1,4 +1,4 @@
-import { ROLES } from '@/constants/role';
+import { ROLES } from '@/constants/Roles';
 import { getProfileLocal } from '@/services/storages/profile';
 import { getTokenLocal } from '@/services/storages/token';
 import { TProfile } from '@/types/profile';
@@ -20,7 +20,8 @@ export default function Index() {
     }
     if (token && profile) {
         console.log(profile);
-        if (profile.role == ROLES.LECTURER) return <Redirect href={'/lecturer'} />;
+        if (profile.role == ROLES.LECTURER)
+            return <Redirect href={'/lecturer'} />;
         else return <Redirect href={'/student'} />;
     }
     return <Redirect href={'/(auth)/sign-in'} />;
