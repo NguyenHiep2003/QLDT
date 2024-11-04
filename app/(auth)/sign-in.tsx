@@ -1,3 +1,6 @@
+import { ROLES } from '@/constants/role';
+import { signIn } from '@/services/api-calls/auth';
+import { router } from 'expo-router';
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Modal } from "react-native";
 
@@ -19,29 +22,41 @@ const SignInScreen: React.FC = () => {
     return password.length >= 6 && password.length <= 10 && email !== password;
   };
 
-  const handleLogin = () => {
-    let valid = true;
-    setEmailError("");
-    setPasswordError("");
-
-    if (!email) {
-      setEmailError("Vui lòng nhập email");
-      valid = false;
-    } else if (!isValidEmail(email)) {
-      setEmailError("Email sai định dạng");
-      valid = false;
-    }
-
-    if (!password) {
-      setPasswordError("Vui lòng nhập mật khẩu");
-      valid = false;
-    } else if (!isValidPassword(email, password)) {
-      setPasswordError("Mật khẩu sai định dạng");
-      valid = false;
-    }
-
-    if (valid) {
-      console.log("Thông tin hợp lệ, tiếp tục đăng nhập...");
+  // Xử lý nhấn nút đăng nhập
+  const handleLogin = async () => {
+    try {
+      let valid = true;
+  
+      // Reset lỗi trước khi kiểm tra
+      setEmailError('');
+      setPasswordError('');
+  
+      // Kiểm tra email
+      if (!email) {
+        setEmailError('Vui lòng nhập email');
+        valid = false;
+      } else if (!isValidEmail(email)) {
+        setEmailError('Email sai định dạng');
+        valid = false;
+      }
+  
+      // Kiểm tra mật khẩu
+      if (!password) {
+        setPasswordError('Vui lòng nhập mật khẩu');
+        valid = false;
+      } else if (!isValidPassword(email, password)) {
+        setPasswordError('Mật khẩu sai định dạng');
+        valid = false;
+      }
+  
+      // Nếu hợp lệ, tiếp tục đăng nhập
+      if (valid) {
+        const profile = await signIn(email,password)
+        if(profile.role == ROLES.STUDENT) router.push('/student');
+        else router.push('/lecturer')
+      }
+    } catch (error: any) {
+      console.log("🚀 ~ handleLogin ~ error:", error?.status)
     }
   };
 

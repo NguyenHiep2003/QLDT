@@ -1,20 +1,27 @@
+import { ROLES } from '@/constants/role';
+import { getProfileLocal } from '@/services/storages/profile';
+import { getTokenLocal } from '@/services/storages/token';
+import { TProfile } from '@/types/profile';
 import { Link, Redirect } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, Text, View } from 'react-native';
 
 export default function Index() {
-    return (
-        <View
-            style={{
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-            }}
-        >
-            <Text>Edit app/index.tsx to edit this screen. Hiệp mo</Text>
-            <Link href={"/student"}>Press here to go to student tab</Link>
-            <Link href={"/lecturer"}>Press here to go to lecturer tab</Link>
-
-        </View>
-    );
+    const [isLoading, setIsLoading] = useState(true);
+    const [profile, setProfile] = useState<TProfile | undefined>(undefined);
+    const [token, setToken] = useState<string | null | undefined>(undefined);
+    useEffect(() => {
+        const p1 = getProfileLocal().then((data) => setProfile(data));
+        const p2 = getTokenLocal().then((token) => setToken(token));
+        Promise.all([p1, p2]).finally(() => setIsLoading(false));
+    }, []);
+    if (isLoading) {
+        return <Text>Loading...</Text>;
+    }
+    if (token && profile) {
+        console.log(profile);
+        if (profile.role == ROLES.LECTURER) return <Redirect href={'/lecturer'} />;
+        else return <Redirect href={'/student'} />;
+    }
+    return <Redirect href={'/(auth)/sign-in'} />;
 }
