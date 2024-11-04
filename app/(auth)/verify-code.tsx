@@ -4,23 +4,27 @@ import { View, Image, Text, TextInput, TouchableOpacity, StyleSheet } from "reac
 const verifyCodeScreen: React.FC = () => {
   const [code, setCode] = useState<string>("");
 
+  const handleVerifyCode = () => {
+    console.log(code);
+  }
+
   return (
     <View style={styles.container}>
-      {/*<Image source={require("../../assets/images/icon.png")} style={styles.logo} />*/}
+      {/*<Image source={require("../../assets/images/icon_hust.png")} style={styles.logo} />*/}
 
       <Text style={styles.title}>Nhập mã từ email của bạn</Text>
 
-      <Text>Nhập mã xác thực được gửi đến truong.nv215496@sis.hust.edu.vn</Text>
+      <Text style={styles.para}>Nhập mã xác thực được gửi đến truong.nv215496@sis.hust.edu.vn</Text>
 
       <TextInput
-        style={styles.input}
+        style={styles.inputVerifyCode}
         placeholder="Nhập mã xác thực"
         placeholderTextColor="#d3d3d3"
         value={code}
         onChangeText={setCode}
       />
 
-      <TouchableOpacity style={styles.loginButton}>
+      <TouchableOpacity style={styles.loginButton} onPress={handleVerifyCode}>
         <Text style={styles.loginButtonText}>Xác nhận</Text>
       </TouchableOpacity>
 
@@ -31,7 +35,7 @@ const verifyCodeScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#F3F4F6",
     alignItems: "center",
     justifyContent: "center",
     padding: 30,
@@ -45,56 +49,44 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#000000",
-    marginBottom: 100,
+    color: "#003366",
+    marginBottom: 40,
     textAlign: "center",
   },
   para: {
     fontSize: 16,
-    color: "#1A1A1A",
-    marginBottom: 40,
+    color: "#4A4A4A",
+    marginBottom: 20,
     textAlign: "center",
-    justifyContent:"center"
+    lineHeight: 24,
   },
-  input: {
+  inputVerifyCode: {
     width: "100%",
-    height: 70,
-    borderColor: "#FFFFFF",
+    height: 55,
+    borderColor: "#B0C4DE",
     borderWidth: 1,
-    borderRadius: 32,
+    borderRadius: 10,
     paddingHorizontal: 15,
     fontSize: 16,
-    color: "#FFFFFF",
+    color: "#000000",
+    backgroundColor: "#FFFFFF",
     marginBottom: 20,
-  },
-  picker: {
-    color: "#d3d3d3",
-    width: "100%",
-    height: 70,
-    backgroundColor: "#a2131b",
-    borderColor: "#FFFFFF",
-    borderWidth: 1,
-    borderRadius: 32,
-    justifyContent: "center",
-    marginBottom: 20,
-    paddingHorizontal: 15,
-    fontSize: 16,
   },
   loginButton: {
     width: "100%",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#1E90FF",
     paddingVertical: 15,
-    borderRadius: 8,
+    borderRadius: 10,
     alignItems: "center",
     marginTop: 20,
   },
   loginButtonText: {
-    color: "#C8102E",
+    color: "#FFFFFF",
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: "600",
   },
   forgotPasswordText: {
-    color: "#FFFFFF",
+    color: "#007BFF",
     fontSize: 14,
     marginTop: 20,
     textDecorationLine: "underline",

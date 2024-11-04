@@ -1,13 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from "react-native";
-import { Picker } from "@react-native-picker/picker"; // Import đúng thư viện
+import DropDownPicker from "react-native-dropdown-picker";
+import { useRouter } from "expo-router";
 
 const SignUpScreen: React.FC = () => {
+  const router = useRouter();
   const [ho, setHo] = useState<string>("");
   const [ten, setTen] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [role, setRole] = useState<string>("");
+  const [role, setRole] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+  const hoInputRef = useRef<TextInput>(null);
+
+  useEffect(() => {
+    hoInputRef.current?.focus(); // Tự động focus vào ô "Họ" khi vào màn hình
+  }, []);
 
   const handleSignUp = () => {
     console.log("Đăng ký");
@@ -15,26 +23,28 @@ const SignUpScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Image source={require("../../assets/images/icon_hust.png")} style={styles.logo} />
+      <Image source={require("../../assets/images/icon_hust.png")} style={styles.logo} resizeMode="contain"/>
       <Text style={styles.title}>Welcome to AllHust</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Họ"
-        placeholderTextColor="#d3d3d3"
-        value={ho}
-        onChangeText={setHo}
-        autoCapitalize="none"
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Tên"
-        placeholderTextColor="#d3d3d3"
-        value={ten}
-        onChangeText={setTen}
-        autoCapitalize="none"
-      />
+      <View style={styles.nameContainer}>
+        <TextInput
+          ref={hoInputRef}
+          style={[styles.input, styles.hoInput]}
+          placeholder="Họ"
+          placeholderTextColor="#d3d3d3"
+          value={ho}
+          onChangeText={setHo}
+          autoCapitalize="words"
+        />
+        <TextInput
+          style={[styles.input, styles.tenInput]}
+          placeholder="Tên"
+          placeholderTextColor="#d3d3d3"
+          value={ten}
+          onChangeText={setTen}
+          autoCapitalize="words"
+        />
+      </View>
 
       <TextInput
         style={styles.input}
@@ -55,25 +65,28 @@ const SignUpScreen: React.FC = () => {
         secureTextEntry={true}
       />
 
-      {/* Dropdown Role with Picker */}
-      
-        <Picker
-          selectedValue={role}
-          style={styles.picker}
-          onValueChange={(itemValue) => setRole(itemValue)}
-        >
-          <Picker.Item label="Chọn vai trò..." value="" color="#d3d3d3" />
-          <Picker.Item label="Giảng viên (Lecturer)" value="lecturer" />
-          <Picker.Item label="Sinh viên (Student)" value="student" />
-        </Picker>
-      
+      <DropDownPicker
+        open={open}
+        value={role}
+        items={[
+          { label: "Sinh viên (Student)", value: "student" },
+          { label: "Giảng viên (Lecturer)", value: "lecturer" },
+        ]}
+        setOpen={setOpen}
+        setValue={setRole}
+        placeholder="Chọn vai trò..."
+        placeholderStyle={styles.placeholderStyle}
+        textStyle={styles.textStyle}
+        style={styles.dropdown}
+        dropDownContainerStyle={styles.dropdownContainer}
+      />
 
       <TouchableOpacity onPress={handleSignUp} style={styles.loginButton}>
         <Text style={styles.loginButtonText}>SIGN UP</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity>
-        <Text style={styles.forgotPasswordText}>Hoặc đăng nhập với username/password</Text>
+      <TouchableOpacity onPress={() => router.push("/sign-in")}>
+        <Text style={styles.loginWithUsername}>Hoặc đăng nhập với username/password</Text>
       </TouchableOpacity>
     </View>
   );
@@ -89,7 +102,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: "100%",
-    height: 100,
+    height: undefined,
     marginBottom: 30,
     borderRadius: 20,
   },
@@ -99,9 +112,22 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     textAlign: "center",
   },
+  nameContainer: {
+    flexDirection: "row",
+    width: "100%",
+    justifyContent: "space-between",
+    marginBottom: 0,
+  },
+  hoInput: {
+    flex: 1,
+    marginRight: 10,
+  },
+  tenInput: {
+    flex: 1,
+  },
   input: {
     width: "100%",
-    height: 70,
+    height: 60,
     borderColor: "#FFFFFF",
     borderWidth: 1,
     borderRadius: 32,
@@ -110,17 +136,27 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     marginBottom: 20,
   },
-  picker: {
-    color: "#d3d3d3",
+  dropdown: {
     width: "100%",
-    height: 70,
+    height: 60,
     backgroundColor: "#a2131b",
     borderColor: "#FFFFFF",
     borderWidth: 1,
     borderRadius: 32,
-    justifyContent: "center",
-    marginBottom: 20,
     paddingHorizontal: 15,
+    marginBottom: 20,
+  },
+  dropdownContainer: {
+    borderColor: "#FFFFFF",
+    backgroundColor: "#a2131b",
+    borderWidth: 1,
+    borderRadius: 16,
+  },
+  placeholderStyle: {
+    color: "#d3d3d3",
+  },
+  textStyle: {
+    color: "#FFFFFF",
     fontSize: 16,
   },
   loginButton: {
@@ -136,7 +172,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
-  forgotPasswordText: {
+  loginWithUsername: {
     color: "#FFFFFF",
     fontSize: 14,
     marginTop: 20,
