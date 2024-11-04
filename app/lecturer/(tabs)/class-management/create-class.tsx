@@ -1,7 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, SafeAreaView, ScrollView } from 'react-native';
+import {
+    View,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    StyleSheet,
+    Alert,
+    SafeAreaView,
+    ScrollView,
+} from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
-import {Link} from "expo-router";
+import { Link } from 'expo-router';
 
 const CreateClassScreen = () => {
     const [className, setClassName] = useState('');
@@ -19,23 +28,32 @@ const CreateClassScreen = () => {
     const [openEndPeriod, setOpenEndPeriod] = useState(false);
 
     const classTypeItems = [
-        {label: 'LT', value: 'LT'},
-        {label: 'BT', value: 'BT'},
-        {label: 'LT+BT', value: 'LTBT'},
-        {label: 'TN', value: 'TN'},
-        {label: 'DA', value: 'DA'},
+        { label: 'LT', value: 'LT' },
+        { label: 'BT', value: 'BT' },
+        { label: 'LT+BT', value: 'LTBT' },
+        { label: 'TN', value: 'TN' },
+        { label: 'DA', value: 'DA' },
     ];
 
-    const periodItems = Array.from({length: 12}, (_, i) => ({
+    const periodItems = Array.from({ length: 12 }, (_, i) => ({
         label: `Tiết ${i + 1}`,
         value: `${i + 1}`,
     }));
 
     const handleCreateClass = () => {
-        if (!className || !classId || !subjectId || !classType || !startPeriod || !endPeriod) {
+        if (
+            !className ||
+            !classId ||
+            !subjectId ||
+            !classType ||
+            !startPeriod ||
+            !endPeriod
+        ) {
             setErrorMessage('Vui lòng điền đầy đủ thông tin');
         } else if (parseInt(startPeriod) > parseInt(endPeriod)) {
-            setErrorMessage('Tiết bắt đầu phải nhỏ hơn hoặc bằng tiết kết thúc');
+            setErrorMessage(
+                'Tiết bắt đầu phải nhỏ hơn hoặc bằng tiết kết thúc'
+            );
         } else {
             // Call API
             Alert.alert('Thành công', 'Lớp học đã được tạo');
@@ -44,7 +62,7 @@ const CreateClassScreen = () => {
     };
 
     const handleNumberInput = (text: string) => {
-        const numericValue = text.replace(/[^0-9]/g, "");
+        const numericValue = text.replace(/[^0-9]/g, '');
         setMaxStudents(numericValue);
     };
 
@@ -56,7 +74,7 @@ const CreateClassScreen = () => {
             <ScrollView
                 style={styles.container}
                 nestedScrollEnabled={true}
-                contentContainerStyle={{paddingBottom: 50}}
+                contentContainerStyle={{ paddingBottom: 50 }}
             >
                 <TextInput
                     style={styles.input}
@@ -84,7 +102,12 @@ const CreateClassScreen = () => {
                 />
 
                 {/* Class Type Dropdown */}
-                <View style={{zIndex: 3000, marginBottom: openClassType ? 120 : 0}}>
+                <View
+                    style={{
+                        zIndex: 3000,
+                        marginBottom: openClassType ? 120 : 0,
+                    }}
+                >
                     <DropDownPicker
                         open={openClassType}
                         value={classType}
@@ -92,11 +115,18 @@ const CreateClassScreen = () => {
                         setOpen={setOpenClassType}
                         setValue={setClassType}
                         placeholder="Loại lớp"
-                        style={[styles.dropdown, {marginBottom: 10, zIndex: 1000}]}
+                        style={[
+                            styles.dropdown,
+                            { marginBottom: 10, zIndex: 1000 },
+                        ]}
                         textStyle={styles.dropdownText}
                         dropDownContainerStyle={[
                             styles.dropdownContainer,
-                            {elevation: 5, shadowColor: '#000', shadowOpacity: 0.2}
+                            {
+                                elevation: 5,
+                                shadowColor: '#000',
+                                shadowOpacity: 0.2,
+                            },
                         ]}
                         listMode="MODAL"
                     />
@@ -104,10 +134,15 @@ const CreateClassScreen = () => {
 
                 <View style={[styles.rowContainer]}>
                     {/* Start Period Dropdown */}
-                    <View style={[
-                        styles.halfWidth,
-                        {zIndex: 2000, marginBottom: openStartPeriod ? 120 : 0}
-                    ]}>
+                    <View
+                        style={[
+                            styles.halfWidth,
+                            {
+                                zIndex: 2000,
+                                marginBottom: openStartPeriod ? 120 : 0,
+                            },
+                        ]}
+                    >
                         <DropDownPicker
                             open={openStartPeriod}
                             value={startPeriod}
@@ -115,21 +150,33 @@ const CreateClassScreen = () => {
                             setOpen={setOpenStartPeriod}
                             setValue={setStartPeriod}
                             placeholder="Tiết bắt đầu"
-                            style={[styles.dropdown, {marginBottom: 10, zIndex: 900}]}
+                            style={[
+                                styles.dropdown,
+                                { marginBottom: 10, zIndex: 900 },
+                            ]}
                             textStyle={styles.dropdownText}
                             dropDownContainerStyle={[
                                 styles.dropdownContainer,
-                                {elevation: 5, shadowColor: '#000', shadowOpacity: 0.2}
+                                {
+                                    elevation: 5,
+                                    shadowColor: '#000',
+                                    shadowOpacity: 0.2,
+                                },
                             ]}
                             listMode="MODAL"
                         />
                     </View>
 
                     {/* End Period Dropdown */}
-                    <View style={[
-                        styles.halfWidth,
-                        {zIndex: 1000, marginBottom: openEndPeriod ? 120 : 0}
-                    ]}>
+                    <View
+                        style={[
+                            styles.halfWidth,
+                            {
+                                zIndex: 1000,
+                                marginBottom: openEndPeriod ? 120 : 0,
+                            },
+                        ]}
+                    >
                         <DropDownPicker
                             open={openEndPeriod}
                             value={endPeriod}
@@ -137,11 +184,18 @@ const CreateClassScreen = () => {
                             setOpen={setOpenEndPeriod}
                             setValue={setEndPeriod}
                             placeholder="Tiết kết thúc"
-                            style={[styles.dropdown, {marginBottom: 10, zIndex: 900}]}
+                            style={[
+                                styles.dropdown,
+                                { marginBottom: 10, zIndex: 900 },
+                            ]}
                             textStyle={styles.dropdownText}
                             dropDownContainerStyle={[
                                 styles.dropdownContainer,
-                                {elevation: 5, shadowColor: '#000', shadowOpacity: 0.2}
+                                {
+                                    elevation: 5,
+                                    shadowColor: '#000',
+                                    shadowOpacity: 0.2,
+                                },
                             ]}
                             listMode="MODAL"
                         />
@@ -153,20 +207,25 @@ const CreateClassScreen = () => {
                     placeholder="Số lượng sinh viên tối đa*"
                     value={maxStudents}
                     onChangeText={handleNumberInput}
-                    keyboardType='numeric'
+                    keyboardType="numeric"
                 />
-                {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
-                <TouchableOpacity style={styles.button} onPress={handleCreateClass}>
+                {errorMessage ? (
+                    <Text style={styles.errorText}>{errorMessage}</Text>
+                ) : null}
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={handleCreateClass}
+                >
                     <Text style={styles.buttonText}>Tạo lớp học</Text>
                 </TouchableOpacity>
 
-                <Link href={"/student"} style={styles.classOpen}>
+                <Link href={'/student'} style={styles.classOpen}>
                     Thông tin danh sách lớp mở
                 </Link>
             </ScrollView>
         </SafeAreaView>
-    )
-}
+    );
+};
 
 const styles = StyleSheet.create({
     safeArea: {
@@ -193,7 +252,7 @@ const styles = StyleSheet.create({
         padding: 10,
         marginBottom: 10,
         borderColor: '#c21c1c',
-        color: '#c21c1c'
+        color: '#c21c1c',
     },
     dropdownSection: {
         marginBottom: 10,
@@ -214,7 +273,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
         marginBottom: 20,
         zIndex: -1,
-        width: "50%",
+        width: '50%',
         alignSelf: 'center',
     },
     buttonText: {
@@ -224,12 +283,12 @@ const styles = StyleSheet.create({
     errorText: {
         color: 'red',
         marginBottom: 10,
-        zIndex: -1
+        zIndex: -1,
     },
     classOpen: {
         color: '#c21c1c',
         zIndex: -1,
-        textAlign: "center"
+        textAlign: 'center',
     },
     rowContainer: {
         flexDirection: 'row',
