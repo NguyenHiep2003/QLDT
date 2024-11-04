@@ -12,7 +12,7 @@ import { ClassInfo } from '@/types/generalClassInfor';
 import { ClassCard } from '@/components/ClassCard';
 import { useEffect, useState } from 'react';
 import { getClassList } from '@/services/api-calls/classes';
-import { ROLES } from '@/constants/role';
+import { ROLES } from '@/constants/Roles';
 import { UnauthorizedDialog } from '@/components/UnauthorizedDialog';
 
 export default function Index() {
