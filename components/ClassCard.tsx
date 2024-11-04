@@ -12,8 +12,8 @@ export const ClassCard = ({ data, onPress }: ClassCardProps) => (
             <Text
                 numberOfLines={2}
                 style={styles.title}
-            >{`${data.classId} - ${data.className} - ${data.courseId}`}</Text>
-            <Text style={styles.sub_info}>GV : {data.lecturer}</Text>
+            >{`${data.class_id} - ${data.class_name}`}</Text>
+            <Text style={styles.sub_info}>GV : {data.lecturer_name}</Text>
         </View>
     </TouchableOpacity>
 );
