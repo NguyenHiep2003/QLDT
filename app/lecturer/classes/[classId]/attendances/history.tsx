@@ -1,4 +1,3 @@
-import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import DateTimePicker from '@react-native-community/datetimepicker'
 import React, { useState } from 'react';
 import { 
