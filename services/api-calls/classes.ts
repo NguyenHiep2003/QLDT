@@ -1,4 +1,4 @@
-import { ROLES } from '@/constants/role';
+import { ROLES } from '@/constants/Roles';
 import instance from './axios';
 import { getProfileLocal } from '../storages/profile';
 
