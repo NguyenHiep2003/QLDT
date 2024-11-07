@@ -11,3 +11,24 @@ export async function getClassList(role: ROLES) {
     });
     return response.data;
 }
+
+export async function getAttendanceList(classId: any, date: any) {
+    const profile = await getProfileLocal();
+    if (!profile) return [];
+    const response = await instance.post('/it5023e/get_attendance_list', {
+        class_id: classId,
+        date: date
+    })
+    return response.data;
+}
+
+export async function getClassInfo(classId: any) {
+    const profile = await getProfileLocal();
+    if (!profile) return [];
+    const response = await instance.post('/it5023e/get_class_info', {
+        role: profile.role,
+        account_id: profile.id,
+        class_id: classId
+    })
+    return response.data;
+}
