@@ -26,11 +26,11 @@ const SignInScreen: React.FC = () => {
   const handleLogin = async () => {
     try {
       let valid = true;
-  
+
       // Reset lỗi trước khi kiểm tra
       setEmailError('');
       setPasswordError('');
-  
+
       // Kiểm tra email
       if (!email) {
         setEmailError('Vui lòng nhập email');
@@ -39,7 +39,7 @@ const SignInScreen: React.FC = () => {
         setEmailError('Email sai định dạng');
         valid = false;
       }
-  
+
       // Kiểm tra mật khẩu
       if (!password) {
         setPasswordError('Vui lòng nhập mật khẩu');
@@ -48,7 +48,7 @@ const SignInScreen: React.FC = () => {
         setPasswordError('Mật khẩu sai định dạng');
         valid = false;
       }
-  
+
       // Nếu hợp lệ, tiếp tục đăng nhập
       if (valid) {
         const profile = await signIn(email,password)
@@ -56,7 +56,7 @@ const SignInScreen: React.FC = () => {
         else router.push('/lecturer')
       }
     } catch (error: any) {
-      console.log("🚀 ~ handleLogin ~ error:", error?.status)
+      console.log("🚀 ~ handleLogin ~ error:", error)
     }
   };
 

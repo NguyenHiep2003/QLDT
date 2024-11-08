@@ -17,8 +17,9 @@ import { UnauthorizedDialog } from '@/components/UnauthorizedDialog';
 
 export default function Index() {
     const [classes, setClasses] = useState<ClassInfo[]>([]);
-    const [dialogUnauthorizedVisible, setDialogUnauthorizedVisible] =
-        useState(false);
+    const [dialogUnauthorizedVisible, setDialogUnauthorizedVisible] = useState(false);
+
+
     useEffect(() => {
         getClassList(ROLES.STUDENT)
             .then((classes) => setClasses(classes))
