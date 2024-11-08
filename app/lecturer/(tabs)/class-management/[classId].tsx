@@ -1,29 +1,36 @@
 import React, {useEffect, useState} from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, SafeAreaView, ScrollView } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
-import {Link, Router, useLocalSearchParams, useRouter} from "expo-router";
-import {getClassInfoResponse} from "@/types/createClassRequest";
 import {editClass, getClassInfo} from "@/services/api-calls/classes";
-import {getProfile} from "@/services/api-calls/profile";
 import {DateTimePickerAndroid} from "@react-native-community/datetimepicker";
+import {useRoute} from "@react-navigation/core";
+
+type RouteParams = {
+    classId: string;
+};
 
 const EditClassScreen = () => {
-
+    const route = useRoute()
+    const classId = route.params as RouteParams
+    const statusList = [
+        { label: 'Đã hoàn thành', value: 'COMPLETED' },
+        { label: 'Mở đăng kí', value: 'UPCOMING' },
+        { label: 'Đang diễn ra', value: 'ACTIVE' },
+    ]
 
     useEffect(() => {
         const getInitialInfo = async () => {
-            console.log(classId.toString());
             try {
                 const response = await getClassInfo({
-                    class_id: classId.toString(),
+                    class_id: classId.classId,
                 });
 
                 if (response.meta.code === 1000) {
                     setNewClassName(response.data.class_name)
                     setNewClassId(response.data.class_id)
                     setNewStatus(response.data.status)
-                    setStartDate(response.data.start_date)
-                    setEndDate(response.data.end_date)
+                    setStartDate(new Date(response.data.start_date))
+                    setEndDate(new Date(response.data.end_date))
                     setErrorMessage('');
                 } else {
                     setErrorMessage(response.meta.message);
@@ -33,9 +40,8 @@ const EditClassScreen = () => {
             }
         }
 
-        getInitialInfo().then(r => console.log(r));
+        getInitialInfo().then(r => console.log(r))
     }, [])
-
 
     const [newClassName, setNewClassName] = useState('');
     const [newClassId, setNewClassId] = useState('');
@@ -43,17 +49,17 @@ const EditClassScreen = () => {
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
     const [errorMessage, setErrorMessage] = useState('');
+    const [openStatus, setOpenStatus] = useState(false);
 
     const handleEditClass = async () => {
+        const response = await editClass({
+            class_id: newClassId,
+            class_name: newClassName,
+            status: newStatus,
+            start_date: startDate.toISOString().slice(0,10),
+            end_date: endDate.toISOString().slice(0,10),
+        })
         try {
-            const response = await editClass({
-                class_id: newClassId,
-                class_name: newClassName,
-                status: newStatus,
-                start_date: startDate.toISOString().slice(0,10),
-                end_date: endDate.toISOString().slice(0,10),
-            })
-
             if (response.meta.code === 1000) {
                 Alert.alert('Thành công', 'Lớp học đã cập nhật');
                 setErrorMessage('');
@@ -77,9 +83,8 @@ const EditClassScreen = () => {
                 }
             },
             mode: 'date',
-            // minimumDate: new Date(),
-        });
-    };
+        })
+    }
 
     const showEndDatePicker = () => {
         DateTimePickerAndroid.open({
@@ -91,8 +96,8 @@ const EditClassScreen = () => {
             },
             mode: 'date',
             minimumDate: startDate,
-        });
-    };
+        })
+    }
 
     const formatDate = (date: Date) => {
         return date.toLocaleDateString('vi-VN');
@@ -121,6 +126,25 @@ const EditClassScreen = () => {
                     value={newClassName}
                     onChangeText={setNewClassName}
                 />
+
+
+                <View style={{zIndex: 3000, marginBottom: openStatus ? 120 : 0}}>
+                    <DropDownPicker
+                        open={openStatus}
+                        value={newStatus}
+                        items={statusList}
+                        setOpen={setOpenStatus}
+                        setValue={setNewStatus}
+                        placeholder="Trạng thái"
+                        style={[styles.dropdown, {marginBottom: 10, zIndex: 1000}]}
+                        textStyle={styles.dropdownText}
+                        dropDownContainerStyle={[
+                            styles.dropdownContainer,
+                            {elevation: 5, shadowColor: '#000', shadowOpacity: 0.2}
+                        ]}
+                        listMode="MODAL"
+                    />
+                </View>
 
                 <View style={styles.datePickerContainer}>
                     <TouchableOpacity
@@ -153,8 +177,8 @@ const EditClassScreen = () => {
                 </TouchableOpacity>
             </ScrollView>
         </SafeAreaView>
-    );
-};
+    )
+}
 
 const styles = StyleSheet.create({
     safeArea: {
