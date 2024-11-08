@@ -5,11 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d0865d62-49a4-4b34-9fa5-8417e28b156e" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/types/createClassRequest.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(auth)/sign-in.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(auth)/sign-in.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/lecturer/(tabs)/class-management/[classId].tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/lecturer/(tabs)/class-management/[classId].tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/lecturer/(tabs)/class-management/create-class.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/lecturer/(tabs)/class-management/create-class.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/lecturer/(tabs)/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/lecturer/(tabs)/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/lecturer/classes/[classId]/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/lecturer/classes/[classId]/index.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/api-calls/auth.ts" beforeDir="false" afterPath="$PROJECT_DIR$/services/api-calls/auth.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/api-calls/classes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/services/api-calls/classes.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,7 +58,8 @@
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;develop&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feature/0411-class-API-DucNH&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;D:/MyProgram/IT4788 - Cross platform/QLDT&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
@@ -129,6 +135,9 @@
       <workItem from="1729096958066" duration="609000" />
       <workItem from="1729173370745" duration="1203000" />
       <workItem from="1730204563323" duration="4695000" />
+      <workItem from="1730945245626" duration="9510000" />
+      <workItem from="1730986692520" duration="11134000" />
+      <workItem from="1731061081774" duration="6345000" />
     </task>
     <servers />
   </component>
