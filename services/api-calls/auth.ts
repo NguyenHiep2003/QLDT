@@ -41,9 +41,11 @@ export async function signIn(email: string, password: string) {
       const message = error.response.data as String;
 
       if (message === "User not found or wrong password") {
-        console.log("Đăng ký thất bại (User existed):", message);
+        console.log("Đăng nhập thất bại:", message);
         throw new Error(message.toString());
-        
+      } else if (message === "Account is locked"){
+        console.log("Tài khoản chưa được xác thực:", message)
+        throw new Error(message.toString());
       } else {
         console.error("Đăng ký thất bại với mã lỗi khác:", message);
         throw new Error(message.toString());
@@ -165,6 +167,39 @@ export async function resendVerifyCode(email: string) {
       }
     } else {
       console.log('🚀 ~ resendVerifyCode ~ error:', error);
+      throw error;
+    }
+  }
+}
+
+type ChangePasswordRequest = {
+  token: string;
+  old_password: string;
+  new_password: string;
+}
+
+type ChangePasswordResponse = string;
+
+export async function changePassword(changePassWordRequest: ChangePasswordRequest) {
+  try {
+    const data: ChangePasswordResponse = await instance.post("/it4788/change_password", changePassWordRequest);
+    console.log(data);
+    return data;
+  } catch (error: any) {
+    if (error.response && error.response.data) {
+      const errorData = error.response.data as string;
+      console.log(errorData)
+      const [status_code, message] = errorData.split(' | ');
+      if (status_code === "9995") {
+        throw new Error("Token is invalid");
+      } else if (status_code === "1001"){
+        throw new Error("Old password is incorrect")
+      } else if (status_code === "1003") {
+        throw new Error("New password is too similar to the old one")
+      }
+      /*Check mật khẩu mới hợp lệ hay không nữa, tài khoản đã bị khóa chưa*/
+    } else {
+      console.log('🚀 ~ changePassword ~ error:', error);
       throw error;
     }
   }
