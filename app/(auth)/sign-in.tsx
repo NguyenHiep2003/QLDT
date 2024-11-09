@@ -111,7 +111,11 @@ const SignInScreen: React.FC = () => {
         displayErrorAlert("Lỗi kết nối mạng", "Vui lòng kiểm tra kết nối mạng và thử lại!");
       } else if (error.message === "User not found or wrong password") {
         displayErrorAlert("Sai thông tin đăng nhập", "Tên người dùng hoặc mật khẩu không hợp lệ!");
-      } else {
+      } else if (error.message === "Account is locked") {
+        //displayErrorAlert("Tài khoản chưa được xác thực", "Bạn sẽ được chuyển hướng đến trang xác thực tài khoản!");
+        router.push({ pathname: "/(auth)/verify-code", params: { email , fromSignIn: "true"} });
+      }
+      else {
         console.error("Server error:", error);
         displayErrorAlert("Có lỗi xảy ra", "Vui lòng thử lại sau ít phút!");
       }

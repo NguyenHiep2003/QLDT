@@ -9,7 +9,8 @@ const VerifyCodeScreen: React.FC = () => {
   const [code, setCode] = useState<string>("");
   const [codeError, setCodeError] = useState<String>("");
 
-  const { email } = useLocalSearchParams();
+  const { email, fromSignIn } = useLocalSearchParams();
+  const isFromSignIn = fromSignIn === "true";
 
   const navigation = useNavigation();
   const [isModalVisible, setModalVisible] = useState(false);
@@ -20,7 +21,7 @@ const VerifyCodeScreen: React.FC = () => {
         if (e.data.action.type === "GO_BACK" || e.data.action.type === "POP") {
           e.preventDefault(); // Ngăn chặn hành động quay lại của người dùng
           setModalVisible(true); // Hiển thị modal khi người dùng nhấn nút Back
-        }
+        } else console.log(e.data.action.type);
       };
 
       navigation.addListener("beforeRemove", onBeforeRemove);
@@ -38,7 +39,6 @@ const VerifyCodeScreen: React.FC = () => {
   const handleConfirmBack = () => {
     setModalVisible(false); // Đóng modal và quay lại màn trước đó
     navigation.dispatch(StackActions.popToTop());
-    router.push("/(auth)/sign-up");
   };
 
   //Hàm hiển thị lỗi (Alert)
@@ -47,14 +47,13 @@ const VerifyCodeScreen: React.FC = () => {
   };
 
   const [isChecking, setIsChecking] = useState(false);
-
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false); //Dùng để bật/tắt animation bàn tay
 
   const handleCheckVerifyCode = async () => {
     if (isChecking) return;
 
     setCode(code.trim());
-    
+
     setCodeError("");
 
     if (!code) {
@@ -93,6 +92,7 @@ const VerifyCodeScreen: React.FC = () => {
       }, 3000);
 
       return;
+
     } catch (error: any) {
       console.log("Đăng ký thất bại:", error);
 
@@ -108,7 +108,8 @@ const VerifyCodeScreen: React.FC = () => {
       ) {
         displayErrorAlert("Lỗi kết nối mạng", "Vui lòng kiểm tra kết nối mạng và thử lại!");
       } else {
-        console.error("Có lỗi xảy ra", "Vui lòng thử lại sau ít phút!");
+        console.error("Server error:", error);
+        displayErrorAlert("Có lỗi xảy ra", "Vui lòng thử lại sau ít phút!");
       }
     } finally {
       setIsChecking(false);
@@ -116,9 +117,18 @@ const VerifyCodeScreen: React.FC = () => {
   };
 
   // Resend code state
-  const [isResending, setIsResending] = useState(false);
+  const [isResending, setIsResending] = useState<boolean>(false);
   const [resendTimer, setResendTimer] = useState<number>(120);
   const resendIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  let ignoreTimer: boolean = false; // Lần đầu từ màn sign-in sẽ cho phép yêu cầu gửi lại mã
+  useEffect(() => {
+    if (isFromSignIn) {
+      console.log("Từ màn hình sign-in:", isFromSignIn);
+      ignoreTimer = true;
+      handleResendCode();
+    }
+  }, []);
 
   useEffect(() => {
     if (resendTimer > 0) {
@@ -144,7 +154,7 @@ const VerifyCodeScreen: React.FC = () => {
   }, [resendTimer]);
 
   const handleResendCode = async () => {
-    if (isResending || resendTimer > 0) return;
+    if ((isResending || resendTimer > 0) && !ignoreTimer) return;
 
     setIsResending(true);
 
@@ -170,6 +180,7 @@ const VerifyCodeScreen: React.FC = () => {
         displayErrorAlert("Không thể gửi mã", "Vui lòng thử lại sau ít phút!");
       }
     } finally {
+      ignoreTimer = false;
       setIsResending(false);
     }
   };
@@ -216,7 +227,7 @@ const VerifyCodeScreen: React.FC = () => {
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Xác nhận</Text>
             <Text style={styles.modalDescription}>
-              Khi quay lại bạn sẽ không thể đăng ký tài khoản bằng email này nữa. Bạn có muốn quay lại không?
+              Bạn chưa hoàn thành việc xác thực tài khoản. Bạn có muốn quay lại không?
             </Text>
             <View style={styles.buttonContainer}>
               <TouchableOpacity style={styles.stayButton} onPress={handleStay}>
