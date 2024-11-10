@@ -56,7 +56,7 @@ const SignInScreen: React.FC = () => {
         else router.push('/lecturer')
       }
     } catch (error: any) {
-      console.log("🚀 ~ handleLogin ~ error:", error)
+      console.log("🚀 ~ handleLogin ~ error:", error?.status)
     }
   };
 

@@ -27,7 +27,6 @@ export async function createClass(request: createClassRequest) {
 
     try {
         const response: createClassResponse = await instance.post('/it5023e/create_class', {
-            token: await getTokenLocal(),
             class_id: request.class_id,
             class_name: request.class_name,
             class_type: request.class_type,
@@ -48,7 +47,6 @@ export async function getClassInfo(request: getClassInfoRequest) {
 
     try {
         const response: getClassInfoResponse = await instance.post('/it5023e/get_class_info', {
-            token: await getTokenLocal(),
             class_id: request.class_id,
             account_id: profile.id,
             role: profile.role
@@ -66,7 +64,6 @@ export async function editClass(request: editClassRequest) {
 
     try {
         const response: editClassResponse = await instance.post('/it5023e/edit_class', {
-            token: await getTokenLocal(),
             class_id: request.class_id,
             class_name: request.class_name,
             status: request.status,
