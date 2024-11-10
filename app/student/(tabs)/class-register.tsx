@@ -14,19 +14,12 @@ import {
     getClassInfo,
     registerClass,
 } from "../../../services/api-calls/classes";
+import {
+    getClassInfoRequest,
+    getClassInfoResponse,
+} from "@/types/createClassRequest";
 
 const CreateClass = () => {
-    type RegisteredClass = {
-        class_id: string;
-        attached_code: string | null;
-        class_name: string;
-        class_type: string;
-        lecturer_name: string;
-        student_count: number;
-        start_date: string;
-        end_date: string;
-        status: string;
-    };
     const headers = [
         "Mã lớp",
         "Mã lớp kèm",
@@ -40,25 +33,17 @@ const CreateClass = () => {
     ];
     const [classCode, setClassCode] = useState<string>("");
     const [registeredClasses, setRegisteredClasses] = useState<
-        RegisteredClass[]
+        getClassInfoResponse["data"][]
     >([]);
     const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
 
     const handleRegister = async () => {
         if (classCode) {
             try {
-                const data = await getClassInfo(classCode);
-                const newClass: RegisteredClass = {
-                    class_id: data.class_id,
-                    attached_code: data.attached_code,
-                    class_name: data.class_name,
-                    class_type: data.class_type,
-                    lecturer_name: data.lecturer_name,
-                    student_count: data.student_count,
-                    start_date: data.start_date,
-                    end_date: data.end_date,
-                    status: data.status,
-                };
+                const data: getClassInfoResponse = await getClassInfo({
+                    class_id: classCode,
+                });
+                const newClass = data.data;
                 setRegisteredClasses([...registeredClasses, newClass]);
                 setClassCode("");
             } catch (error) {
