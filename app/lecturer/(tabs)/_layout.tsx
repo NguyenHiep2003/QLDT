@@ -19,6 +19,7 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="class-management"
                 options={{
+                    unmountOnBlur: true,
                     title: 'Quản lý lớp',
                     tabBarIcon: ({ color }) => (
                         <FontAwesome size={28} name="plus" color={color} />

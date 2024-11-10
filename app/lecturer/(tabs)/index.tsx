@@ -1,16 +1,14 @@
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import {
     SafeAreaView,
-    View,
     FlatList,
     StyleSheet,
     Text,
     StatusBar,
-    TouchableOpacity,
 } from 'react-native';
 import { ClassInfo } from '@/types/generalClassInfor';
 import { ClassCard } from '@/components/ClassCard';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { getClassList } from '@/services/api-calls/classes';
 import { ROLES } from '@/constants/Roles';
 import { UnauthorizedDialog } from '@/components/UnauthorizedDialog';
@@ -19,15 +17,17 @@ export default function Index() {
     const [classes, setClasses] = useState<ClassInfo[]>([]);
     const [dialogUnauthorizedVisible, setDialogUnauthorizedVisible] =
         useState(false);
-    useEffect(() => {
-        getClassList(ROLES.STUDENT)
+
+    useFocusEffect(() => {
+        getClassList(ROLES.LECTURER)
             .then((classes) => setClasses(classes))
             .catch((err) => {
                 if (err.response.status == 401 || err.response.status == 403) {
                     setDialogUnauthorizedVisible(true);
                 }
             });
-    }, []);
+    });
+
     return (
         <SafeAreaView style={styles.container}>
             <Text style={styles.title}>Danh sách lớp giảng dạy</Text>

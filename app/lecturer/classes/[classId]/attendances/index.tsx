@@ -364,11 +364,11 @@ export default function TakeAttendanceScreen() {
     const getStudentList = async() => {
       const token = await getTokenLocal()
       console.log('token: ', token)
-      getClassInfo(classId)
-      .then((classInfo) => {
+      getClassInfo({class_id: classId as string} )
+      .then((response) => {
         getAttendanceList(classId, getLocalDateString(new Date(Date.now())))
         .then((attendanceRecord) => {
-          const studentList = classInfo.student_accounts.map((student: any) => {
+          const studentList = response.data.student_accounts.map((student: any) => {
             const attendance = attendanceRecord.attendance_student_details.find((att: any) => att.student_id === student.student_id)
             return {
                 ...student,
@@ -391,7 +391,7 @@ export default function TakeAttendanceScreen() {
             // Yêu cầu đã được gửi và máy chủ đã phản hồi với mã trạng thái khác 2xx
             const errorCode = error.response.data.meta.code;
             if(errorCode == 9994){
-              const studentList =  classInfo.student_accounts.map((student: any) => {
+              const studentList =  response.data.student_accounts.map((student: any) => {
                   return {
                       ...student,
                       status: 'PRESENT'
