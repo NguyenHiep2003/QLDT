@@ -1,63 +1,86 @@
 import React, { useState } from 'react';
-import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    StyleSheet,
-    Alert,
-    SafeAreaView,
-    ScrollView,
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, SafeAreaView, ScrollView } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
+import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { Link } from 'expo-router';
+import {createClass} from "@/services/api-calls/classes";
+import {createClassResponse} from "@/types/createClassRequest";
 
 const CreateClassScreen = () => {
     const [className, setClassName] = useState('');
     const [classId, setClassId] = useState('');
-    const [additionalClassId, setAdditionalClassId] = useState('');
-    const [subjectId, setSubjectId] = useState('');
     const [classType, setClassType] = useState(null);
-    const [startPeriod, setStartPeriod] = useState(null);
-    const [endPeriod, setEndPeriod] = useState(null);
+    const [startDate, setStartDate] = useState(new Date());
+    const [endDate, setEndDate] = useState(new Date());
     const [maxStudents, setMaxStudents] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
-
     const [openClassType, setOpenClassType] = useState(false);
-    const [openStartPeriod, setOpenStartPeriod] = useState(false);
-    const [openEndPeriod, setOpenEndPeriod] = useState(false);
+
 
     const classTypeItems = [
         { label: 'LT', value: 'LT' },
         { label: 'BT', value: 'BT' },
-        { label: 'LT+BT', value: 'LTBT' },
-        { label: 'TN', value: 'TN' },
-        { label: 'DA', value: 'DA' },
+        { label: 'LT+BT', value: 'LT_BT' }
     ];
 
-    const periodItems = Array.from({ length: 12 }, (_, i) => ({
-        label: `Tiết ${i + 1}`,
-        value: `${i + 1}`,
-    }));
+    const showStartDatePicker = () => {
+        DateTimePickerAndroid.open({
+            value: startDate,
+            onChange: (event, selectedDate) => {
+                if (event.type === 'set' && selectedDate) {
+                    setStartDate(selectedDate);
+                    if (endDate < selectedDate) {
+                        setEndDate(selectedDate);
+                    }
+                }
+            },
+            mode: 'date',
+            // minimumDate: new Date(),
+        });
+    };
 
-    const handleCreateClass = () => {
-        if (
-            !className ||
-            !classId ||
-            !subjectId ||
-            !classType ||
-            !startPeriod ||
-            !endPeriod
-        ) {
+    const showEndDatePicker = () => {
+        DateTimePickerAndroid.open({
+            value: endDate,
+            onChange: (event, selectedDate) => {
+                if (event.type === 'set' && selectedDate) {
+                    setEndDate(selectedDate);
+                }
+            },
+            mode: 'date',
+            minimumDate: startDate,
+        });
+    };
+
+    const formatDate = (date: Date) => {
+        return date.toLocaleDateString('vi-VN');
+    };
+
+    const handleCreateClass = async() => {
+        if (!className || !classId || !classType || !startDate || !endDate) {
             setErrorMessage('Vui lòng điền đầy đủ thông tin');
-        } else if (parseInt(startPeriod) > parseInt(endPeriod)) {
-            setErrorMessage(
-                'Tiết bắt đầu phải nhỏ hơn hoặc bằng tiết kết thúc'
-            );
+        } else if (startDate >= endDate) {
+            setErrorMessage('Ngày kết thúc phải sau ngày bắt đầu');
         } else {
-            // Call API
-            Alert.alert('Thành công', 'Lớp học đã được tạo');
-            setErrorMessage('');
+            try {
+                const response = await createClass({
+                    class_id: classId,
+                    class_type: classType,
+                    class_name: className,
+                    start_date: startDate.toISOString().slice(0,10),
+                    end_date: endDate.toISOString().slice(0,10),
+                    max_student_amount: parseInt(maxStudents)
+                });
+
+                if (response.meta.code === 1000) {
+                    Alert.alert('Thành công', 'Lớp học đã được tạo');
+                    setErrorMessage('');
+                } else {
+                    setErrorMessage(response.meta.message);
+                }
+            } catch (error) {
+                setErrorMessage('Có lỗi xảy ra, vui lòng thử lại sau.');
+            }
         }
     };
 
@@ -68,9 +91,6 @@ const CreateClassScreen = () => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
-            <View style={styles.headerContainer}>
-                <Text style={styles.header}>CREATE CLASS</Text>
-            </View>
             <ScrollView
                 style={styles.container}
                 nestedScrollEnabled={true}
@@ -82,23 +102,12 @@ const CreateClassScreen = () => {
                     value={classId}
                     onChangeText={setClassId}
                 />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Mã lớp kèm*"
-                    value={additionalClassId}
-                    onChangeText={setAdditionalClassId}
-                />
+
                 <TextInput
                     style={styles.input}
                     placeholder="Tên lớp*"
                     value={className}
                     onChangeText={setClassName}
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Mã học phần*"
-                    value={subjectId}
-                    onChangeText={setSubjectId}
                 />
 
                 {/* Class Type Dropdown */}
@@ -132,74 +141,24 @@ const CreateClassScreen = () => {
                     />
                 </View>
 
-                <View style={[styles.rowContainer]}>
-                    {/* Start Period Dropdown */}
-                    <View
-                        style={[
-                            styles.halfWidth,
-                            {
-                                zIndex: 2000,
-                                marginBottom: openStartPeriod ? 120 : 0,
-                            },
-                        ]}
+                <View style={styles.datePickerContainer}>
+                    <TouchableOpacity
+                        style={styles.dateInput}
+                        onPress={showStartDatePicker}
                     >
-                        <DropDownPicker
-                            open={openStartPeriod}
-                            value={startPeriod}
-                            items={periodItems}
-                            setOpen={setOpenStartPeriod}
-                            setValue={setStartPeriod}
-                            placeholder="Tiết bắt đầu"
-                            style={[
-                                styles.dropdown,
-                                { marginBottom: 10, zIndex: 900 },
-                            ]}
-                            textStyle={styles.dropdownText}
-                            dropDownContainerStyle={[
-                                styles.dropdownContainer,
-                                {
-                                    elevation: 5,
-                                    shadowColor: '#000',
-                                    shadowOpacity: 0.2,
-                                },
-                            ]}
-                            listMode="MODAL"
-                        />
-                    </View>
+                        <Text style={styles.dateText}>
+                            Ngày bắt đầu: {formatDate(startDate)}
+                        </Text>
+                    </TouchableOpacity>
 
-                    {/* End Period Dropdown */}
-                    <View
-                        style={[
-                            styles.halfWidth,
-                            {
-                                zIndex: 1000,
-                                marginBottom: openEndPeriod ? 120 : 0,
-                            },
-                        ]}
+                    <TouchableOpacity
+                        style={styles.dateInput}
+                        onPress={showEndDatePicker}
                     >
-                        <DropDownPicker
-                            open={openEndPeriod}
-                            value={endPeriod}
-                            items={periodItems}
-                            setOpen={setOpenEndPeriod}
-                            setValue={setEndPeriod}
-                            placeholder="Tiết kết thúc"
-                            style={[
-                                styles.dropdown,
-                                { marginBottom: 10, zIndex: 900 },
-                            ]}
-                            textStyle={styles.dropdownText}
-                            dropDownContainerStyle={[
-                                styles.dropdownContainer,
-                                {
-                                    elevation: 5,
-                                    shadowColor: '#000',
-                                    shadowOpacity: 0.2,
-                                },
-                            ]}
-                            listMode="MODAL"
-                        />
-                    </View>
+                        <Text style={styles.dateText}>
+                            Ngày kết thúc: {formatDate(endDate)}
+                        </Text>
+                    </TouchableOpacity>
                 </View>
 
                 <TextInput
@@ -243,6 +202,7 @@ const styles = StyleSheet.create({
         color: 'white',
     },
     container: {
+        marginTop: 15,
         flex: 1,
         paddingHorizontal: 20,
     },
@@ -306,6 +266,21 @@ const styles = StyleSheet.create({
         borderColor: '#ccc',
         backgroundColor: '#c21c1c',
         borderRadius: 5,
+    },
+    datePickerContainer: {
+        marginBottom: 10,
+        zIndex: -1,
+    },
+    dateInput: {
+        borderWidth: 1,
+        borderRadius: 5,
+        padding: 10,
+        marginBottom: 10,
+        borderColor: '#c21c1c',
+        backgroundColor: 'white',
+    },
+    dateText: {
+        color: '#c21c1c',
     },
 });
 
