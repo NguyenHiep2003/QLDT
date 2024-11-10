@@ -1,4 +1,4 @@
-import { ROLES } from "@/constants/role";
+import { ROLES } from "@/constants/Roles";
 import { signIn } from "@/services/api-calls/auth";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState, useEffect, useRef } from "react";
