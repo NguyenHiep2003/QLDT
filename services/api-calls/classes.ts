@@ -21,6 +21,13 @@ export async function getClassList(role: ROLES) {
     return response.data;
 }
 
+export async function registerClass(class_ids: string[]) {
+    const response = await instance.post('/it5023e/register_class', {
+        class_ids: class_ids,
+    });
+    return response.data;
+}
+
 export async function createClass(request: createClassRequest) {
     const profile = await getProfileLocal();
     if (!profile) return { meta: { code: 400, message: 'Profile not found' } };

@@ -1,5 +1,5 @@
 import Checkbox from "expo-checkbox";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import React, { useState } from "react";
 import {
     View,
@@ -10,53 +10,71 @@ import {
     TextInput,
     TouchableOpacity,
 } from "react-native";
+import {
+    getClassInfo,
+    registerClass,
+} from "../../../services/api-calls/classes";
+import {
+    getClassInfoRequest,
+    getClassInfoResponse,
+} from "@/types/createClassRequest";
 
 const CreateClass = () => {
-    // Mock data
-    const headers = ["Mã lớp", "Mã lớp kèm", "Tên lớp"];
-    const [classCode, setClassCode] = useState("");
-    const [registeredClasses, setRegisteredClasses] = useState([
-        {
-            code: "IT4788",
-            combinedCode: "IT4788",
-            name: "Phát triển ứng dụng đa nền tảng",
-        },
-        {
-            code: "IT4000",
-            combinedCode: "IT4000",
-            name: "Lập trình hướng đối tượng",
-        },
-        {
-            code: "IT3080",
-            combinedCode: "IT3080",
-            name: "Cấu trúc dữ liệu và giải thuật",
-        },
-    ]);
+    const headers = [
+        "Mã lớp",
+        "Mã lớp kèm",
+        "Tên lớp",
+        "Loại lớp",
+        "Giảng viên",
+        "Số sinh viên",
+        "Ngày bắt đầu",
+        "Ngày kết thúc",
+        "Trạng thái",
+    ];
+    const [classCode, setClassCode] = useState<string>("");
+    const [registeredClasses, setRegisteredClasses] = useState<
+        getClassInfoResponse["data"][]
+    >([]);
     const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
 
-    const handleRegister = () => {
+    const handleRegister = async () => {
         if (classCode) {
-            const newClass = {
-                code: classCode,
-                combinedCode: `${classCode}-ABC`,
-                name: `New Class ${classCode}`,
-            };
-            setRegisteredClasses([...registeredClasses, newClass]);
-            setClassCode("");
+            try {
+                const data: getClassInfoResponse = await getClassInfo({
+                    class_id: classCode,
+                });
+                const newClass = data.data;
+                setRegisteredClasses([...registeredClasses, newClass]);
+                setClassCode("");
+            } catch (error) {
+                console.error("Lấy thông tin lớp thất bại:", error);
+            }
         }
     };
 
-    const toggleSelectClass = (code: string) => {
-        if (selectedClasses.includes(code)) {
-            setSelectedClasses(selectedClasses.filter((item) => item !== code));
+    const toggleSelectClass = (class_id: string) => {
+        if (selectedClasses.includes(class_id)) {
+            setSelectedClasses(
+                selectedClasses.filter((item) => item !== class_id)
+            );
         } else {
-            setSelectedClasses([...selectedClasses, code]);
+            setSelectedClasses([...selectedClasses, class_id]);
+        }
+    };
+
+    const handleSendRegister = async () => {
+        try {
+            const class_ids = registeredClasses.map((cls) => cls.class_id);
+            const data = await registerClass(class_ids);
+            console.log("Gửi đăng ký thành công:", data);
+        } catch (error) {
+            console.error("Gửi đăng ký thất bại:", error);
         }
     };
 
     const handleRemoveSelected = () => {
         const filteredClasses = registeredClasses.filter(
-            (item) => !selectedClasses.includes(item.code)
+            (item) => !selectedClasses.includes(item.class_id)
         );
         setRegisteredClasses(filteredClasses);
         setSelectedClasses([]);
@@ -84,7 +102,15 @@ const CreateClass = () => {
                     {/* Header Row */}
                     <View style={styles.headerRow}>
                         {headers.map((header, index) => (
-                            <View key={index} style={styles.headerCell}>
+                            <View
+                                key={index}
+                                style={[
+                                    styles.headerCell,
+                                    (header === "Mã lớp" ||
+                                        header === "Mã lớp kèm") &&
+                                        styles.headerCellClassCode,
+                                ]}
+                            >
                                 <Text style={styles.headerText}>{header}</Text>
                             </View>
                         ))}
@@ -94,29 +120,59 @@ const CreateClass = () => {
                     <ScrollView style={styles.verticalScroll}>
                         {registeredClasses.map((item, index) => (
                             <View key={index} style={styles.classRow}>
-                                <View style={styles.cell}>
+                                <View style={styles.cellClassCode}>
                                     <Text style={styles.classCode}>
-                                        {item.code}
+                                        {item.class_id}
+                                    </Text>
+                                </View>
+                                <View style={styles.cellClassCode}>
+                                    <Text style={styles.classCode}>
+                                        {item.attached_code}
                                     </Text>
                                 </View>
                                 <View style={styles.cell}>
                                     <Text style={styles.classCode}>
-                                        {item.combinedCode}
+                                        {item.class_name}
                                     </Text>
                                 </View>
                                 <View style={styles.cell}>
                                     <Text style={styles.classCode}>
-                                        {item.name}
+                                        {item.class_type}
+                                    </Text>
+                                </View>
+                                <View style={styles.cell}>
+                                    <Text style={styles.classCode}>
+                                        {item.lecturer_name}
+                                    </Text>
+                                </View>
+                                <View style={styles.cell}>
+                                    <Text style={styles.classCode}>
+                                        {item.student_count}
+                                    </Text>
+                                </View>
+                                <View style={styles.cell}>
+                                    <Text style={styles.classCode}>
+                                        {item.start_date}
+                                    </Text>
+                                </View>
+                                <View style={styles.cell}>
+                                    <Text style={styles.classCode}>
+                                        {item.end_date}
+                                    </Text>
+                                </View>
+                                <View style={styles.cell}>
+                                    <Text style={styles.classCode}>
+                                        {item.status}
                                     </Text>
                                 </View>
                                 <View style={styles.CheckboxCell}>
                                     <Checkbox
                                         color={"#B71C1C"}
                                         value={selectedClasses.includes(
-                                            item.code
+                                            item.class_id
                                         )}
                                         onValueChange={() =>
-                                            toggleSelectClass(item.code)
+                                            toggleSelectClass(item.class_id)
                                         }
                                         style={styles.checkbox}
                                     />
@@ -128,14 +184,17 @@ const CreateClass = () => {
             </ScrollView>
 
             <View style={styles.bottomFooter}>
-                <TouchableOpacity style={styles.sendButton}>
+                <TouchableOpacity
+                    style={styles.sendButton}
+                    onPress={handleSendRegister}
+                >
                     <Text style={styles.buttonText}>Gửi đăng ký</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.removeButton}
                     onPress={handleRemoveSelected}
                 >
-                    <Text style={styles.buttonText}>Xóa</Text>
+                    <Text style={styles.buttonText}>Xóa lớp</Text>
                 </TouchableOpacity>
             </View>
 
@@ -196,7 +255,6 @@ const styles = StyleSheet.create({
         maxHeight: 460,
         borderColor: "#B71C1C",
         borderWidth: 1,
-        borderRadius: 10,
     },
     verticalScroll: {
         maxHeight: Dimensions.get("window").height * 0.6,
@@ -206,12 +264,21 @@ const styles = StyleSheet.create({
         backgroundColor: "#B71C1C",
     },
     headerCell: {
-        width: 160,
+        width: 170,
         padding: 16,
         borderWidth: 1,
         borderColor: "#fff",
         alignItems: "center",
     },
+
+    headerCellClassCode: {
+        width: 120,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: "#fff",
+        alignItems: "center",
+    },
+
     headerText: {
         color: "#fff",
         fontWeight: "bold",
@@ -221,11 +288,23 @@ const styles = StyleSheet.create({
         flexDirection: "row",
     },
     cell: {
-        width: 160,
-        height: 60,
+        width: 170,
+        height: 70,
         padding: 16,
         borderWidth: 1,
         borderColor: "#ddd",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+
+    cellClassCode: {
+        width: 120,
+        height: 70,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: "#ddd",
+        justifyContent: "center",
+        alignItems: "center",
     },
 
     bottomFooter: {
@@ -259,11 +338,12 @@ const styles = StyleSheet.create({
 
     CheckboxCell: {
         width: 60,
-        height: 60,
+        height: 70,
         padding: 16,
         borderWidth: 1,
         borderColor: "#ddd",
         alignItems: "center",
+        justifyContent: "center",
     },
 
     classRow: {
@@ -272,7 +352,9 @@ const styles = StyleSheet.create({
     },
 
     classCode: {
-        flexWrap: "wrap",
+        height: 70,
+        textAlign: "center",
+        textAlignVertical: "center",
     },
 });
 
