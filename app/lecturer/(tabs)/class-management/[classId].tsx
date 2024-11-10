@@ -4,6 +4,7 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import {editClass, getClassInfo} from "@/services/api-calls/classes";
 import {DateTimePickerAndroid} from "@react-native-community/datetimepicker";
 import {useRoute} from "@react-navigation/core";
+import {router} from "expo-router";
 
 type RouteParams = {
     classId: string;
@@ -63,6 +64,7 @@ const EditClassScreen = () => {
             if (response.meta.code === 1000) {
                 Alert.alert('Thành công', 'Lớp học đã cập nhật');
                 setErrorMessage('');
+                router.push(`/lecturer/(tabs)`)
             } else {
                 setErrorMessage(response.meta.message);
             }
@@ -111,10 +113,10 @@ const EditClassScreen = () => {
                 contentContainerStyle={{ paddingBottom: 50 }}
             >
                 <TextInput
-                    style={styles.input}
+                    style={[styles.input, { backgroundColor: '#D3D3D3' }]}
                     placeholder="Mã lớp*"
                     value={newClassId}
-                    onChangeText={setNewClassId}
+                    editable={false}
                 />
 
                 <TextInput
