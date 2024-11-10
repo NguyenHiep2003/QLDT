@@ -11,23 +11,16 @@ import {
     Dimensions,
     TextInput,
     TouchableOpacity,
+    Keyboard,
 } from "react-native";
+import {
+    getClassInfoRequest,
+    getClassInfoResponse,
+} from "@/types/createClassRequest";
 
 const CreateClass = () => {
-    type Classes = {
-        class_id: string;
-        attached_code: string | null;
-        class_name: string;
-        class_type: string;
-        lecturer_name: string;
-        student_count: number;
-        start_date: string;
-        end_date: string;
-        status: string;
-    };
     const headers = [
         "Mã lớp",
-        "Mã lớp kèm",
         "Tên lớp",
         "Loại lớp",
         "Giảng viên",
@@ -37,7 +30,7 @@ const CreateClass = () => {
         "Trạng thái",
     ];
     const [classCode, setClassCode] = useState("");
-    const [classes, setClasses] = useState<Classes[]>([]);
+    const [classes, setClasses] = useState<getClassInfoResponse["data"][]>([]);
     const [selectedClass, setSelectedClass] = useState<string | null>(null);
 
     useEffect(() => {
@@ -54,10 +47,17 @@ const CreateClass = () => {
 
     const handleFindClass = () => {
         if (classCode) {
-            const filtered = classes.filter((cls) =>
-                cls.class_id.includes(classCode)
-            );
-            setClasses(filtered);
+            try {
+                const filtered = classes.filter((cls) =>
+                    cls.class_id.includes(classCode)
+                );
+                setClasses(filtered);
+
+                Keyboard.dismiss();
+            } catch (error) {
+                Keyboard.dismiss();
+                console.error("Tìm kiếm lớp thất bại:", error);
+            }
         }
     };
 
@@ -90,7 +90,7 @@ const CreateClass = () => {
             <View style={styles.inputContainer}>
                 <TextInput
                     style={styles.input}
-                    placeholder="Mã lớp"
+                    placeholder="Nhập mã lớp"
                     value={classCode}
                     onChangeText={setClassCode}
                 />
@@ -112,7 +112,9 @@ const CreateClass = () => {
                                 style={[
                                     styles.headerCell,
                                     (header === "Mã lớp" ||
-                                        header === "Mã lớp kèm") &&
+                                        header === "Loại lớp" ||
+                                        header === "Số sinh viên" ||
+                                        header === "Trạng thái") &&
                                         styles.headerCellClassCode,
                                 ]}
                             >
@@ -141,17 +143,13 @@ const CreateClass = () => {
                                             {item.class_id}
                                         </Text>
                                     </View>
-                                    <View style={styles.cellClassCode}>
-                                        <Text style={styles.classCode}>
-                                            {item.attached_code}
-                                        </Text>
-                                    </View>
+
                                     <View style={styles.cell}>
                                         <Text style={styles.classCode}>
                                             {item.class_name}
                                         </Text>
                                     </View>
-                                    <View style={styles.cell}>
+                                    <View style={styles.cellClassCode}>
                                         <Text style={styles.classCode}>
                                             {item.class_type}
                                         </Text>
@@ -161,7 +159,7 @@ const CreateClass = () => {
                                             {item.lecturer_name}
                                         </Text>
                                     </View>
-                                    <View style={styles.cell}>
+                                    <View style={styles.cellClassCode}>
                                         <Text style={styles.classCode}>
                                             {item.student_count}
                                         </Text>
@@ -176,7 +174,7 @@ const CreateClass = () => {
                                             {item.end_date}
                                         </Text>
                                     </View>
-                                    <View style={styles.cell}>
+                                    <View style={styles.cellClassCode}>
                                         <Text style={styles.classCode}>
                                             {item.status}
                                         </Text>
