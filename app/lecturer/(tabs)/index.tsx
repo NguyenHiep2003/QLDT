@@ -1,4 +1,4 @@
-import {router, useFocusEffect} from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import {
     SafeAreaView,
     FlatList,
@@ -8,17 +8,18 @@ import {
 } from 'react-native';
 import { ClassInfo } from '@/types/generalClassInfor';
 import { ClassCard } from '@/components/ClassCard';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { getClassList } from '@/services/api-calls/classes';
 import { ROLES } from '@/constants/Roles';
 import { UnauthorizedDialog } from '@/components/UnauthorizedDialog';
 
 export default function Index() {
     const [classes, setClasses] = useState<ClassInfo[]>([]);
-    const [dialogUnauthorizedVisible, setDialogUnauthorizedVisible] = useState(false);
+    const [dialogUnauthorizedVisible, setDialogUnauthorizedVisible] =
+        useState(false);
 
     useFocusEffect(() => {
-        getClassList(ROLES.STUDENT)
+        getClassList(ROLES.LECTURER)
             .then((classes) => setClasses(classes))
             .catch((err) => {
                 if (err.response.status == 401 || err.response.status == 403) {
@@ -36,10 +37,7 @@ export default function Index() {
                     <ClassCard
                         data={item}
                         onPress={() =>
-                            router.push({
-                                pathname: `/lecturer/classes/${item.class_id}`,
-                                params: { class_id: item.class_id },
-                            })
+                            router.push(`/lecturer/classes/${item.class_id}`)
                         }
                     />
                 )}
