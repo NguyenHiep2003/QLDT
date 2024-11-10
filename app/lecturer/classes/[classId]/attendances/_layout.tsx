@@ -4,7 +4,7 @@ import {
     MaterialTopTabNavigationOptions,
     createMaterialTopTabNavigator,
   } from "@react-navigation/material-top-tabs";
-  import { withLayoutContext } from "expo-router";
+  import { useLocalSearchParams, withLayoutContext } from "expo-router";
   import { ParamListBase, TabNavigationState } from "@react-navigation/native";
   
   const { Navigator } = createMaterialTopTabNavigator();
@@ -17,10 +17,11 @@ import {
   >(Navigator);
   
   export default function TabLayout() {
+    const { classId } = useLocalSearchParams();
     return (
       <MaterialTopTabs>
-        <MaterialTopTabs.Screen name="index" options={{ title: "Điểm danh" }} />
-        <MaterialTopTabs.Screen name="history" options={{ title: "Lịch sử điểm danh" }} />
+        <MaterialTopTabs.Screen name="index" options={{ title: "Điểm danh" }} initialParams={{ classId }} />
+        <MaterialTopTabs.Screen name="history" options={{ title: "Lịch sử điểm danh" }} initialParams={{ classId }} />
       </MaterialTopTabs>
     );
   }
