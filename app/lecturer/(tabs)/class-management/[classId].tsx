@@ -1,104 +1,141 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, SafeAreaView, ScrollView } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
-import {Link} from "expo-router";
-import {ClassInfo} from "@/app/type/class-info";
+import {editClass, getClassInfo} from "@/services/api-calls/classes";
+import {DateTimePickerAndroid} from "@react-native-community/datetimepicker";
+import {useRoute} from "@react-navigation/core";
 
-const CreateClassScreen = () => {
-    const data: ClassInfo = {
-        classId: '147000',
-        additionalClassId: '147001',
-        subjectId: 'IT4441',
-        classType: 'LT',
-        startPeriod: 'Tiết 1',
-        endPeriod: 'Tiết 4',
-        maxStudents: '90'
-    }
+type RouteParams = {
+    classId: string;
+};
 
-    const [className, setClassName] = useState('');
-    const [classId, setClassId] = useState(data.classId);
-    const [additionalClassId, setAdditionalClassId] = useState(data.additionalClassId);
-    const [subjectId, setSubjectId] = useState(data.subjectId);
-    const [classType, setClassType] = useState(data.classType);
-    const [startPeriod, setStartPeriod] = useState(data.startPeriod);
-    const [endPeriod, setEndPeriod] = useState(data.endPeriod);
-    const [maxStudents, setMaxStudents] = useState(data.maxStudents);
+const EditClassScreen = () => {
+    const route = useRoute()
+    const classId = route.params as RouteParams
+    const statusList = [
+        { label: 'Đã hoàn thành', value: 'COMPLETED' },
+        { label: 'Mở đăng kí', value: 'UPCOMING' },
+        { label: 'Đang diễn ra', value: 'ACTIVE' },
+    ]
+
+    useEffect(() => {
+        const getInitialInfo = async () => {
+            try {
+                const response = await getClassInfo({
+                    class_id: classId.classId,
+                });
+
+                if (response.meta.code === 1000) {
+                    setNewClassName(response.data.class_name)
+                    setNewClassId(response.data.class_id)
+                    setNewStatus(response.data.status)
+                    setStartDate(new Date(response.data.start_date))
+                    setEndDate(new Date(response.data.end_date))
+                    setErrorMessage('');
+                } else {
+                    setErrorMessage(response.meta.message);
+                }
+            } catch (error) {
+                setErrorMessage('Có lỗi xảy ra, vui lòng thử lại sau.');
+            }
+        }
+
+        getInitialInfo().then(r => console.log(r))
+    }, [])
+
+    const [newClassName, setNewClassName] = useState('');
+    const [newClassId, setNewClassId] = useState('');
+    const [newStatus, setNewStatus] = useState('');
+    const [startDate, setStartDate] = useState(new Date());
+    const [endDate, setEndDate] = useState(new Date());
     const [errorMessage, setErrorMessage] = useState('');
+    const [openStatus, setOpenStatus] = useState(false);
 
-    const [openClassType, setOpenClassType] = useState(false);
-    const [openStartPeriod, setOpenStartPeriod] = useState(false);
-    const [openEndPeriod, setOpenEndPeriod] = useState(false);
-
-    const classTypeItems = [
-        { label: 'LT', value: 'LT' },
-        { label: 'BT', value: 'BT' },
-        { label: 'LT+BT', value: 'LTBT' },
-        { label: 'TN', value: 'TN' },
-        { label: 'DA', value: 'DA' },
-    ];
-
-    const periodItems = Array.from({ length: 12 }, (_, i) => ({
-        label: `Tiết ${i + 1}`,
-        value: `${i + 1}`,
-    }));
-
-    const handleDeleteClass = () => {
-
+    const handleEditClass = async () => {
+        const response = await editClass({
+            class_id: newClassId,
+            class_name: newClassName,
+            status: newStatus,
+            start_date: startDate.toISOString().slice(0,10),
+            end_date: endDate.toISOString().slice(0,10),
+        })
+        try {
+            if (response.meta.code === 1000) {
+                Alert.alert('Thành công', 'Lớp học đã cập nhật');
+                setErrorMessage('');
+            } else {
+                setErrorMessage(response.meta.message);
+            }
+        } catch (error) {
+            setErrorMessage('Có lỗi xảy ra, vui lòng thử lại sau.');
+        }
     }
 
-    const handleEditClass = () => {
-
+    const showStartDatePicker = () => {
+        DateTimePickerAndroid.open({
+            value: startDate,
+            onChange: (event, selectedDate) => {
+                if (event.type === 'set' && selectedDate) {
+                    setStartDate(selectedDate);
+                    if (endDate < selectedDate) {
+                        setEndDate(selectedDate);
+                    }
+                }
+            },
+            mode: 'date',
+        })
     }
 
-    const handleNumberInput = (text: string) => {
-        const numericValue = text.replace(/[^0-9]/g, "");
-        setMaxStudents(numericValue);
+    const showEndDatePicker = () => {
+        DateTimePickerAndroid.open({
+            value: endDate,
+            onChange: (event, selectedDate) => {
+                if (event.type === 'set' && selectedDate) {
+                    setEndDate(selectedDate);
+                }
+            },
+            mode: 'date',
+            minimumDate: startDate,
+        })
+    }
+
+    const formatDate = (date: Date) => {
+        return date.toLocaleDateString('vi-VN');
     };
 
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.headerContainer}>
-                <Text style={styles.header}>EDIT CLASS</Text>
+                <Text style={styles.header}>CHỈNH SỬA THÔNG TIN LỚP HỌC</Text>
             </View>
             <ScrollView
                 style={styles.container}
                 nestedScrollEnabled={true}
-                contentContainerStyle={{paddingBottom: 50}}
+                contentContainerStyle={{ paddingBottom: 50 }}
             >
                 <TextInput
                     style={styles.input}
                     placeholder="Mã lớp*"
-                    value={classId}
-                    onChangeText={setClassId}
+                    value={newClassId}
+                    onChangeText={setNewClassId}
                 />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Mã lớp kèm*"
-                    value={additionalClassId}
-                    onChangeText={setAdditionalClassId}
-                />
+
                 <TextInput
                     style={styles.input}
                     placeholder="Tên lớp*"
-                    value={className}
-                    onChangeText={setClassName}
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Mã học phần*"
-                    value={subjectId}
-                    onChangeText={setSubjectId}
+                    value={newClassName}
+                    onChangeText={setNewClassName}
                 />
 
-                {/* Class Type Dropdown */}
-                <View style={{zIndex: 3000, marginBottom: openClassType ? 120 : 0}}>
+
+                <View style={{zIndex: 3000, marginBottom: openStatus ? 120 : 0}}>
                     <DropDownPicker
-                        open={openClassType}
-                        value={classType}
-                        items={classTypeItems}
-                        setOpen={setOpenClassType}
-                        setValue={setClassType}
-                        placeholder="Loại lớp"
+                        open={openStatus}
+                        value={newStatus}
+                        items={statusList}
+                        setOpen={setOpenStatus}
+                        setValue={setNewStatus}
+                        placeholder="Trạng thái"
                         style={[styles.dropdown, {marginBottom: 10, zIndex: 1000}]}
                         textStyle={styles.dropdownText}
                         dropDownContainerStyle={[
@@ -109,76 +146,39 @@ const CreateClassScreen = () => {
                     />
                 </View>
 
-                <View style={[styles.rowContainer]}>
-                    {/* Start Period Dropdown */}
-                    <View style={[
-                        styles.halfWidth,
-                        {zIndex: 2000, marginBottom: openStartPeriod ? 120 : 0}
-                    ]}>
-                        <DropDownPicker
-                            open={openStartPeriod}
-                            value={startPeriod}
-                            items={periodItems}
-                            setOpen={setOpenStartPeriod}
-                            setValue={setStartPeriod}
-                            placeholder="Tiết bắt đầu"
-                            style={[styles.dropdown, {marginBottom: 10, zIndex: 900}]}
-                            textStyle={styles.dropdownText}
-                            dropDownContainerStyle={[
-                                styles.dropdownContainer,
-                                {elevation: 5, shadowColor: '#000', shadowOpacity: 0.2}
-                            ]}
-                            listMode="MODAL"
-                        />
-                    </View>
-
-                    {/* End Period Dropdown */}
-                    <View style={[
-                        styles.halfWidth,
-                        {zIndex: 1000, marginBottom: openEndPeriod ? 120 : 0}
-                    ]}>
-                        <DropDownPicker
-                            open={openEndPeriod}
-                            value={endPeriod}
-                            items={periodItems}
-                            setOpen={setOpenEndPeriod}
-                            setValue={setEndPeriod}
-                            placeholder="Tiết kết thúc"
-                            style={[styles.dropdown, {marginBottom: 10, zIndex: 900}]}
-                            textStyle={styles.dropdownText}
-                            dropDownContainerStyle={[
-                                styles.dropdownContainer,
-                                {elevation: 5, shadowColor: '#000', shadowOpacity: 0.2}
-                            ]}
-                            listMode="MODAL"
-                        />
-                    </View>
-                </View>
-
-                <TextInput
-                    style={styles.input}
-                    placeholder="Số lượng sinh viên tối đa*"
-                    value={maxStudents}
-                    onChangeText={handleNumberInput}
-                    keyboardType='numeric'
-                />
-                {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
-
-                <View style={[styles.rowContainer, styles.buttonContainer]}>
-                    <TouchableOpacity style={styles.button} onPress={handleDeleteClass}>
-                        <Text style={styles.buttonText}>Xóa lớp này</Text>
+                <View style={styles.datePickerContainer}>
+                    <TouchableOpacity
+                        style={styles.dateInput}
+                        onPress={showStartDatePicker}
+                    >
+                        <Text style={styles.dateText}>
+                            Ngày bắt đầu: {formatDate(startDate)}
+                        </Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.button} onPress={handleEditClass}>
-                        <Text style={styles.buttonText}>Xác nhận</Text>
+
+                    <TouchableOpacity
+                        style={styles.dateInput}
+                        onPress={showEndDatePicker}
+                    >
+                        <Text style={styles.dateText}>
+                            Ngày kết thúc: {formatDate(endDate)}
+                        </Text>
                     </TouchableOpacity>
                 </View>
 
-                <Link href={"/student"} style={styles.classOpen}>Thông tin danh sách lớp mở</Link>
-
+                {errorMessage ? (
+                    <Text style={styles.errorText}>{errorMessage}</Text>
+                ) : null}
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={handleEditClass}
+                >
+                    <Text style={styles.buttonText}>Chỉnh sửa lớp học</Text>
+                </TouchableOpacity>
             </ScrollView>
         </SafeAreaView>
-    );
-};
+    )
+}
 
 const styles = StyleSheet.create({
     safeArea: {
@@ -205,27 +205,16 @@ const styles = StyleSheet.create({
         padding: 10,
         marginBottom: 10,
         borderColor: '#c21c1c',
-        color: '#c21c1c'
+        color: '#c21c1c',
     },
     dropdownSection: {
         marginBottom: 10,
-        zIndex: 10
     },
-    dropdown: {
-        borderColor: '#c21c1c',
-        zIndex: 10
 
-    },
     dropdownText: {
         color: '#c21c1c',
     },
-    dropdownContainer: {
-        borderColor: '#c21c1c',
-    },
-    rowContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
+
     halfWidth: {
         width: '48%',
     },
@@ -236,7 +225,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: 10,
         marginBottom: 20,
-        width: "48%",
+        zIndex: -1,
+        width: '50%',
         alignSelf: 'center',
     },
     buttonText: {
@@ -246,15 +236,45 @@ const styles = StyleSheet.create({
     errorText: {
         color: 'red',
         marginBottom: 10,
+        zIndex: -1,
     },
     classOpen: {
         color: '#c21c1c',
-        textAlign: "center",
-        zIndex: -1
+        zIndex: -1,
+        textAlign: 'center',
     },
-    buttonContainer: {
-        zIndex: -1
-    }
+    rowContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 15,
+    },
+    dropdown: {
+        borderColor: '#c21c1c',
+        borderWidth: 1,
+        borderRadius: 5,
+        backgroundColor: 'white',
+        borderStyle: 'solid',
+    },
+    dropdownContainer: {
+        borderColor: '#ccc',
+        backgroundColor: '#c21c1c',
+        borderRadius: 5,
+    },
+    datePickerContainer: {
+        marginBottom: 10,
+        zIndex: -1,
+    },
+    dateInput: {
+        borderWidth: 1,
+        borderRadius: 5,
+        padding: 10,
+        marginBottom: 10,
+        borderColor: '#c21c1c',
+        backgroundColor: 'white',
+    },
+    dateText: {
+        color: '#c21c1c',
+    },
 });
 
-export default CreateClassScreen;
+export default EditClassScreen;
