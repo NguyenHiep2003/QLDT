@@ -63,6 +63,23 @@ export async function getClassInfo(request: getClassInfoRequest) {
     }
 }
 
+export async function getBasicClassInfo(request: getClassInfoRequest) {
+    const profile = await getProfileLocal();
+    if (!profile) throw new Error('Profile not found');
+
+    try {
+        const response: getClassInfoResponse = await instance.post('/it5023e/get_basic_class_info', {
+            class_id: request.class_id,
+            account_id: profile.id,
+            role: profile.role
+        })
+
+        return response
+    } catch (error) {
+        throw new Error('Error get class info');
+    }
+}
+
 export async function editClass(request: editClassRequest) {
     const profile = await getProfileLocal();
     if (!profile) return { meta: { code: 400, message: 'Profile not found' } };

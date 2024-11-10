@@ -9,9 +9,10 @@ import {
     Dimensions,
     TextInput,
     TouchableOpacity,
+    Keyboard,
 } from "react-native";
 import {
-    getClassInfo,
+    getBasicClassInfo,
     registerClass,
 } from "../../../services/api-calls/classes";
 import {
@@ -22,7 +23,6 @@ import {
 const CreateClass = () => {
     const headers = [
         "Mã lớp",
-        "Mã lớp kèm",
         "Tên lớp",
         "Loại lớp",
         "Giảng viên",
@@ -40,13 +40,15 @@ const CreateClass = () => {
     const handleRegister = async () => {
         if (classCode) {
             try {
-                const data: getClassInfoResponse = await getClassInfo({
+                const data: getClassInfoResponse = await getBasicClassInfo({
                     class_id: classCode,
                 });
                 const newClass = data.data;
                 setRegisteredClasses([...registeredClasses, newClass]);
                 setClassCode("");
+                Keyboard.dismiss();
             } catch (error) {
+                Keyboard.dismiss();
                 console.error("Lấy thông tin lớp thất bại:", error);
             }
         }
@@ -85,7 +87,7 @@ const CreateClass = () => {
             <View style={styles.inputContainer}>
                 <TextInput
                     style={styles.input}
-                    placeholder="Mã lớp"
+                    placeholder="Nhập mã lớp"
                     value={classCode}
                     onChangeText={setClassCode}
                 />
@@ -107,7 +109,9 @@ const CreateClass = () => {
                                 style={[
                                     styles.headerCell,
                                     (header === "Mã lớp" ||
-                                        header === "Mã lớp kèm") &&
+                                        header === "Loại lớp" ||
+                                        header === "Số sinh viên" ||
+                                        header === "Trạng thái") &&
                                         styles.headerCellClassCode,
                                 ]}
                             >
@@ -125,17 +129,13 @@ const CreateClass = () => {
                                         {item.class_id}
                                     </Text>
                                 </View>
-                                <View style={styles.cellClassCode}>
-                                    <Text style={styles.classCode}>
-                                        {item.attached_code}
-                                    </Text>
-                                </View>
+
                                 <View style={styles.cell}>
                                     <Text style={styles.classCode}>
                                         {item.class_name}
                                     </Text>
                                 </View>
-                                <View style={styles.cell}>
+                                <View style={styles.cellClassCode}>
                                     <Text style={styles.classCode}>
                                         {item.class_type}
                                     </Text>
@@ -145,7 +145,7 @@ const CreateClass = () => {
                                         {item.lecturer_name}
                                     </Text>
                                 </View>
-                                <View style={styles.cell}>
+                                <View style={styles.cellClassCode}>
                                     <Text style={styles.classCode}>
                                         {item.student_count}
                                     </Text>
@@ -160,7 +160,7 @@ const CreateClass = () => {
                                         {item.end_date}
                                     </Text>
                                 </View>
-                                <View style={styles.cell}>
+                                <View style={styles.cellClassCode}>
                                     <Text style={styles.classCode}>
                                         {item.status}
                                     </Text>
