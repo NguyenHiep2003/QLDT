@@ -105,9 +105,6 @@ const EditClassScreen = () => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
-            <View style={styles.headerContainer}>
-                <Text style={styles.header}>CHỈNH SỬA THÔNG TIN LỚP HỌC</Text>
-            </View>
             <ScrollView
                 style={styles.container}
                 nestedScrollEnabled={true}
@@ -198,6 +195,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingHorizontal: 20,
+        marginTop: 15,
     },
     input: {
         borderWidth: 1,

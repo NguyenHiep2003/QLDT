@@ -8,8 +8,6 @@ import {
     getClassInfoRequest,
     getClassInfoResponse
 } from "@/types/createClassRequest";
-import {TProfile} from "@/types/profile";
-import exp from "node:constants";
 
 export async function getClassList(role: ROLES) {
     const profile = await getProfileLocal();
@@ -50,7 +48,7 @@ export async function createClass(request: createClassRequest) {
 
 export async function getClassInfo(request: getClassInfoRequest) {
     const profile = await getProfileLocal();
-    if (!profile) return { meta: { code: 400, message: 'Profile not found' } };
+    if (!profile) throw new Error('Profile not found');
 
     try {
         const response: getClassInfoResponse = await instance.post('/it5023e/get_class_info', {

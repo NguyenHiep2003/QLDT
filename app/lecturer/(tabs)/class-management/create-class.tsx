@@ -91,9 +91,6 @@ const CreateClassScreen = () => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
-            <View style={styles.headerContainer}>
-                <Text style={styles.header}>CREATE CLASS</Text>
-            </View>
             <ScrollView
                 style={styles.container}
                 nestedScrollEnabled={true}
@@ -205,6 +202,7 @@ const styles = StyleSheet.create({
         color: 'white',
     },
     container: {
+        marginTop: 15,
         flex: 1,
         paddingHorizontal: 20,
     },
