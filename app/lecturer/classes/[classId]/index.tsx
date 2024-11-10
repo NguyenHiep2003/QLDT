@@ -17,6 +17,7 @@ export default function Index() {
             <Link href={`/lecturer/classes/${classId}/documents`}>Press here to go to documents tab</Link>
             <Link href={`/lecturer/classes/${classId}/attendances`}>Press here to go to attendances tab</Link>
 
+            <Link href={`/lecturer/(tabs)/class-management/${classId}`}>Edit class</Link>
         </View>
     );
 }
