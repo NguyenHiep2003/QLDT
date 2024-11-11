@@ -1,3 +1,4 @@
+import Header from '@/components/Header';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Tabs } from 'expo-router';
 import { StyleSheet } from 'react-native';
@@ -5,16 +6,27 @@ import { StyleSheet } from 'react-native';
 export default function TabLayout() {
     return (
         <Tabs
-            screenOptions={{ tabBarActiveTintColor: '#c21c1c', headerShown: false }}
+            screenOptions={{
+                tabBarActiveTintColor: '#c21c1c',
+            }}
         >
             <Tabs.Screen
                 name="index"
                 options={{
                     title: 'Trang chủ',
                     tabBarIcon: ({ color }) => (
-                        <FontAwesome size={28} name="home" color={color}/>
+                        <FontAwesome size={28} name="home" color={color} />
                     ),
-                   }}
+                    headerStyle: {
+                        backgroundColor: '#c21c1c',
+                    },
+                    headerTintColor: '#fff',
+                    headerTitleStyle: {
+                        fontWeight: 'bold',
+                    },
+                    headerTitleAlign: 'center',
+                    headerTitle: () => <Header></Header>,
+                }}
             />
             <Tabs.Screen
                 name="class-register"
@@ -23,6 +35,15 @@ export default function TabLayout() {
                     tabBarIcon: ({ color }) => (
                         <FontAwesome size={28} name="plus" color={color} />
                     ),
+                    headerStyle: {
+                        backgroundColor: '#c21c1c',
+                    },
+                    headerTintColor: '#fff',
+                    headerTitleStyle: {
+                        fontWeight: 'bold',
+                    },
+                    headerTitleAlign: 'center',
+                    headerTitle: () => <Header title="Đăng ký lớp"></Header>,
                 }}
             />
             <Tabs.Screen
@@ -32,6 +53,17 @@ export default function TabLayout() {
                     tabBarIcon: ({ color }) => (
                         <FontAwesome size={28} name="user" color={color} />
                     ),
+                    headerStyle: {
+                        backgroundColor: '#c21c1c',
+                    },
+                    headerTintColor: '#fff',
+                    headerTitleStyle: {
+                        fontWeight: 'bold',
+                    },
+                    headerTitleAlign: 'center',
+                    headerTitle: () => (
+                        <Header title="Thông tin tài khoản"></Header>
+                    ),
                 }}
             />
         </Tabs>
@@ -39,12 +71,12 @@ export default function TabLayout() {
 }
 const styles = StyleSheet.create({
     container: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     image: {
-      width: 50,
-      height: 50,
+        width: 50,
+        height: 50,
     },
-  });
+});

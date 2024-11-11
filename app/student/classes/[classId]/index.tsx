@@ -1,17 +1,14 @@
 import { ServiceCard } from '@/components/ServiceCard';
+import { StudentInfo, StudentList } from '@/components/StudentList';
 import { getClassInfo } from '@/services/api-calls/classes';
 import { ClassInfo } from '@/types/generalClassInfor';
-import { Link, useLocalSearchParams } from 'expo-router';
+import { Href, Link, router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Text, StyleSheet, ScrollView, View } from 'react-native';
+import { Text, StyleSheet, ScrollView, View, Pressable } from 'react-native';
+import { Divider } from 'react-native-elements';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 export default function StudentClassDetail() {
-    const servicesCardConfig = [
-        { name: 'description', title: 'Tài liệu' },
-        { name: 'assignment', title: 'Bài tập' },
-        { name: 'sick', title: 'Nghỉ học' },
-    ];
     const classStatusMap = {
         ACTIVE: 'Đang diễn ra',
         COMPLETED: 'Đã hoàn thành',
@@ -21,7 +18,23 @@ export default function StudentClassDetail() {
     const [classInfo, setClassInfo] = useState<ClassInfo | undefined>(
         undefined
     );
-    const [isShowStudentList, setIsShowStudentList] = useState(false);
+    const servicesCardConfig = [
+        {
+            name: 'description',
+            title: 'Tài liệu',
+            link: `/student/classes/${classId}/documents` as Href<string>,
+        },
+        {
+            name: 'assignment',
+            title: 'Bài tập',
+            link: `/student/classes/${classId}/assignments` as Href<string>,
+        },
+        {
+            name: 'rule',
+            title: 'Điểm danh',
+            link: `/student/classes/${classId}/attendances` as Href<string>,
+        },
+    ];
     useEffect(() => {
         getClassInfo({ class_id: classId as string })
             .then((response) => setClassInfo(response.data))
@@ -50,7 +63,6 @@ export default function StudentClassDetail() {
                         <Text style={styles.text}>
                             Số sinh viên:{' '}
                             <Text
-                                onPress={() => setIsShowStudentList(true)}
                                 style={{
                                     textDecorationLine: 'underline',
                                     fontStyle: 'italic',
@@ -73,32 +85,54 @@ export default function StudentClassDetail() {
                                 : undefined}
                         </Text>
                     </View>
+                    <Divider style={{ width: '95%', margin: 10 }} width={2}>
+                        <Text style={{ fontSize: 20, fontWeight: 'bold' }}>
+                            Dịch vụ
+                        </Text>
+                    </Divider>
                     <View
                         style={{
                             flexDirection: 'row',
                             flexWrap: 'wrap',
-                            justifyContent: 'space-between', // Chia đều khoảng cách giữa các box
-                            alignItems: 'center',
+                            justifyContent: 'space-between',
                         }}
                     >
                         {servicesCardConfig.map((val) => (
-                            <View style={{ flex: 1 }}>
-                                <ServiceCard
-                                    title={val.title}
-                                    name={val.name}
-                                ></ServiceCard>
-                            </View>
+                            <Pressable
+                                onPress={() => router.push(val.link)}
+                                key={val.name}
+                            >
+                                <View style={{ width: 135 }}>
+                                    <ServiceCard
+                                        title={val.title}
+                                        name={val.name}
+                                    ></ServiceCard>
+                                </View>
+                            </Pressable>
                         ))}
                     </View>
-                    <Text>
-                        Display class information and service for student
-                    </Text>
-                    <Link href={`/student/classes/${classId}/assignments`}>
-                        Press here to go to assignments tab
-                    </Link>
-                    <Link href={`/student/classes/${classId}/documents`}>
-                        Press here to go to documents tab
-                    </Link>
+                    <Divider
+                        style={{ width: '95%', margin: 10, marginTop: 20 }}
+                        width={2}
+                    >
+                        <Text style={{ fontSize: 20, fontWeight: 'bold' }}>
+                            Danh sách sinh viên
+                        </Text>
+                    </Divider>
+                    <View style={{ marginLeft: 10, marginTop: 10 }}>
+                        {classInfo?.student_accounts.length == 0 ? (
+                            <Text style={{ fontSize: 17, alignSelf: 'center' }}>
+                                Không có sinh viên
+                            </Text>
+                        ) : (
+                            classInfo?.student_accounts.map((val) => (
+                                <StudentInfo
+                                    key={val.account_id.toString()}
+                                    info={val}
+                                ></StudentInfo>
+                            ))
+                        )}
+                    </View>
                 </ScrollView>
             </SafeAreaView>
         </SafeAreaProvider>

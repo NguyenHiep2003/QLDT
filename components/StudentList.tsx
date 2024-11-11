@@ -12,7 +12,7 @@ export const StudentList = ({ data }: StudentListProps) => {
     return (
             <FlatList
                 data={data}
-                // keyExtractor={(item) => item.account_id.toString()}
+                keyExtractor={(item) => item.account_id.toString()}
                 renderItem={({ item }) => (
                     <StudentInfo info={item}></StudentInfo>
                 )}
@@ -20,7 +20,7 @@ export const StudentList = ({ data }: StudentListProps) => {
     );
 };
 
-const StudentInfo = ({ info }: StudentInfoProps) => {
+export const StudentInfo = ({ info }: StudentInfoProps) => {
     return (
         <View style={styles.core}>
             <View style={styles.coreContent}>

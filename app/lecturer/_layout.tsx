@@ -14,16 +14,32 @@ export default function LecturerLayout() {
                 headerTitleStyle: {
                     fontWeight: 'bold',
                 },
-                headerTitleAlign:"center",
-                headerTitle: (props) => <Header />,
+                headerTitleAlign: 'center',
             }}
         >
-            {/* <Stack.Screen
-                name="index"
-            />
             <Stack.Screen
-                name="student/(tabs)"
-            ></Stack.Screen> */}
+                name="classes/[classId]"
+                options={{ headerShown: false }}
+            ></Stack.Screen>
+            <Stack.Screen
+                name="(tabs)"
+                options={{ headerShown: false }}
+            ></Stack.Screen>
+            <Stack.Screen
+                name="changePassword"
+                options={{
+                    headerShown: true,
+                    headerStyle: {
+                        backgroundColor: '#c21c1c',
+                    },
+                    headerTintColor: '#fff',
+                    headerTitleStyle: {
+                        fontWeight: 'bold',
+                    },
+                    headerTitleAlign: 'center',
+                    headerTitle: () => <Header title="Đổi mật khẩu"></Header>,
+                }}
+            ></Stack.Screen>
         </Stack>
     );
 }

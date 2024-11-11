@@ -5,6 +5,7 @@ import {
     StyleSheet,
     Text,
     StatusBar,
+    View,
 } from 'react-native';
 import { ClassInfo } from '@/types/generalClassInfor';
 import { ClassCard } from '@/components/ClassCard';
@@ -31,18 +32,28 @@ export default function Index() {
     return (
         <SafeAreaView style={styles.container}>
             <Text style={styles.title}>Danh sách lớp giảng dạy</Text>
-            <FlatList
-                data={classes}
-                renderItem={({ item }) => (
-                    <ClassCard
-                        data={item}
-                        onPress={() =>
-                            router.push(`/lecturer/classes/${item.class_id}`)
-                        }
-                    />
-                )}
-                keyExtractor={(item) => item.class_id}
-            />
+            {classes && classes.length == 0 ? (
+                <View style={{ marginLeft: 16, justifyContent:'center',alignItems:'center',alignContent:'center',flex:1}}>
+                    <Text style={{ fontSize: 16 }}>
+                        Chưa có lớp
+                    </Text>
+                </View>
+            ) : (
+                <FlatList
+                    data={classes}
+                    renderItem={({ item }) => (
+                        <ClassCard
+                            data={item}
+                            onPress={() =>
+                                router.push(
+                                    `/lecturer/classes/${item.class_id}`
+                                )
+                            }
+                        />
+                    )}
+                    keyExtractor={(item) => item.class_id}
+                />
+            )}
             <UnauthorizedDialog
                 isVisible={dialogUnauthorizedVisible}
             ></UnauthorizedDialog>

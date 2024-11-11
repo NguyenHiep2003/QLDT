@@ -123,7 +123,7 @@ const ChangePasswordScreen = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-      <Text style={styles.title}>Đổi mật khẩu</Text>
+      {/* <Text style={styles.title}>Đổi mật khẩu</Text> */}
 
       <View style={styles.inputContainer}>
         <TextInput

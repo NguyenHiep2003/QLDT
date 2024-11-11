@@ -1,8 +1,7 @@
-import Checkbox from "expo-checkbox";
-import { Link, router } from "expo-router";
-import React, { useState, useEffect } from "react";
-import { getClassList } from "@/services/api-calls/classes";
-import { ROLES } from "@/constants/Roles";
+import { Link, router } from 'expo-router';
+import React, { useState, useEffect } from 'react';
+import { getClassList } from '@/services/api-calls/classes';
+import { ROLES } from '@/constants/Roles';
 import {
     View,
     Text,
@@ -12,34 +11,35 @@ import {
     TextInput,
     TouchableOpacity,
     Keyboard,
-} from "react-native";
+} from 'react-native';
 import {
     getClassInfoRequest,
     getClassInfoResponse,
-} from "@/types/createClassRequest";
+} from '@/types/createClassRequest';
 
 const CreateClass = () => {
     const headers = [
-        "Mã lớp",
-        "Tên lớp",
-        "Loại lớp",
-        "Giảng viên",
-        "Số sinh viên",
-        "Ngày bắt đầu",
-        "Ngày kết thúc",
-        "Trạng thái",
+        'Mã lớp',
+        'Tên lớp',
+        'Loại lớp',
+        'Giảng viên',
+        'Số sinh viên',
+        'Ngày bắt đầu',
+        'Ngày kết thúc',
+        'Trạng thái',
     ];
-    const [classCode, setClassCode] = useState("");
-    const [classes, setClasses] = useState<getClassInfoResponse["data"][]>([]);
+    const [classCode, setClassCode] = useState('');
+    const [classes, setClasses] = useState<getClassInfoResponse['data'][]>([]);
     const [selectedClass, setSelectedClass] = useState<string | null>(null);
-
+    const [isLoadDing, setIsLoading] = useState(true);
     useEffect(() => {
         const fetchClasses = async () => {
             try {
                 const data = await getClassList(ROLES.LECTURER);
                 setClasses(data);
+                setIsLoading(false);
             } catch (error) {
-                console.error("Lấy danh sách lớp thất bại:", error);
+                console.error('Lấy danh sách lớp thất bại:', error);
             }
         };
         fetchClasses();
@@ -56,7 +56,7 @@ const CreateClass = () => {
                 Keyboard.dismiss();
             } catch (error) {
                 Keyboard.dismiss();
-                console.error("Tìm kiếm lớp thất bại:", error);
+                console.error('Tìm kiếm lớp thất bại:', error);
             }
         }
     };
@@ -73,7 +73,7 @@ const CreateClass = () => {
         if (selectedClass) {
             router.push(`/lecturer/(tabs)/class-management/${selectedClass}`);
         } else {
-            console.error("Không có lớp nào được chọn để chỉnh sửa");
+            console.error('Không có lớp nào được chọn để chỉnh sửa');
         }
     };
 
@@ -111,10 +111,10 @@ const CreateClass = () => {
                                 key={index}
                                 style={[
                                     styles.headerCell,
-                                    (header === "Mã lớp" ||
-                                        header === "Loại lớp" ||
-                                        header === "Số sinh viên" ||
-                                        header === "Trạng thái") &&
+                                    (header === 'Mã lớp' ||
+                                        header === 'Loại lớp' ||
+                                        header === 'Số sinh viên' ||
+                                        header === 'Trạng thái') &&
                                         styles.headerCellClassCode,
                                 ]}
                             >
@@ -125,7 +125,7 @@ const CreateClass = () => {
 
                     {/* Table Body */}
                     <ScrollView style={styles.verticalScroll}>
-                        {classes.length > 0 ? (
+                        {classes.length > 0 && isLoadDing == false ? (
                             classes.map((item, index) => (
                                 <TouchableOpacity
                                     key={index}
@@ -181,10 +181,14 @@ const CreateClass = () => {
                                     </View>
                                 </TouchableOpacity>
                             ))
-                        ) : (
+                        ) : isLoadDing == false ? (
                             <Text style={styles.textNoData}>
                                 Không có dữ liệu
                             </Text>
+                        ) : (
+                                <Text style={styles.textNoData}>
+                                    Loading...
+                                </Text>
                         )}
                     </ScrollView>
                 </View>
@@ -195,7 +199,7 @@ const CreateClass = () => {
                     style={styles.sendButton}
                     onPress={() =>
                         router.push(
-                            "/lecturer/(tabs)/class-management/create-class"
+                            '/lecturer/(tabs)/class-management/create-class'
                         )
                     }
                 >
@@ -216,7 +220,7 @@ const CreateClass = () => {
             </View>
 
             {/* Footer */}
-            <Link href={"/"} style={styles.footerText}>
+            <Link href={'/'} style={styles.footerText}>
                 Thông tin danh sách các lớp mở
             </Link>
         </View>
@@ -227,22 +231,22 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 16,
-        backgroundColor: "#fff",
+        backgroundColor: '#fff',
     },
 
     inputContainer: {
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
         marginTop: 40,
         marginBottom: 20,
     },
 
     input: {
         flex: 2,
-        color: "#c21c1c",
+        color: '#c21c1c',
         borderWidth: 1,
-        borderColor: "#c21c1c",
+        borderColor: '#c21c1c',
         padding: 10,
         borderRadius: 5,
         marginRight: 10,
@@ -251,67 +255,67 @@ const styles = StyleSheet.create({
 
     registerButton: {
         flex: 1,
-        backgroundColor: "#c21c1c",
+        backgroundColor: '#c21c1c',
         padding: 10,
         borderRadius: 5,
     },
     buttonText: {
-        color: "#fff",
-        textAlign: "center",
+        color: '#fff',
+        textAlign: 'center',
         fontSize: 18,
-        fontStyle: "italic",
-        fontWeight: "bold",
+        fontStyle: 'italic',
+        fontWeight: 'bold',
     },
     title: {
         fontSize: 20,
-        fontWeight: "bold",
+        fontWeight: 'bold',
         marginBottom: 16,
     },
     horizontalScroll: {
         flex: 1,
         maxHeight: 460,
-        borderColor: "#B71C1C",
+        borderColor: '#B71C1C',
         borderWidth: 1,
     },
     verticalScroll: {
-        maxHeight: Dimensions.get("window").height * 0.6,
+        maxHeight: Dimensions.get('window').height * 0.6,
     },
     headerRow: {
-        flexDirection: "row",
-        backgroundColor: "#B71C1C",
+        flexDirection: 'row',
+        backgroundColor: '#B71C1C',
     },
     headerCell: {
         width: 170,
         padding: 16,
         borderWidth: 1,
-        borderColor: "#fff",
-        alignItems: "center",
+        borderColor: '#fff',
+        alignItems: 'center',
     },
 
     headerCellClassCode: {
         width: 120,
         padding: 16,
         borderWidth: 1,
-        borderColor: "#fff",
-        alignItems: "center",
+        borderColor: '#fff',
+        alignItems: 'center',
     },
 
     headerText: {
-        color: "#fff",
-        fontWeight: "bold",
-        textAlign: "center",
+        color: '#fff',
+        fontWeight: 'bold',
+        textAlign: 'center',
     },
     row: {
-        flexDirection: "row",
+        flexDirection: 'row',
     },
     cell: {
         width: 170,
         height: 70,
         padding: 16,
         borderWidth: 1,
-        borderColor: "#ddd",
-        justifyContent: "center",
-        alignItems: "center",
+        borderColor: '#ddd',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 
     cellClassCode: {
@@ -319,41 +323,41 @@ const styles = StyleSheet.create({
         height: 70,
         padding: 16,
         borderWidth: 1,
-        borderColor: "#ddd",
-        justifyContent: "center",
-        alignItems: "center",
+        borderColor: '#ddd',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 
     bottomFooter: {
-        flexDirection: "row",
-        justifyContent: "space-between",
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         marginBottom: 10,
         marginTop: 10,
     },
     sendButton: {
-        backgroundColor: "#B71C1C",
+        backgroundColor: '#B71C1C',
         padding: 10,
         borderRadius: 5,
     },
     removeButton: {
-        backgroundColor: "#B71C1C",
+        backgroundColor: '#B71C1C',
         padding: 10,
         borderRadius: 5,
     },
     editButton: {
-        backgroundColor: "#c21c1c",
+        backgroundColor: '#c21c1c',
         padding: 10,
         borderRadius: 5,
     },
     footerText: {
         marginTop: 20,
-        textAlign: "center",
-        color: "#B71C1C",
-        fontStyle: "italic",
+        textAlign: 'center',
+        color: '#B71C1C',
+        fontStyle: 'italic',
         fontSize: 18,
     },
     selectedRow: {
-        backgroundColor: "#EEEEEE",
+        backgroundColor: '#EEEEEE',
     },
     checkbox: {
         width: 20,
@@ -365,26 +369,26 @@ const styles = StyleSheet.create({
         height: 70,
         padding: 16,
         borderWidth: 1,
-        borderColor: "#ddd",
-        alignItems: "center",
-        justifyContent: "center",
+        borderColor: '#ddd',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 
     classRow: {
-        flexDirection: "row",
-        alignItems: "center",
+        flexDirection: 'row',
+        alignItems: 'center',
     },
 
     classCode: {
         height: 70,
-        textAlign: "center",
-        textAlignVertical: "center",
+        textAlign: 'center',
+        textAlignVertical: 'center',
     },
 
     textNoData: {
-        marginLeft: 100,
-        marginTop: 100,
-        color: "#B71C1C",
+        marginLeft: 150,
+        marginTop: 170,
+        color: '#B71C1C',
         fontSize: 20,
     },
 });

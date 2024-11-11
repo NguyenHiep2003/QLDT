@@ -14,17 +14,32 @@ export default function StudentLayout() {
                 headerTitleStyle: {
                     fontWeight: 'bold',
                 },
-                headerTitleAlign:"center",
-                headerTitle: (props) => <Header />,
-                // animation:'slide_from_right'
+                headerTitleAlign: 'center',
             }}
         >
-            {/* <Stack.Screen
-                name="index" options={{animation:'ios'}}
-            /> */}
-            {/* <Stack.Screen
-                name="student/classes"
-            ></Stack.Screen> */}
+            <Stack.Screen
+                name="classes/[classId]"
+                options={{ headerShown: false }}
+            ></Stack.Screen>
+            <Stack.Screen
+                name="(tabs)"
+                options={{ headerShown: false }}
+            ></Stack.Screen>
+            <Stack.Screen
+                name="changePassword"
+                options={{
+                    headerShown: true,
+                    headerStyle: {
+                        backgroundColor: '#c21c1c',
+                    },
+                    headerTintColor: '#fff',
+                    headerTitleStyle: {
+                        fontWeight: 'bold',
+                    },
+                    headerTitleAlign: 'center',
+                    headerTitle: () => <Header title="Đổi mật khẩu"></Header>,
+                }}
+            ></Stack.Screen>
         </Stack>
     );
 }
