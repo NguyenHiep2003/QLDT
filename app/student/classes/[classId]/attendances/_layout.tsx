@@ -20,9 +20,8 @@ import {
     const { classId } = useLocalSearchParams();
     return (
       <MaterialTopTabs>
-        <MaterialTopTabs.Screen name="index" options={{ title: "Điểm danh" }} initialParams={{ classId }} />
-        <MaterialTopTabs.Screen name="history" options={{ title: "Lịch sử" }} initialParams={{ classId }} />
-        <MaterialTopTabs.Screen name="absence-request" options={{ title: "Đơn xin nghỉ" }} initialParams={{ classId }} />
+        <MaterialTopTabs.Screen name="index" options={{ title: "Lịch sử điểm danh" }} initialParams={{ classId }} />
+        <MaterialTopTabs.Screen name="request-absence" options={{ title: "Xin nghỉ" }} initialParams={{ classId }} />
       </MaterialTopTabs>
     );
   }

@@ -14,7 +14,7 @@ export async function changeUsername(newUsername: string) {
 export async function getProfile(id: number) {
     try {
         const response = await instance.post('/it4788/get_user_info', {
-            user_id: id,
+            userId: id,
         });
         return response.data;
     } catch (error) {

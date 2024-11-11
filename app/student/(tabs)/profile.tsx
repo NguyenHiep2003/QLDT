@@ -49,7 +49,7 @@ export default function Profile() {
                         <View style={styles.info}>
                             <View style={{ flexDirection: 'row' }}>
                                 <Text style={styles.name}>
-                                    {profile.username}
+                                    {profile.user_name}
                                 </Text>
                                 <View style={{ marginLeft: 10, marginTop: 33 }}>
                                     <Icon

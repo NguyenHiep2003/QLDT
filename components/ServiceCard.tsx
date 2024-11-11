@@ -10,8 +10,13 @@ export const ServiceCard = ({
     title: string;
 }) => {
     return (
-        <Card>
-            <Card.Title>{title}</Card.Title>
+        <Card
+            containerStyle={{
+                borderColor: 'black',
+                borderRadius: 10,
+            }}
+        >
+            <Card.Title numberOfLines={1}>{title}</Card.Title>
             <Icon name={name} size={70}></Icon>
         </Card>
     );

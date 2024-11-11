@@ -3,7 +3,6 @@ import { changeUsername } from '@/services/api-calls/profile';
 import { deleteProfile, getProfileLocal } from '@/services/storages/profile';
 import { deleteToken } from '@/services/storages/token';
 import { TProfile } from '@/types/profile';
-import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { StatusBar, Text, View, StyleSheet, Image, Button } from 'react-native';
@@ -50,7 +49,7 @@ export default function Profile() {
                         <View style={styles.info}>
                             <View style={{ flexDirection: 'row' }}>
                                 <Text style={styles.name}>
-                                    {profile.username}
+                                    {profile.user_name}
                                 </Text>
                                 <View style={{ marginLeft: 10, marginTop: 33 }}>
                                     <Icon
