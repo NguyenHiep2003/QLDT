@@ -9,34 +9,43 @@ import {
 } from 'react-native';
 import { ClassInfo } from '@/types/generalClassInfor';
 import { ClassCard } from '@/components/ClassCard';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { getClassList } from '@/services/api-calls/classes';
 import { ROLES } from '@/constants/Roles';
-import { UnauthorizedDialog } from '@/components/UnauthorizedDialog';
+import { Dialog } from 'react-native-elements';
+import { useErrorContext } from '@/utils/ctx';
+import { CustomException, InternalServerError, UnauthorizedException } from '@/utils/exception';
 
 export default function Index() {
+    const { setUnhandledError } = useErrorContext();
     const [classes, setClasses] = useState<ClassInfo[]>([]);
-    const [dialogUnauthorizedVisible, setDialogUnauthorizedVisible] =
-        useState(false);
-
-    useFocusEffect(() => {
-        getClassList(ROLES.LECTURER)
-            .then((classes) => setClasses(classes))
-            .catch((err) => {
-                if (err.response.status == 401 || err.response.status == 403) {
-                    setDialogUnauthorizedVisible(true);
-                }
-            });
-    });
+    const [isLoading, setIsLoading] = useState(true);
+    useFocusEffect(
+        React.useCallback(() => {
+            setIsLoading(true);
+            getClassList(ROLES.LECTURER)
+                .then((classes) => setClasses(classes))
+                .catch((err) => {
+                    setUnhandledError(err);
+                })
+                .finally(() => setIsLoading(false));
+        }, [])
+    );
 
     return (
         <SafeAreaView style={styles.container}>
             <Text style={styles.title}>Danh sách lớp giảng dạy</Text>
-            {classes && classes.length == 0 ? (
-                <View style={{ marginLeft: 16, justifyContent:'center',alignItems:'center',alignContent:'center',flex:1}}>
-                    <Text style={{ fontSize: 16 }}>
-                        Chưa có lớp
-                    </Text>
+            {isLoading == false && classes && classes.length == 0 ? (
+                <View
+                    style={{
+                        marginLeft: 16,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        alignContent: 'center',
+                        flex: 1,
+                    }}
+                >
+                    <Text style={{ fontSize: 16 }}>Chưa có lớp</Text>
                 </View>
             ) : (
                 <FlatList
@@ -54,9 +63,9 @@ export default function Index() {
                     keyExtractor={(item) => item.class_id}
                 />
             )}
-            <UnauthorizedDialog
-                isVisible={dialogUnauthorizedVisible}
-            ></UnauthorizedDialog>
+            <Dialog isVisible={isLoading && classes.length == 0}>
+                <Dialog.Loading></Dialog.Loading>
+            </Dialog>
         </SafeAreaView>
     );
 }

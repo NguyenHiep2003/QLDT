@@ -8,10 +8,11 @@ import {
     getClassInfoRequest,
     getClassInfoResponse
 } from "@/types/createClassRequest";
+import { UnauthorizedException } from '@/utils/exception';
 
 export async function getClassList(role: ROLES) {
     const profile = await getProfileLocal();
-    if (!profile) return [];
+    if (!profile) throw new UnauthorizedException();
     const response = await instance.post('/it5023e/get_class_list', {
         role,
         account_id: profile.id,
@@ -89,7 +90,7 @@ export async function createClass(request: createClassRequest) {
 
 export async function getClassInfo(request: getClassInfoRequest) {
     const profile = await getProfileLocal();
-    if (!profile) throw new Error('Profile not found');
+    if (!profile) throw new UnauthorizedException('Profile not found');
 
     try {
         const response: getClassInfoResponse = await instance.post('/it5023e/get_class_info', {
@@ -100,7 +101,8 @@ export async function getClassInfo(request: getClassInfoRequest) {
 
         return response
     } catch (error) {
-        throw new Error('Error get class info');
+        console.log("🚀 ~ getClassInfo ~ error:", error)
+        throw error;
     }
 }
 
