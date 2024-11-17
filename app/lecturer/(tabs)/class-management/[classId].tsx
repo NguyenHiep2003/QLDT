@@ -69,7 +69,8 @@ const EditClassScreen = () => {
                 setErrorMessage(response.meta.message);
             }
         } catch (error) {
-            setErrorMessage('Có lỗi xảy ra, vui lòng thử lại sau.');
+            setErrorMessage(response.meta.message);
+            // setErrorMessage('Có lỗi xảy ra, vui lòng thử lại sau.');
         }
     }
 
@@ -122,6 +123,7 @@ const EditClassScreen = () => {
                 <TextInput
                     style={styles.input}
                     placeholder="Tên lớp*"
+                    placeholderTextColor="#c21c1c"
                     value={newClassName}
                     onChangeText={setNewClassName}
                 />
