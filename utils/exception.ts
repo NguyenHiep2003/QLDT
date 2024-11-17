@@ -59,7 +59,7 @@ export class InternalServerError extends CustomException {
 
 export class NetworkError extends CustomException {
     title = 'Lỗi kết nối mạng';
-    content = 'Kết nối Internet không ổn định.Vui lòng kiểm tra và thử lại sau';
+    content = 'Kết nối Internet không ổn định. Vui lòng kiểm tra và thử lại sau';
     constructor(error?: any, message?: string) {
         super(message, error);
     }
