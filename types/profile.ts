@@ -2,7 +2,8 @@ export type TProfile = {
     id: number;
     ho: string;
     ten: string;
-    user_name: string;
+    email: string;
+    name: string;
     active: string;
     role: string;
     class_list: any[];
