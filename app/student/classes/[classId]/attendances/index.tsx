@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -8,30 +8,46 @@ import {
 
 const DATA = {
     "absent_dates": [
-        "2024-11-06",
-        "2024-11-05",
-        "2024-11-08",
-        "2024-11-02",
-        "2024-11-01",
-        "2024-11-18"
+        '2021-22-11' 
     ]
 };
+import _ from 'lodash'
+import {getAttendanceRecord} from '@/services/api-calls/classes'
+import { useLocalSearchParams } from 'expo-router';
+import { AxiosResponse } from 'axios';
 
 export default function AttendanceHistory() {
+    const [data, setData] = useState<any[]>([])
+    const { classId } = useLocalSearchParams();
+    useEffect(() => {
+        getAttendanceRecord(classId)
+        .then((response)  => {
+            const axiosResponse  = response as AxiosResponse<any>
+            setData(axiosResponse.data.absent_dates)
+        })
+        .catch((error: any) => {
+            //TODO: Xử lý lỗi
+        })
+    }, [])
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Bạn đã nghỉ {DATA.absent_dates.length} buổi vào các ngày</Text>
-            
-            <FlatList
-                data={DATA.absent_dates}
-                keyExtractor={index => index.toString()}
-                renderItem={({ item }) => (
-                    <View style={styles.card}>
-                        <Text style={styles.dateText}>{item}</Text>
-                    </View>
-                )}
-                contentContainerStyle={styles.listContainer}
-            />
+            {(_.isEmpty(data))
+                ? <Text style={styles.title}>Bạn chưa nghỉ học buổi nào {"\n"} Tiếp tục phát huy nhé!</Text>
+                :
+                (<>
+                    <Text style={styles.title}>Bạn đã nghỉ {data.length} buổi vào các ngày</Text>
+                    <FlatList
+                        data={data}
+                        keyExtractor={({index}) => index}
+                        renderItem={({ item }) => (
+                            <View style={styles.card}>
+                                <Text style={styles.dateText}>{item}</Text>
+                            </View>
+                        )}
+                        contentContainerStyle={styles.listContainer}
+                    />
+                </>)
+            }
         </View>
     );
 }
@@ -44,7 +60,7 @@ const styles = StyleSheet.create({
         paddingTop: 10
     },
     title: {
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: 'bold',
         color: '#333',
         marginBottom: 20,

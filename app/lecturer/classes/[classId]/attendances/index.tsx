@@ -138,9 +138,9 @@ export default function TakeAttendanceScreen() {
           })
         })
         .catch((error: any) => {
-          if (error.response) {
+          if (error.rawError) {
             // Yêu cầu đã được gửi và máy chủ đã phản hồi với mã trạng thái khác 2xx
-            const errorCode = error.response.data.meta.code;
+            const errorCode = error.rawError.meta.code;
             if(errorCode == 9994){
               const studentList =  response.data.student_accounts.map((student: any) => {
                   return {
@@ -176,8 +176,8 @@ export default function TakeAttendanceScreen() {
               })
           } else {
               // Có lỗi xảy ra khi thiết lập yêu cầu
-              console.error('Error:', error.message);
-              setErr('Hmm... Có gì đó không ổn đã xảy ra!');
+              console.error('Error-----:', error.message);
+              setErr('Có lỗi xảy ra khi thiết lập yêu cầu!');
               setStatusShow({
                 showRecord: false,
                 showErr: true,
