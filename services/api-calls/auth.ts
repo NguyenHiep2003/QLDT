@@ -1,7 +1,9 @@
 import { TProfile } from '@/types/profile';
 import instance from './axios';
 import { saveProfileLocal } from '../storages/profile';
-import { saveTokenLocal } from '../storages/token';
+import { getTokenLocal, saveTokenLocal } from '../storages/token';
+import { convertDriveUrl } from '@/utils/convertDriveUrl';
+import { UnauthorizedException } from '@/utils/exception';
 
 type SignInResponse = {
     data: {
@@ -9,8 +11,9 @@ type SignInResponse = {
         ho: string;
         ten: string;
         token: string;
-        user_name: string;
+        name: string;
         active: string;
+        email: string;
         role: string;
         class_list: any[];
         avatar: string;
@@ -24,18 +27,20 @@ export async function signIn(email: string, password: string) {
             password,
             deviceId: 1,
         });
-        const { ho, ten, id, user_name, active, role, class_list, avatar } =
+        const { ho, ten, id, name, active, role, class_list, avatar } =
             response.data;
         const profile: TProfile = {
             id,
             ho,
             ten,
-            user_name,
+            email,
+            name,
             active,
             role,
             class_list,
             avatar,
         };
+        profile.avatar = convertDriveUrl(profile.avatar);
         await saveProfileLocal(profile);
         await saveTokenLocal(response.data.token);
         return response.data;
@@ -229,5 +234,16 @@ export async function changePassword(
             console.log('🚀 ~ changePassword ~ error:', error);
             throw error;
         }
+    }
+}
+
+export async function logOut() {
+    try {
+        const token = await getTokenLocal();
+        if (!token) throw new UnauthorizedException();
+        return await instance.post('/it4788/logout', { token });
+    } catch (error) {
+        console.log('🚀 ~ logOut ~ error:', error);
+        throw error;
     }
 }
