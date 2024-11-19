@@ -1,7 +1,9 @@
-import { TProfile } from "@/types/profile";
-import instance from "./axios";
-import { saveProfileLocal } from "../storages/profile";
-import { saveTokenLocal } from "../storages/token";
+import { TProfile } from '@/types/profile';
+import instance from './axios';
+import { saveProfileLocal } from '../storages/profile';
+import { getTokenLocal, saveTokenLocal } from '../storages/token';
+import { convertDriveUrl } from '@/utils/convertDriveUrl';
+import { UnauthorizedException } from '@/utils/exception';
 
 type ErrorResponse = {
   code: number;
@@ -10,39 +12,42 @@ type ErrorResponse = {
 
 type SignInResponse = {
   data: {
-    id: number;
-    ho: string;
-    ten: string;
-    token: string;
-    user_name: string;
-    active: string;
-    role: string;
-    class_list: any[];
-    avatar: string;
+      id: number;
+      ho: string;
+      ten: string;
+      token: string;
+      name: string;
+      active: string;
+      email: string;
+      role: string;
+      class_list: any[];
+      avatar: string;
   };
 };
 
 export async function signIn(email: string, password: string) {
   try {
-    const response: SignInResponse = await instance.post("/it4788/login", {
-      email,
-      password,
-      deviceId: 1,
+    const response: SignInResponse = await instance.post('/it4788/login', {
+        email,
+        password,
+        deviceId: 1,
     });
-    const { ho, ten, id, user_name, active, role, class_list, avatar } = response.data;
+    const { ho, ten, id, name, active, role, class_list, avatar } =
+        response.data;
     const profile: TProfile = {
-      id,
-      ho,
-      ten,
-      user_name,
-      active,
-      role,
-      class_list,
-      avatar,
+        id,
+        ho,
+        ten,
+        email,
+        name,
+        active,
+        role,
+        class_list,
+        avatar,
     };
+    profile.avatar = convertDriveUrl(profile.avatar);
     await saveProfileLocal(profile);
     await saveTokenLocal(response.data.token);
-    console.log("Login successfully!");
     return response.data;
 
   } catch (error: any) {
@@ -194,4 +199,15 @@ export async function changePassword(changePassWordRequest: ChangePasswordReques
 
     throw error;
   }
+}
+
+export async function logOut() {
+    try {
+        const token = await getTokenLocal();
+        if (!token) throw new UnauthorizedException();
+        return await instance.post('/it4788/logout', { token });
+    } catch (error) {
+        console.log('🚀 ~ logOut ~ error:', error);
+        throw error;
+    }
 }
