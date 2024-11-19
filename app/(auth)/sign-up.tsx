@@ -7,16 +7,15 @@ import {
   StyleSheet,
   Image,
   ScrollView,
-  Alert,
   ActivityIndicator,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import { useRouter } from "expo-router";
+import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { signUp } from "@/services/api-calls/auth";
+import { useErrorContext } from "@/utils/ctx";
 
 const SignUpScreen: React.FC = () => {
-  const router = useRouter();
   const [ho, setHo] = useState<string>("");
   const [ten, setTen] = useState<string>("");
   const [email, setEmail] = useState<string>("");
@@ -34,6 +33,7 @@ const SignUpScreen: React.FC = () => {
   const [emailError, setEmailError] = useState<string>("");
   const [passwordError, setPasswordError] = useState<string>("");
   const [roleError, setRoleError] = useState<string>("");
+  const { setUnhandledError } = useErrorContext(); // Dialog báo lỗi
 
   //Kiểm tra định dạng Email
   const isValidEmail = (email: string): boolean => {
@@ -62,6 +62,7 @@ const SignUpScreen: React.FC = () => {
     const noSpecialCharRegex = /^[a-zA-Z0-9]*$/;
     return noSpecialCharRegex.test(password);
   };
+
 
   //Kiểm tra đầu vào trước khi gửi request đến server
   const validateInputs = (): boolean => {
@@ -118,11 +119,6 @@ const SignUpScreen: React.FC = () => {
     return true;
   };
 
-  //Hàm hiển thị lỗi (Alert)
-  const displayErrorAlert = (title: string, message: string) => {
-    Alert.alert(title, message);
-  };
-
   //Trạng thái đang đăng ký
   const [isSigningIn, setIsSigningIn] = useState(false);
 
@@ -135,9 +131,6 @@ const SignUpScreen: React.FC = () => {
     setTen(ten.trim());
     setEmail(email.trim());
     setPassword(password.trim());
-
-    console.log(isPasswordLengthValid(password))
-    console.log(hasNoSpecialCharacters(password))
 
     if (!validateInputs()) return;
 
@@ -155,21 +148,10 @@ const SignUpScreen: React.FC = () => {
 
       const response = await signUp(requestBody);
       console.log("Mã xác minh:", response.verify_code);
-      if (response.status_code === 1000) {
-        console.log(response);
-        router.push({ pathname: "/(auth)/verify-code", params: { email } });
-        return;
-      } else if (response.status_code === 9996) {
-        displayErrorAlert("Email đã được đăng ký từ trước", "Vui lòng nhập một Email khác");
-      }
+      router.push({ pathname: "/(auth)/verify-code", params: { email, password } });
+
     } catch (error: any) {
-      console.log("Đăng ký thất bại:", error);
-      if (error.message === "Network request failed" || error instanceof SyntaxError || error.name === "TypeError") {
-        displayErrorAlert("Lỗi kết nối mạng", "Vui lòng kiểm tra kết nối mạng và thử lại!");
-      } else {
-        console.error("Server error:", error);
-        displayErrorAlert("Có lỗi xảy ra", "Vui lòng thử lại sau ít phút!");
-      }
+      setUnhandledError(error);
     } finally {
       setIsSigningIn(false);
     }

@@ -1,10 +1,10 @@
-import { UnauthorizedDialog } from "@/components/UnauthorizedDialog";
 import { changePassword } from "@/services/api-calls/auth";
-import { getTokenLocal } from "@/services/storages/token";
-import { router, useNavigation } from "expo-router";
+import { useErrorContext } from "@/utils/ctx";
+import { router } from "expo-router";
 import React, { useState } from "react";
-import { ScrollView, View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { ScrollView, View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { GeneralErrorDialog } from "@/components/GeneralErrorDialog";
 
 const ChangePasswordScreen = () => {
   const [password, setPassword] = useState("");
@@ -13,13 +13,13 @@ const ChangePasswordScreen = () => {
   const [isPasswordVisible, setPasswordVisible] = useState(false);
   const [isNewPasswordVisible, setNewPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
-
-  const navigation = useNavigation();
-
-  //Hàm hiển thị lỗi (Alert)
-  const displayErrorAlert = (title: string, message: string) => {
-    Alert.alert(title, message);
-  };
+  const { setUnhandledError } = useErrorContext(); // Dialog báo lỗi
+  const [errorDialog, setErrorDialog] = useState({
+    isVisible: false,
+    title: "",
+    content: "",
+    onClickPositiveBtn: () => {},
+  });
 
   // Kiểm tra độ dài mật khẩu
   const isPasswordLengthValid = (password: string): boolean => {
@@ -75,7 +75,6 @@ const ChangePasswordScreen = () => {
   };
 
   const [isChangingPassword, setIsChangingPassword] = useState<boolean>(false);
-  const [isDialogVisible, setDialogVisible] = useState(false);
 
   const handleChangePassword = async () => {
     if (isChangingPassword) return;
@@ -88,9 +87,7 @@ const ChangePasswordScreen = () => {
 
     setIsChangingPassword(true);
     try {
-      const token = getTokenLocal().toString();
       const requestBody = {
-        token: token,
         old_password: password,
         new_password: newPassword,
       };
@@ -98,24 +95,18 @@ const ChangePasswordScreen = () => {
       const response = await changePassword(requestBody);
       console.log("data:", response);
 
-      Alert.alert("Thành công", "Đổi mật khẩu thành công", [], {
-        cancelable: true,
+      setErrorDialog({
+        isVisible: true,
+        title: "Thành công",
+        content: "Đổi mật khẩu thành công!",
+        onClickPositiveBtn: () => {
+          setErrorDialog((prev) => ({ ...prev, isVisible: false }));
+          router.back();
+        },
       });
-      router.back();
-    } catch (error: any) {
-      console.log("Đăng ký thất bại:", error);
 
-      if (error.message === "Token is invalid") {
-        displayErrorAlert("Phiên đăng nhập đã hết hạn", "Vui lòng đăng nhập lại");
-        setDialogVisible(true);
-      } else if (error.message === "Old password is incorrect") {
-        displayErrorAlert("Mật khẩu không chính xác", "Mật khẩu cũ không đúng");
-      } else if (error.message === "New password is too similar to the old one") {
-        displayErrorAlert("Mật khẩu mới gần giống mật khẩu cũ", "Vui lòng chọn mật khẩu mới khác");
-      } else {
-        console.error("Có lỗi xảy ra", "Vui lòng thử lại sau ít phút!");
-        displayErrorAlert("Có lỗi xảy ra", "Vui lòng thử lại sau ít phút!");
-      }
+    } catch (error: any) {
+      setUnhandledError(error);
     } finally {
       setIsChangingPassword(false);
     }
@@ -173,11 +164,19 @@ const ChangePasswordScreen = () => {
       </View>
       {confirmPasswordError ? <Text style={styles.errorText}>{confirmPasswordError}</Text> : null}
 
-      <TouchableOpacity style={styles.button} onPress={handleChangePassword}>
-        <Text style={styles.buttonText}>Xác nhận đặt lại mật khẩu</Text>
+      <TouchableOpacity
+        onPress={handleChangePassword}
+        disabled={isChangingPassword}
+        style={[styles.button, isChangingPassword && styles.disabledButton]}
+      >
+        {isChangingPassword ? (
+          <ActivityIndicator color="#FFFFFF" />
+        ) : (
+          <Text style={styles.buttonText}>Xác nhận đặt lại mật khẩu</Text>
+        )}
       </TouchableOpacity>
 
-      <UnauthorizedDialog isVisible={isDialogVisible} />
+      <GeneralErrorDialog {...errorDialog} />
     </ScrollView>
   );
 };
@@ -227,6 +226,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 5,
     marginBottom: 15,
+  },
+  disabledButton: {
+    opacity: 0.6,
   },
 });
 

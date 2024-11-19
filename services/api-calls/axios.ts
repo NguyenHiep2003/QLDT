@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { getTokenLocal } from '../storages/token';
 import {
+    ForbiddenException,
     InternalServerError,
     NetworkError,
     UnauthorizedException,
@@ -30,7 +31,7 @@ instance.interceptors.response.use(
         if (httpStatusCode == 401)
             return Promise.reject(new UnauthorizedException(data));
         if (httpStatusCode == 403)
-            return Promise.reject(new UnauthorizedException(data));
+            return Promise.reject(new ForbiddenException(data));
         else if (httpStatusCode)
             return Promise.reject(new InternalServerError(data));
         const netInfo = await NetInfo.fetch();

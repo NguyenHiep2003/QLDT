@@ -1,233 +1,197 @@
-import { TProfile } from '@/types/profile';
-import instance from './axios';
-import { saveProfileLocal } from '../storages/profile';
-import { saveTokenLocal } from '../storages/token';
+import { TProfile } from "@/types/profile";
+import instance from "./axios";
+import { saveProfileLocal } from "../storages/profile";
+import { saveTokenLocal } from "../storages/token";
+
+type ErrorResponse = {
+  code: number;
+  message: string;
+};
 
 type SignInResponse = {
-    data: {
-        id: number;
-        ho: string;
-        ten: string;
-        token: string;
-        user_name: string;
-        active: string;
-        role: string;
-        class_list: any[];
-        avatar: string;
-    };
+  data: {
+    id: number;
+    ho: string;
+    ten: string;
+    token: string;
+    user_name: string;
+    active: string;
+    role: string;
+    class_list: any[];
+    avatar: string;
+  };
 };
 
 export async function signIn(email: string, password: string) {
-    try {
-        const response: SignInResponse = await instance.post('/it4788/login', {
-            email,
-            password,
-            deviceId: 1,
-        });
-        const { ho, ten, id, user_name, active, role, class_list, avatar } =
-            response.data;
-        const profile: TProfile = {
-            id,
-            ho,
-            ten,
-            user_name,
-            active,
-            role,
-            class_list,
-            avatar,
-        };
-        await saveProfileLocal(profile);
-        await saveTokenLocal(response.data.token);
-        return response.data;
-    } catch (error: any) {
-        if (error.response && error.response.data) {
-            const message = error.response.data as String;
+  try {
+    const response: SignInResponse = await instance.post("/it4788/login", {
+      email,
+      password,
+      deviceId: 1,
+    });
+    const { ho, ten, id, user_name, active, role, class_list, avatar } = response.data;
+    const profile: TProfile = {
+      id,
+      ho,
+      ten,
+      user_name,
+      active,
+      role,
+      class_list,
+      avatar,
+    };
+    await saveProfileLocal(profile);
+    await saveTokenLocal(response.data.token);
+    console.log("Login successfully!");
+    return response.data;
 
-            if (message === 'User not found or wrong password') {
-                console.log('Đăng nhập thất bại:', message);
-                throw new Error(message.toString());
-            } else if (message === 'Account is locked') {
-                console.log('Tài khoản chưa được xác thực:', message);
-                throw new Error(message.toString());
-            } else {
-                console.error('Đăng ký thất bại với mã lỗi khác:', message);
-                throw new Error(message.toString());
-            }
-        } else {
-            console.log('🚀 ~ signUp ~ error:', error);
-            throw error;
-        }
+  } catch (error: any) {
+    const errorResponse: ErrorResponse = error.rawError;
+    const { code, message } = errorResponse;
+
+    if (code === 1016) {
+      error.setTitle("Sai thông tin đăng nhập");
+      error.setContent("Email chưa được đăng ký trước đó");
+    } else if (code === 1017) {
+      error.setTitle("Sai thông tin đăng nhập");
+      error.setContent("Mật khẩu không chính xác");
     }
+
+    throw error;
+  }
 }
 
+
 type SignUpResponse = {
-    status_code: number;
-    message: string;
-    verify_code: string;
+  code: number;
+  message: string;
+  verify_code: string;
 };
 
 type SignUpRequest = {
-    ho: string;
-    ten: string;
-    email: string;
-    password: string;
-    uuid: number;
-    role: string;
+  ho: string;
+  ten: string;
+  email: string;
+  password: string;
+  uuid: number;
+  role: string;
 };
 
 export async function signUp(signUpData: SignUpRequest) {
-    try {
-        const data: SignUpResponse = await instance.post(
-            '/it4788/signup',
-            signUpData
-        );
+  try {
+    const data: SignUpResponse = await instance.post("/it4788/signup", signUpData);
+    console.log("Sign up successfully, verify now!");
+    return data;
 
-        console.log(data);
-        console.log(data.status_code);
+  } catch (error: any) {
+    const errorResponse: ErrorResponse = error.rawError;
+    const { code, message } = errorResponse;
 
-        return data;
-    } catch (error: any) {
-        // Kiểm tra nếu có lỗi với response và có data từ server
-        if (error.response && error.response.data) {
-            const data = error.response.data as SignUpResponse;
-
-            if (data.status_code === 9996) {
-                console.log('Đăng ký thất bại (User existed):', data);
-                return data;
-            } else {
-                console.error(
-                    'Đăng ký thất bại với mã lỗi khác:',
-                    data.message
-                );
-                throw new Error(data.message);
-            }
-        } else {
-            console.log('🚀 ~ signUp ~ error:', error);
-            throw error;
-        }
+    if (code === 9996) {
+      error.setTitle("Email đã được đăng ký từ trước");
+      error.setContent("Vui lòng nhập một Email khác");
     }
+
+    throw error;
+  }
 }
 
+
 type CheckVerifyCodeResponse = {
-    message: string;
-    userId: number;
+  code: number;
+  message: string;
+  userId: number;
 };
 
 type CheckVerifyCodeRequest = {
-    email: string;
-    verify_code: string;
+  email: string;
+  verify_code: string;
 };
 
-export async function CheckVerifyCode(
-    checkVerifyCodeData: CheckVerifyCodeRequest
-) {
-    try {
-        const data: CheckVerifyCodeResponse = await instance.post(
-            '/it4788/check_verify_code',
-            checkVerifyCodeData
-        );
+export async function CheckVerifyCode(checkVerifyCodeData: CheckVerifyCodeRequest) {
+  try {
+    const data: CheckVerifyCodeResponse = await instance.post("/it4788/check_verify_code", checkVerifyCodeData);
+    console.log(data);
+    console.log("Verify successfully!");
+    return data;
 
-        console.log(data);
-        console.log(data.message);
+  } catch (error: any) {
+    const errorResponse: ErrorResponse = error.rawError;
+    const { code, message } = errorResponse;
 
-        return data;
-    } catch (error: any) {
-        // Kiểm tra nếu có lỗi với response và có data từ server
-        if (error.response && error.response.data) {
-            const errorData = error.response.data as string;
-
-            // Phân tích chuỗi lỗi
-            const [status_code, message] = errorData.split(' | ');
-
-            // Kiểm tra mã lỗi 1004 và 1010
-            if (status_code === '1004') {
-                console.error(
-                    'Mã xác thực không hợp lệ hoặc email không khớp:',
-                    message
-                );
-                throw new Error('Mã xác thực không hợp lệ.');
-            } else if (status_code === '1010') {
-                console.error('Email đã được xác thực trước đó:', message);
-                throw new Error('Email đã được xác thực trước đó.');
-            } else {
-                console.error('Lỗi khác từ server:', message);
-                throw new Error(message);
-            }
-        } else {
-            console.log('🚀 ~ CheckVerifyCode ~ error:', error);
-            throw error;
-        }
+    if (code === 1016) {
+      error.setTitle("Lỗi xác thực");
+      error.setContent("Email đã được xác thực trước đó");
+    } else if (code === 9990) {
+      error.setTitle("Lỗi email xác thực");
+      error.setContent("Email chưa được đăng ký trước đó");
+    } else if (code === 9993) {
+      error.setTitle("Lỗi mã xác thực");
+      error.setContent("Mã xác thực không hợp lệ");
     }
+
+    throw error;
+  }
 }
 
 type ResendVerifyCodeResponse = {
-    data: string;
-    meta: {
-        code: number;
-        message: string;
-    };
+  code: number;
+  message: string;
+  verify_code: string;
 };
 
-export async function resendVerifyCode(email: string) {
-    try {
-        const data: ResendVerifyCodeResponse = await instance.post(
-            '/it4788/get_verify_code',
-            { email }
-        );
-        console.log('ResendVerifyCode success:', data);
-        return data;
-    } catch (error: any) {
-        if (error.response && error.response.data) {
-            const errorData = error.response.data as string;
-            const [status_code, message] = errorData.split(' | ');
-            if (status_code === '1010') {
-                throw new Error('Email đã được xác thực từ trước.');
-            } else if (status_code === '1009') {
-                throw new Error(
-                    'Yêu cầu quá thường xuyên. Vui lòng thử lại sau.'
-                );
-            }
-        } else {
-            console.log('🚀 ~ resendVerifyCode ~ error:', error);
-            throw error;
-        }
+export async function resendVerifyCode(email: string, password: string) {
+  try {
+    const data: ResendVerifyCodeResponse = await instance.post("/it4788/get_verify_code", { email, password });
+    console.log("ResendVerifyCode success:", data);
+    return data;
+  } catch (error: any) {
+    const errorResponse: ErrorResponse = error.rawError;
+    const { code, message } = errorResponse;
+
+    if (code === 1019) {
+      error.setTitle("Lỗi xác thực");
+      error.setContent("Email đã được xác thực trước đó");
+    } else if (code === 1020) {
+      error.setTitle("Lỗi gửi mã");
+      error.setContent("Yêu cầu quá thường xuyên. Vui lòng thử lại sau");
+    } else if (code === 9990) {
+      error.setTitle("Lỗi xác thực");
+      error.setContent("Email chưa được đăng ký trước đó");
     }
+
+    throw error;
+  }
 }
 
+
 type ChangePasswordRequest = {
-    token: string;
-    old_password: string;
-    new_password: string;
+  old_password: string;
+  new_password: string;
 };
 
-type ChangePasswordResponse = string;
+type ChangePasswordResponse = {
+  code: number;
+  message: string;
+};
 
-export async function changePassword(
-    changePassWordRequest: ChangePasswordRequest
-) {
-    try {
-        const data: ChangePasswordResponse = await instance.post(
-            '/it4788/change_password',
-            changePassWordRequest
-        );
-        console.log(data);
-        return data;
-    } catch (error: any) {
-        if (error.response && error.response.data) {
-            const errorData = error.response.data as string;
-            console.log(errorData);
-            const [status_code, message] = errorData.split(' | ');
-            if (status_code === '9995') {
-                throw new Error('Token is invalid');
-            } else if (status_code === '1001') {
-                throw new Error('Old password is incorrect');
-            } else if (status_code === '1003') {
-                throw new Error('New password is too similar to the old one');
-            }
-            /*Check mật khẩu mới hợp lệ hay không nữa, tài khoản đã bị khóa chưa*/
-        } else {
-            console.log('🚀 ~ changePassword ~ error:', error);
-            throw error;
-        }
+export async function changePassword(changePassWordRequest: ChangePasswordRequest) {
+  try {
+    const data: ChangePasswordResponse = await instance.post("/it4788/change_password", changePassWordRequest);
+    console.log(data);
+    return data;
+  } catch (error: any) {
+    const errorResponse: ErrorResponse = error.rawError;
+    const { code, message } = errorResponse;
+
+    if (code === 1017) {
+      error.setTitle("Mật khẩu không chính xác");
+      error.setContent("Mật khẩu cũ không đúng");
+    } else if (code === 1018) {
+      error.setTitle("Mật khẩu mới gần giống mật khẩu cũ");
+      error.setContent("Vui lòng chọn mật khẩu mới khác");
     }
+
+    throw error;
+  }
 }
