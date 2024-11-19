@@ -35,7 +35,7 @@ export type sendNotificationResponse = {
 }
 
 export type markAsReadRequest = {
-    ids: number[];
+    notification_ids: number[];
 }
 
 export type markAsReadResponse = {
