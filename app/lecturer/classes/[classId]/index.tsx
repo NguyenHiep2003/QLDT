@@ -19,7 +19,7 @@ export default function LecturerClassDetail() {
     const [classInfo, setClassInfo] = useState<ClassInfo | undefined>(
         undefined
     );
-    const {setUnhandledError} = useErrorContext()
+    const { setUnhandledError } = useErrorContext();
     const [isLoading, setIsLoading] = useState(false);
 
     const servicesCardConfig = [
@@ -104,11 +104,11 @@ export default function LecturerClassDetail() {
                             flexDirection: 'row',
                             flexWrap: 'wrap',
                             alignItems: 'center',
-                            justifyContent: 'space-between',
                         }}
                     >
                         {servicesCardConfig.map((val) => (
                             <Pressable
+                                style={{ width: '33%' }}
                                 onPress={() => router.push(val.link)}
                                 key={val.name}
                             >

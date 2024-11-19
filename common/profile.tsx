@@ -15,9 +15,9 @@ import { useEffect, useState } from 'react';
 import { StatusBar, Text, View, StyleSheet } from 'react-native';
 import { Avatar, Dialog, Icon, ListItem } from 'react-native-elements';
 import * as ImagePicker from 'expo-image-picker';
-import { ROLES } from '@/constants/Roles';
 import * as WebBrowser from 'expo-web-browser';
 import { convertDriveUrl } from '@/utils/convertDriveUrl';
+import { ROLES } from '@/constants/Roles';
 
 export function Profile({ role }: { role: string }) {
     const [profile, setProfile] = useState<TProfile | undefined>(undefined);
@@ -64,9 +64,12 @@ export function Profile({ role }: { role: string }) {
         setDialogLogoutVisible(!dialogLogoutVisible);
     };
     useEffect(() => {
-        getProfileLocal().then((data) => {
-            setProfile(data);
-        });
+        setIsLoading(true);
+        getProfileLocal()
+            .then((data) => {
+                setProfile(data);
+            })
+            .finally(() => setIsLoading(false));
     }, []);
     if (profile)
         return (
@@ -187,22 +190,26 @@ export function Profile({ role }: { role: string }) {
                         </ListItem.Content>
                         <ListItem.Chevron />
                     </ListItem>
-                    <ListItem
-                        style={{ marginBottom: 5 }}
-                        onPress={_handlePressButtonAsync}
-                    >
-                        <Icon
-                            name="book"
-                            type="material-community"
-                            color="#189bcc"
-                        />
-                        <ListItem.Content>
-                            <ListItem.Title>
-                                {'Sinh viên cần biết'}
-                            </ListItem.Title>
-                        </ListItem.Content>
-                        <ListItem.Chevron onPress={_handlePressButtonAsync} />
-                    </ListItem>
+                    {role == ROLES.STUDENT ? (
+                        <ListItem
+                            style={{ marginBottom: 5 }}
+                            onPress={_handlePressButtonAsync}
+                        >
+                            <Icon
+                                name="book"
+                                type="material-community"
+                                color="#189bcc"
+                            />
+                            <ListItem.Content>
+                                <ListItem.Title>
+                                    {'Sinh viên cần biết'}
+                                </ListItem.Title>
+                            </ListItem.Content>
+                            <ListItem.Chevron
+                                onPress={_handlePressButtonAsync}
+                            />
+                        </ListItem>
+                    ) : undefined}
                     <ListItem
                         style={{ marginBottom: 5 }}
                         onPress={() => setDialogLogoutVisible(true)}
