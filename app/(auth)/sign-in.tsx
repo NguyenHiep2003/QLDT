@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useErrorContext } from '@/utils/ctx';
+import { ForbiddenException } from '@/utils/exception';
 
 const SignInScreen: React.FC = () => {
     const { email: passedEmail } = useLocalSearchParams<{ email?: string }>();
@@ -30,7 +31,7 @@ const SignInScreen: React.FC = () => {
         useState<boolean>(false);
     const [forgotEmail, setForgotEmail] = useState<string>('');
     const [forgotEmailError, setForgotEmailError] = useState<string>('');
-    const { setUnhandledError } = useErrorContext();
+    const { setUnhandledError } = useErrorContext(); // Dialog báo lỗi
     const passwordInputRef = useRef<TextInput>(null); // Tạo ref cho ô nhập mật khẩu
     // Nếu có email từ tham số, focus vào ô mật khẩu
     useEffect(() => {
@@ -56,6 +57,7 @@ const SignInScreen: React.FC = () => {
             noSpecialCharRegex.test(password)
         );
     };
+
 
     //Kiểm tra đầu vào trước khi gửi request đến server
     const validateInputs = (): boolean => {
@@ -86,10 +88,6 @@ const SignInScreen: React.FC = () => {
         return true;
     };
 
-    //Hàm hiển thị lỗi (Alert)
-    const displayErrorAlert = (title: string, message: string) => {
-        Alert.alert(title, message);
-    };
 
     //Hàm xử lý người dùng ấn Đăng nhập
     const handleLogin = async () => {
@@ -110,29 +108,17 @@ const SignInScreen: React.FC = () => {
                 router.replace('/student');
             } else if (profile?.role === ROLES.LECTURER) {
                 router.replace('/lecturer');
-            } else {
-                displayErrorAlert(
-                    'Đăng nhập không thành công',
-                    'Không thể kết nối Internet!'
-                );
-            }
+            } 
         } catch (error: any) {
-            if (error.message === "Network request failed" || error instanceof SyntaxError || error.name === "TypeError") {
-              displayErrorAlert("Lỗi kết nối mạng", "Vui lòng kiểm tra kết nối mạng và thử lại!");
-            } else if (error.message === "User not found or wrong password") {
-              displayErrorAlert("Sai thông tin đăng nhập", "Tên người dùng hoặc mật khẩu không hợp lệ!");
-            } else if (error.message === "Account is locked") {
-              //displayErrorAlert("Tài khoản chưa được xác thực", "Bạn sẽ được chuyển hướng đến trang xác thực tài khoản!");
-              router.push({ pathname: "/(auth)/verify-code", params: { email , fromSignIn: "true"} });
+            if (error instanceof ForbiddenException) {
+                return router.push({ pathname: "/(auth)/verify-code", params: { email, password, fromSignIn: "true"} });
             }
-            else {
-              console.error("Server error:", error);
-              displayErrorAlert("Có lỗi xảy ra", "Vui lòng thử lại sau ít phút!");
-            }
+            setUnhandledError(error);
         } finally {
             setIsLoggingIn(false);
         }
     };
+
 
     //Hàm xử lý quên mật khẩu
     const handleForgotPasswordSubmit = () => {
@@ -145,7 +131,7 @@ const SignInScreen: React.FC = () => {
         } else {
             console.log('Yêu cầu đặt lại mật khẩu đã được gửi');
             setForgotPasswordVisible(false);
-            displayErrorAlert('Thông báo!', 'Chức năng hiện chưa phát triển!');
+            Alert.alert('Thông báo!', 'Chức năng hiện chưa phát triển!');
         }
     };
 
