@@ -14,6 +14,7 @@ const instance = axios.create({
 
 instance.interceptors.request.use(async function (config) {
     const token = await getTokenLocal();
+    if (config.headers['no-need-token']) return config;
     config.data = { ...config.data, token };
     return config;
 });
@@ -27,6 +28,7 @@ instance.interceptors.response.use(
         // Do something with response error
         const data = error.response?.data;
         console.log('>>>>>', data?.meta?.code ?? data?.status_code);
+        console.log('error axios', JSON.stringify(error));
         const httpStatusCode = error.response?.status;
         if (httpStatusCode == 401)
             return Promise.reject(new UnauthorizedException(data));
