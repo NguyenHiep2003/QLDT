@@ -2,9 +2,9 @@ import { ROLES } from '@/constants/Roles';
 import { getProfileLocal } from '@/services/storages/profile';
 import { getTokenLocal } from '@/services/storages/token';
 import { TProfile } from '@/types/profile';
-import { Link, Redirect } from 'expo-router';
+import { Redirect } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Button, Text, View } from 'react-native';
+import { Text } from 'react-native';
 
 export default function Index() {
     const [isLoading, setIsLoading] = useState(true);
