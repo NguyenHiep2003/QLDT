@@ -1,8 +1,7 @@
 import { TProfile } from '@/types/profile';
 import instance from './axios';
 import { saveProfileLocal } from '../storages/profile';
-import { getTokenLocal, saveTokenLocal } from '../storages/token';
-import { UnauthorizedException } from '@/utils/exception';
+import { saveTokenLocal } from '../storages/token';
 
 type SignInResponse = {
     data: {
@@ -10,8 +9,7 @@ type SignInResponse = {
         ho: string;
         ten: string;
         token: string;
-        name: string;
-        email: string;
+        user_name: string;
         active: string;
         role: string;
         class_list: any[];
@@ -26,14 +24,13 @@ export async function signIn(email: string, password: string) {
             password,
             deviceId: 1,
         });
-        const { ho, ten, id, name, active, role, class_list, avatar } =
+        const { ho, ten, id, user_name, active, role, class_list, avatar } =
             response.data;
         const profile: TProfile = {
             id,
             ho,
             ten,
-            name,
-            email,
+            user_name,
             active,
             role,
             class_list,
@@ -232,17 +229,5 @@ export async function changePassword(
             console.log('🚀 ~ changePassword ~ error:', error);
             throw error;
         }
-    }
-}
-
-export async function logOut() {
-    try {
-        const token = await getTokenLocal();
-        if (!token) throw new UnauthorizedException('Token not found');
-        const res = await instance.post('/it4788/logout', { token });
-        return;
-    } catch (error) {
-        console.log('🚀 ~ logOut ~ error:', error);
-        throw error;
     }
 }
