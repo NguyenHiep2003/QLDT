@@ -2,10 +2,11 @@ import { ServiceCard } from '@/components/ServiceCard';
 import { StudentInfo, StudentList } from '@/components/StudentList';
 import { getClassInfo } from '@/services/api-calls/classes';
 import { ClassInfo } from '@/types/generalClassInfor';
-import { Href, Link, router, useLocalSearchParams } from 'expo-router';
+import { useErrorContext } from '@/utils/ctx';
+import { Href, router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Text, StyleSheet, ScrollView, View, Pressable } from 'react-native';
-import { Divider } from 'react-native-elements';
+import { Dialog, Divider } from 'react-native-elements';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 export default function LecturerClassDetail() {
@@ -18,6 +19,9 @@ export default function LecturerClassDetail() {
     const [classInfo, setClassInfo] = useState<ClassInfo | undefined>(
         undefined
     );
+    const {setUnhandledError} = useErrorContext()
+    const [isLoading, setIsLoading] = useState(false);
+
     const servicesCardConfig = [
         {
             name: 'description',
@@ -36,9 +40,14 @@ export default function LecturerClassDetail() {
         },
     ];
     useEffect(() => {
+        setIsLoading(true);
         getClassInfo({ class_id: classId as string })
-            .then((response) => setClassInfo(response.data))
-            .catch((err) => console.log(err));
+            .then((response) => {
+                setClassInfo(response.data);
+                setIsLoading(false);
+            })
+            .catch((err) => setUnhandledError(err))
+            .finally(() => setIsLoading(false));
     }, []);
     return (
         <SafeAreaProvider>
@@ -135,6 +144,9 @@ export default function LecturerClassDetail() {
                         )}
                     </View>
                 </ScrollView>
+                <Dialog isVisible={isLoading}>
+                    <Dialog.Loading></Dialog.Loading>
+                </Dialog>
             </SafeAreaView>
         </SafeAreaProvider>
     );
