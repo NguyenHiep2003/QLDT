@@ -141,3 +141,18 @@ export async function editClass(request: editClassRequest) {
         throw new Error('Error update class')
     }
 }
+
+export async function getAttendanceRecord(classId: any) {
+    const profile = await getProfileLocal();
+    if (!profile) return { meta: { code: 400, message: 'Profile not found' } };
+
+    try {
+        const response = await instance.post('/it5023e/get_attendance_record', {
+            class_id: classId,
+        })
+
+        return response;
+    } catch (error) {
+        throw new Error('Error get attendance record')
+    }
+}

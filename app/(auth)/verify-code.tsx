@@ -4,16 +4,26 @@ import { useLocalSearchParams, router } from "expo-router";
 import { CheckVerifyCode, resendVerifyCode } from "@/services/api-calls/auth";
 import { StackActions, useFocusEffect, useNavigation } from "@react-navigation/native";
 import ThumbsUpAnimation from "@/components/ThumbsUpAnimation";
+import { useErrorContext } from "@/utils/ctx";
+import { GeneralErrorDialog } from "@/components/GeneralErrorDialog";
 
 const VerifyCodeScreen: React.FC = () => {
   const [code, setCode] = useState<string>("");
   const [codeError, setCodeError] = useState<String>("");
 
-  const { email, fromSignIn } = useLocalSearchParams();
+  const { email, password, fromSignIn } = useLocalSearchParams();
   const isFromSignIn = fromSignIn === "true";
 
   const navigation = useNavigation();
   const [isModalVisible, setModalVisible] = useState(false);
+
+  const { setUnhandledError } = useErrorContext(); // Dialog báo lỗi
+  const [errorDialog, setErrorDialog] = useState({
+    isVisible: false,
+    title: "",
+    content: "",
+    onClickPositiveBtn: () => {},
+  });
 
   useFocusEffect(
     useCallback(() => {
@@ -41,25 +51,28 @@ const VerifyCodeScreen: React.FC = () => {
     navigation.dispatch(StackActions.popToTop());
   };
 
-  //Hàm hiển thị lỗi (Alert)
-  const displayErrorAlert = (title: string, message: string) => {
-    Alert.alert(title, message);
-  };
+  const validateInputs = () => {
+    setCodeError("");
+
+    if (!code) {
+      setCodeError("Vui lòng nhập mã xác thực");
+      return false;
+    }
+
+    //Nếu đúng định dạng
+    return true;
+  }
 
   const [isChecking, setIsChecking] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false); //Dùng để bật/tắt animation bàn tay
+
 
   const handleCheckVerifyCode = async () => {
     if (isChecking) return;
 
     setCode(code.trim());
 
-    setCodeError("");
-
-    if (!code) {
-      setCodeError("Vui lòng nhập mã xác thực");
-      return;
-    }
+    if (!validateInputs()) return;
 
     setIsChecking(true);
 
@@ -70,7 +83,6 @@ const VerifyCodeScreen: React.FC = () => {
       };
 
       const response = await CheckVerifyCode(requestBody);
-      console.log("data:", response);
 
       // Đặt modal về false để không hiển thị lại khi điều hướng
       setModalVisible(false);
@@ -91,26 +103,8 @@ const VerifyCodeScreen: React.FC = () => {
         });
       }, 3000);
 
-      return;
-
     } catch (error: any) {
-      console.log("Đăng ký thất bại:", error);
-
-      // Kiểm tra loại lỗi và hiển thị thông báo
-      if (error.message === "Mã xác thực không hợp lệ.") {
-        displayErrorAlert("Lỗi mã xác thực", error.message);
-      } else if (error.message === "Email đã được xác thực trước đó.") {
-        displayErrorAlert("Lỗi xác thực", error.message);
-      } else if (
-        error.message === "Network request failed" ||
-        error instanceof SyntaxError ||
-        error.name === "TypeError"
-      ) {
-        displayErrorAlert("Lỗi kết nối mạng", "Vui lòng kiểm tra kết nối mạng và thử lại!");
-      } else {
-        console.error("Server error:", error);
-        displayErrorAlert("Có lỗi xảy ra", "Vui lòng thử lại sau ít phút!");
-      }
+      setUnhandledError(error);
     } finally {
       setIsChecking(false);
     }
@@ -160,25 +154,20 @@ const VerifyCodeScreen: React.FC = () => {
 
     try {
       const emailValue = Array.isArray(email) ? email[0] : email;
-      const response = await resendVerifyCode(emailValue);
-      console.log("Resend data:", response);
+      const passwordValue = Array.isArray(password) ? password[0] : password;
+      const response = await resendVerifyCode(emailValue, passwordValue);
 
       // Nếu thành công, bắt đầu đếm ngược
-      if (response?.meta?.code === 1000) {
-        setResendTimer(120);
-        displayErrorAlert("Thành công", "Mã xác thực đã được gửi lại. Vui lòng kiểm tra Email của bạn!");
-      }
+      setResendTimer(120);
+      setErrorDialog({
+        isVisible: true,
+        title: "Thành công",
+        content: "Mã xác thực đã được gửi lại. Vui lòng kiểm tra email của bạn!",
+        onClickPositiveBtn: () => setErrorDialog({ ...errorDialog, isVisible: false }),
+      });
+
     } catch (error: any) {
-      console.log("Resend code failed:", error.message);
-      if (error.message === "Yêu cầu quá thường xuyên. Vui lòng thử lại sau.") {
-        displayErrorAlert("Lỗi gửi mã", error.message);
-      } else if (error.message === "Email đã được xác thực từ trước.") {
-        setResendTimer(0);
-        displayErrorAlert("Lỗi xác thực", error.message);
-      } else {
-        setResendTimer(0);
-        displayErrorAlert("Không thể gửi mã", "Vui lòng thử lại sau ít phút!");
-      }
+      setUnhandledError(error);
     } finally {
       ignoreTimer = false;
       setIsResending(false);
@@ -221,6 +210,8 @@ const VerifyCodeScreen: React.FC = () => {
           <Text style={styles.resendButtonText}>Gửi lại mã xác thực</Text>
         )}
       </TouchableOpacity>
+
+      <GeneralErrorDialog {...errorDialog} />
 
       <Modal visible={isModalVisible} transparent animationType="fade" onRequestClose={handleStay}>
         <View style={styles.modalOverlay}>
@@ -320,7 +311,7 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   disabledText: {
-    opacity: 0.3,
+    opacity: 0.5,
     textDecorationLine: "none",
     fontSize: 14,
   },

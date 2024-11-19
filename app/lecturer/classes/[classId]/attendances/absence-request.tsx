@@ -33,8 +33,8 @@ const  data = [
     }
 ]
 
-const HistoryCard: React.FC<{name: any, title: any, reason: any, DateTime: any}> = ({name, title, reason, DateTime}) => (
-    <TouchableOpacity style={styles.historyCard}>
+const RequestAbsenceCard: React.FC<{name: any, title: any, reason: any, DateTime: any}> = ({name, title, reason, DateTime}) => (
+    <TouchableOpacity style={styles.requestAbsenceCard}>
         <View style={styles.statusContainer} >
             <Text style={styles.statusText}>Chờ phê duyệt</Text>
         </View>
@@ -80,7 +80,7 @@ export default function AbsenceRequestScreen() {
                 style={styles.flatList}
                 data={data}
                 renderItem={({item}) => 
-                    <HistoryCard name={'tên sinh viên'} title={item.title} reason={item.reason} DateTime={item.DateTime}/>
+                    <RequestAbsenceCard name={'tên sinh viên'} title={item.title} reason={item.reason} DateTime={item.DateTime}/>
                 }
                 keyExtractor={item => item.id}
             >
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         marginBottom: 10
     },
-    historyCard: {
+    requestAbsenceCard: {
         backgroundColor: 'white',
         borderRadius: 10,
         paddingHorizontal: 20,
