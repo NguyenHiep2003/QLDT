@@ -6,7 +6,7 @@ export default function Header({title='HUST'}:{title?: string}) {
     return(
         <View style={styles.header}>
             <Text style={styles.headerTitle}>{title}</Text>
-            <Ionicons style={styles.icon} name="notifications-outline" size={24} color="white" onPress={() => router.navigate(`/(notification)/notification` as Href<string>)}/>
+            <Ionicons style={styles.icon} name="notifications-outline" size={24} color="white" onPress={() => router.navigate(`/(notification)` as Href<string>)}/>
         </View>
     )
 }

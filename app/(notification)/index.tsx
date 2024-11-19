@@ -1,7 +1,8 @@
 import {useState, useEffect} from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import {getNotifications} from "@/services/api-calls/notification";
+import {getNotifications, markAsRead} from "@/services/api-calls/notification";
+import {markAsReadResponse} from "@/types/notification";
 
 interface Notification {
     id: number,
@@ -14,7 +15,7 @@ interface Notification {
     sent_time: string
 }
 
-export default function Notification() {
+const Notification = () => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -47,33 +48,23 @@ export default function Notification() {
     };
 
     const handleMarkAllAsRead = async () => {
+        const ids = notifications.map(notification => notification.id);
+        console.log(ids);
         try {
-            const response = await fetch('YOUR_API_ENDPOINT/notifications/mark-all-read', {
-                method: 'PUT',
-                headers: {
-                    'Authorization': 'Bearer YOUR_TOKEN',
-                    'Content-Type': 'application/json',
-                }
+            const response: any = await markAsRead({
+                notification_ids: ids
             });
 
-            if (!response.ok) {
+            if (response.meta.code !== 1000) {
                 throw new Error('Failed to mark notifications as read');
             }
-
-            // Update local state to mark all as read
-            setNotifications(prevNotifications =>
-                prevNotifications.map(notification => ({
-                    ...notification,
-                    status: 'READ'
-                }))
-            );
         } catch (err) {
+            console.log(err);
             Alert.alert('Error', 'Failed to mark notifications as read');
         }
     };
 
     const handleSendNewNotification = () => {
-        // Replace this with your actual notification sending logic
         Alert.alert('Send Notification', 'Add your notification sending logic here');
     };
 
@@ -86,7 +77,7 @@ export default function Notification() {
                 <Text style={styles.senderName}>{item.from_user}</Text>
                 <Text style={styles.timestamp}>{item.sent_time}</Text>
             </View>
-            <Text style={styles.content}>{item.message}</Text>
+            <Text style={styles.content} numberOfLines={2} ellipsizeMode={"tail"}>{item.message}</Text>
             {item.status === 'UNREAD' && <View style={styles.unreadDot} />}
         </View>
     );
@@ -118,7 +109,6 @@ export default function Notification() {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.title}>Notifications</Text>
                 <View style={styles.buttonContainer}>
                     <TouchableOpacity
                         style={styles.button}
@@ -152,7 +142,7 @@ export default function Notification() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#c21c1c',
+        backgroundColor: '#e0e0e0',
     },
     header: {
         padding: 16,
@@ -246,3 +236,5 @@ const styles = StyleSheet.create({
         borderRadius: 8,
     },
 });
+
+export default Notification;

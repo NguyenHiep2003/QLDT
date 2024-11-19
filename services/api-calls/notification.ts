@@ -5,7 +5,6 @@ import {
     sendNotificationResponse
 } from "@/types/notification";
 import {getProfileLocal} from "@/services/storages/profile";
-import { useErrorContext } from '@/utils/ctx';
 import {Alert} from "react-native";
 import {UnauthorizedException} from "@/utils/exception";
 import instance from "@/services/api-calls/axios";
@@ -53,7 +52,7 @@ export async function markAsRead(request: markAsReadRequest) {
 
     try {
         const response: markAsReadResponse = await instance.post('/it5023e/mark_notification_as_read', {
-            ids: request.ids,
+            notification_ids: request.notification_ids,
         });
 
         return response;
