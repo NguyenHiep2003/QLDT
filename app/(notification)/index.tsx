@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity, FlatList, Alert } from 'react
 import { Ionicons } from '@expo/vector-icons';
 import {getNotifications, markAsRead} from "@/services/api-calls/notification";
 import {markAsReadResponse} from "@/types/notification";
+import {getProfile} from "@/services/api-calls/profile";
 
 interface Notification {
     id: number,
@@ -18,6 +19,7 @@ interface Notification {
 const Notification = () => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [ids, setIds] = useState<number[]>([]);
     const [error, setError] = useState<string | null>(null);
 
     // Fetch notifications when component mounts
@@ -25,20 +27,40 @@ const Notification = () => {
         fetchNotifications();
     }, []);
 
+    async function getNameById(id: number) {
+        try {
+            const response = await getProfile(id);
+            return response.name;
+        } catch (error) {
+            console.log('🚀 ~ getNameById ~ error:', error);
+        }
+    }
+
     const fetchNotifications = async () => {
         try {
             setIsLoading(true);
             setError(null);
-            const response: any = await getNotifications({
-                index: 0,
-                count: 10,
-            });
 
-            if (response.meta.code !== 1000) {
-                throw new Error('Failed to fetch notifications');
-            }
+            const response = await getNotifications({ index: 0, count: 10 });
 
-            setNotifications(response.data);
+            // if (response.meta.code !== 1000) {
+            //     throw new Error('Failed to fetch notifications');
+            // }
+
+            const notifications = response.data;
+            setNotifications(notifications);
+
+            // Fetch names using Promise.all for concurrent requests
+            const senderNames = await Promise.all(
+                notifications.map(async (notification: Notification) => {
+                    const name = await getProfile(notification.senderId);
+                    return { notificationId: notification.id, senderName: name };
+                })
+            );
+
+            // Now you have an array of { notificationId, senderName }
+            console.log(senderNames);
+
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to fetch notifications');
             Alert.alert('Error', 'Failed to load notifications');
@@ -47,8 +69,20 @@ const Notification = () => {
         }
     };
 
+    function formatDate(dateString: string) {
+        const date = new Date(dateString);
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+
+        return `${day}-${month}-${year} ${hours}:${minutes}`;
+    }
+
     const handleMarkAllAsRead = async () => {
         const ids = notifications.map(notification => notification.id);
+
         console.log(ids);
         try {
             const response: any = await markAsRead({
@@ -75,7 +109,7 @@ const Notification = () => {
         ]}>
             <View style={styles.notificationHeader}>
                 <Text style={styles.senderName}>{item.from_user}</Text>
-                <Text style={styles.timestamp}>{item.sent_time}</Text>
+                <Text style={styles.timestamp}>{formatDate(item.sent_time)}</Text>
             </View>
             <Text style={styles.content} numberOfLines={2} ellipsizeMode={"tail"}>{item.message}</Text>
             {item.status === 'UNREAD' && <View style={styles.unreadDot} />}
@@ -100,7 +134,7 @@ const Notification = () => {
                     style={styles.retryButton}
                     onPress={fetchNotifications}
                 >
-                    <Text style={styles.buttonText}>Retry</Text>
+                    <Text style={styles.buttonText}>Thử lại</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -114,14 +148,14 @@ const Notification = () => {
                         style={styles.button}
                         onPress={handleMarkAllAsRead}
                     >
-                        <Text style={styles.buttonText}>Mark all as read</Text>
+                        <Text style={styles.buttonText}>Đánh dấu tất cả là đã đọc</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={[styles.button, styles.sendButton]}
                         onPress={handleSendNewNotification}
                     >
                         <Ionicons name="add" size={20} color="white" />
-                        <Text style={styles.buttonText}>New Notification</Text>
+                        <Text style={styles.buttonText}>Tạo thông báo mới</Text>
                     </TouchableOpacity>
                 </View>
             </View>
