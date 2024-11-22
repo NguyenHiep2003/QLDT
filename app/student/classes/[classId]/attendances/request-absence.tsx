@@ -1,4 +1,304 @@
-import { Text } from 'react-native';
+import React, { useState } from 'react';
+import { Text,
+  TextInput,
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  Image,
+  Alert,
+  ScrollView,
+  SafeAreaView,
+  ActivityIndicator
+} from 'react-native';
+import * as DocumentPicker from 'expo-document-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import * as FileSystem from 'expo-file-system';
+import {requestAbsence} from '@/services/api-calls/classes'
+import { useLocalSearchParams } from 'expo-router';
+import _ from 'lodash'
+
 export default function RequestAbsenceScreen() {
-    return <Text>Xin nghỉ</Text>;
+  const [requesting, setRequesting] = useState(false)
+  const [textTitle, onChangeTextTitle] = useState('');
+  const [textReason, onChangeTextReason] = useState('');
+  const [selectedFile, setSelectedFile] = useState<Array<DocumentPicker.DocumentPickerSuccessResult>>([]);
+  const [dateAbsence, setDateAbsence] = useState<Date>(new Date(Date.now())); 
+  const [showDatepicker, setShowDatePicker] = useState(false);
+  const [err, setErr] = useState('')
+  const { classId } = useLocalSearchParams();
+
+  const getLocalDateString = (utcDate: Date) => {
+    const localDate = new Date(utcDate); // Tạo đối tượng Date từ UTC
+
+    // Lấy năm, tháng, ngày
+    const year = localDate.getFullYear();
+    const month = String(localDate.getMonth() + 1).padStart(2, '0'); // Tháng bắt đầu từ 0
+    const day = String(localDate.getDate()).padStart(2, '0');
+
+    // Trả về chuỗi theo định dạng yyyy-mm-dd
+    return `${year}-${month}-${day}`;
 };
+
+  // Hàm chọn file
+  const handleChooseFile = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: '*/*',
+        copyToCacheDirectory: true,
+      });
+
+      if (result.canceled === false) {
+        const isDuplicate = selectedFile.some(
+          (file) => file.assets[0].name === result.assets[0].name && file.assets[0].size === result.assets[0].size && file.assets[0].mimeType === result.assets[0].mimeType
+        );
+        if (isDuplicate) {
+          Alert.alert('Tệp trùng lặp', 'Tập tin này đã được chọn.');
+          return;
+        }
+        setSelectedFile(prevFiles => [...prevFiles, result]);
+      }
+    } catch (err) {
+      console.error('Error selecting file:', err);
+    }
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setSelectedFile(prevFiles => prevFiles.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = async () => {
+    if (!textReason.trim()) {
+      setErr('"Lý do" không được để trống!!!')
+      return;
+    }
+    const formData = new FormData()
+    formData.append('title', textTitle)
+    formData.append('reason', textReason)
+    formData.append('classId', classId.toString())
+    formData.append('date', getLocalDateString(dateAbsence))
+
+    for(const file of selectedFile) {
+      const fileUri = file.assets[0].uri;
+      const fileName = file.assets[0].name;
+      const fileType = file.assets[0].mimeType;
+
+      formData.append('file', {
+        uri: fileUri,
+        name: fileName,
+        type: fileType,
+      } as any);
+    }
+    setRequesting(true)
+    try{
+      const res = await requestAbsence(formData)
+      Alert.alert(
+        'Thành công',
+        'Gửi yêu cầu xin nghỉ thành công'
+      )
+      onChangeTextTitle('')
+      onChangeTextReason('')
+      setSelectedFile([])
+      setDateAbsence(new Date(Date.now()))
+    } catch(error: any) {
+      console.log('error: ', error.rawError)
+      // TODO: Xử lý lỗi
+    } finally {
+      setErr('')
+      setRequesting(false)
+    }
+  }
+
+  return (
+    <SafeAreaView style={{ flex: 1 }}>
+      {requesting && (
+      <View style={styles.overlay}>
+        <ActivityIndicator size="large" color="#007BFF" />
+      </View>
+    )}
+      <ScrollView>
+        <View style={styles.container}>
+          <TextInput
+            style= {styles.input}
+            // onFocus={() => setSearching(true)}
+            // onBlur={() => setSearching(false)}
+            onChangeText={onChangeTextTitle}
+            value= {textTitle}
+            placeholder= "Tiêu đề"
+            placeholderTextColor= '#b71c1c'
+            multiline= {true}
+          />
+          <TextInput
+            style= {[styles.input, styles.reasonInput]}
+            // onFocus={() => setSearching(true)}
+            // onBlur={() => setSearching(false)}
+            onChangeText={value => {
+              onChangeTextReason(value)
+              if(value.length > 0) setErr('')
+            }}
+            value= {textReason}
+            placeholder= "Lý do"
+            placeholderTextColor= '#b71c1c'
+            multiline= {true}
+            numberOfLines={8}
+            // maxLength={40}
+          />
+          
+          {!_.isEmpty(err.trim()) &&
+            <View style={{width: '100%', paddingVertical: 6}}>
+              <Text style={{justifyContent: 'flex-start', alignItems: 'flex-start', color: '#fc9403', fontSize: 15}}>{err}</Text>
+            </View>
+          }
+
+          <TouchableOpacity
+              style={{
+                marginTop: 10,
+                padding: 10,
+                marginRight: 10,
+                backgroundColor: '#b71c1c',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 10
+              }}
+              onPress = {() => { handleChooseFile() }}
+            >
+              <Text style={{color: 'white'}}>Tải minh chứng</Text>
+            </TouchableOpacity>
+
+            {/* Hiển thị danh sách file đã chọn */}
+          {selectedFile.length > 0 && selectedFile.map((file, index) => (
+            <View key={index} 
+              style={{
+                flexDirection: 'row',
+                width: '100%',
+                justifyContent: 'space-between' ,
+                alignItems: 'center',
+                marginTop: 10,
+                backgroundColor: "#f0dddd",
+                paddingVertical: 10,
+                paddingHorizontal: 15,
+                borderRadius: 5,
+                borderColor: "#b71c1c",
+                borderWidth: 0.75}}
+            >
+              <Text style={{ marginRight: 10, maxWidth: '90%', fontSize: 16 }} numberOfLines={1} ellipsizeMode="tail">{file.assets[0].name}</Text>
+              <TouchableOpacity onPress={() => handleRemoveFile(index)}>
+                <Text style={{ color: 'red', paddingHorizontal: 3, fontSize: 16}}>X</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+
+            <TouchableOpacity
+              onPress={() =>setShowDatePicker(true)}
+              style={{
+                  borderRadius: 8,
+                  marginVertical: 10,
+                  backgroundColor: 'white',
+                  paddingHorizontal: 12,
+                  paddingVertical: 4,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  width: '100%',
+                  borderColor: '#b71c1c',
+                  borderWidth: 0.75 
+              }}
+            >
+              <View style={{ marginRight: 20, paddingVertical: 8 }}>
+                  <Text style={{ marginTop: 3, fontSize: 16 }}>
+                      <Text style={{ color: '#b71c1c' }}> Ngày nghỉ phép:</Text>
+                      {'  '}
+                      {dateAbsence == null
+                          ? 'Chọn ngày nghỉ phép'
+                          : dateAbsence.toLocaleDateString('vi-VN')}{' '}
+                  </Text>
+              </View>
+              <Image source={require('@assets/images/calendar.png')} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={{
+                marginTop: 10,
+                padding: 10,
+                marginRight: 10,
+                backgroundColor: '#b71c1c',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 3,
+                paddingHorizontal: 20
+              }}
+              onPress={() => {
+                Alert.alert(
+                  'Xác nhận gửi yêu cầu xin nghỉ!',
+                  'Bạn có chắc chắn muốn gửi yêu cầu xin nghỉ không?',
+                  [
+                    {
+                      text: 'Cancel',
+                      onPress: () => {},
+                      style:'cancel'
+                    },
+                    {
+                      text: 'OK',
+                      onPress: () => {handleSubmit()}
+                    },
+                  ],
+                  { cancelable: false } // Không cho phép đóng hộp thoại bằng cách nhấn ra ngoài
+                );
+              }}
+            >
+              <Text style={{color: 'white', fontWeight: 'bold', fontSize: 16}}>Submit</Text>
+            </TouchableOpacity>
+
+            {showDatepicker && (
+                  <DateTimePicker
+                      testID="dateTimePicker"
+                      value={dateAbsence == null ? new Date(Date.now()) : dateAbsence}
+                      mode={'date'}
+                      minimumDate={new Date(Date.now())}
+                      // TODO: giới hạn dưới bằng ngày bắt đầu lớp học
+                      onChange={(event: any, selectedDate: any) => {
+                        const currentDate = selectedDate;
+                        setShowDatePicker(false);
+                        setDateAbsence(currentDate);
+                      }}
+                      timeZoneName={'Asia/Bangkok'}
+                  />
+              )}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  )
+};
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 20,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  input: {
+    backgroundColor: 'white',
+    width: '100%',
+    borderRadius: 5,
+    padding: 10,
+    // color: '#b71c1c',
+    borderColor: '#b71c1c',
+    borderWidth: 1,
+    marginTop: 20,
+    fontSize: 16
+  },
+  reasonInput: {
+    textAlignVertical: 'top',
+    marginTop: 10
+  },
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Màu xám với độ trong suốt
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000, // Đảm bảo lớp phủ nằm trên các thành phần khác
+    height: '100%',
+  }
+})

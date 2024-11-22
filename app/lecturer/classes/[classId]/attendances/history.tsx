@@ -63,6 +63,8 @@ export default function ViewAttendanceHistoryScreen() {
     const [data, setData] = useState<any[]>([]);
     const [err, setErr] = useState('');
 
+    
+
     const { classId } = useLocalSearchParams();
 
     const handleLookup = async () => {
@@ -93,12 +95,12 @@ export default function ViewAttendanceHistoryScreen() {
             setIsLoading(false);
             setShowRecord(true);
         } catch (error: any) {
-            if (error.response) {
+            if (error.rawError) {
                 // Yêu cầu đã được gửi và máy chủ đã phản hồi với mã trạng thái khác 2xx
-                const errorCode = error.response.data.meta.code;
+                const errorCode = error.rawError.meta.code;
                 if (errorCode == 9994)
                     setErr(
-                        `Không có lịch sử điểm danh\nvào ngày ${dateLookup}!`
+                        `Không có lịch sử điểm danh\nvào ngày ${date.toLocaleDateString('vi-VN')}!`
                     );
                 else if (errorCode == 1004)
                     setErr(`Thời gian tra cứu\nkhông thuộc thời gian mở lớp!`);
@@ -174,7 +176,7 @@ export default function ViewAttendanceHistoryScreen() {
                             {' '}
                             {date == null
                                 ? 'Chọn ngày tra cứu'
-                                : date.toLocaleDateString()}{' '}
+                                :date.toLocaleDateString('vi-VN')}{' '}
                         </Text>
                     </View>
                     <Image source={require('@assets/images/calendar.png')} />
