@@ -17,255 +17,6 @@ import {
 } from 'react-native';
 import _ from 'lodash'
 
-const DATA = [
-  {
-      "id": "58694a0f-3da1-471f-bd96-145571e29d74",
-      "name": "Lê Trọng Bảo An",
-      "MSSV": "20215295",
-      "status": "có mặt"
-  },
-  {
-      "id": "b1a2c3d4-e5f6-7890-1234-56789abcdef0",
-      "name": "Hoàng Kỳ Anh",
-      "MSSV": "20210068",
-      "status": "có mặt"
-  },
-  {
-      "id": "12345678-90ab-cdef-1234-567890abcdef",
-      "name": "Nguyễn Thuý Anh",
-      "MSSV": "20215306",
-      "status": "có mặt"
-  },
-  {
-      "id": "abcdef12-3456-7890-abcd-ef1234567890",
-      "name": "Quách Hữu Tùng Anh",
-      "MSSV": "20215311",
-      "status": "có mặt"
-  },
-  {
-      "id": "fedcba98-7654-3210-fedc-ba9876543210",
-      "name": "Trần Minh Chiến",
-      "MSSV": "20215321",
-      "status": "có mặt"
-  },
-  {
-      "id": "0f1e2d3c-4b5a-6978-90ab-cdef12345678",
-      "name": "Nguyễn Quốc Dũng",
-      "MSSV": "20215329",
-      "status": "có mặt"
-  },
-  {
-      "id": "9a8b7c6d-5e4f-3210-1a2b-3c4d5e6f7a8b",
-      "name": "Nguyễn Hoàng Dương",
-      "MSSV": "20215337",
-      "status": "vắng"
-  },
-  {
-      "id": "1a2b3c4d-5e6f-7890-1234-56789abcdef0",
-      "name": "Nguyễn Thành Đạt",
-      "MSSV": "20215344",
-      "status": "vắng"
-  },
-  {
-      "id": "abcdef01-2345-6789-0abc-def123456789",
-      "name": "Vũ Hải Đăng",
-      "MSSV": "20215347",
-      "status": "vắng"
-  },
-  {
-      "id": "12345678-9abc-def0-1234-56789abcdef0",
-      "name": "Đinh Nhẫn Đức",
-      "MSSV": "20215350",
-      "status": "có mặt"
-  },
-  {
-      "id": "0a1b2c3d-4e5f-6789-0abc-def123456789",
-      "name": "Nguyễn Trọng Đức",
-      "MSSV": "20215356",
-      "status": "có mặt"
-  },
-  {
-      "id": "abcdef12-3456-7890-abcd-ef1234567891",
-      "name": "Nguyễn Đức Hải",
-      "MSSV": "20210313",
-      "status": "có mặt"
-  },
-  {
-      "id": "fedcba98-7654-3210-fedc-ba9876543211",
-      "name": "Nguyễn Phúc Hiệp",
-      "MSSV": "20215367",
-      "status": "vắng"
-  },
-  {
-      "id": "0f1e2d3c-4b5a-6978-90ab-cdef12345679",
-      "name": "Phạm Trung Hiếu",
-      "MSSV": "20215374",
-      "status": "có mặt"
-  },
-  {
-      "id": "9a8b7c6d-5e4f-3210-1a2b-3c4d5e6f7a8c",
-      "name": "Lục Minh Hoàng",
-      "MSSV": "20215379",
-      "status": "có mặt"
-  },
-  {
-      "id": "1a2b3c4d-5e6f-7890-1234-56789abcdef1",
-      "name": "Nguyễn Việt Hoàng",
-      "MSSV": "20215384",
-      "status": "có mặt"
-  },
-  {
-      "id": "abcdef01-2345-6789-0abc-def12345678a",
-      "name": "Nguyễn Vũ Hùng",
-      "MSSV": "20210400",
-      "status": "có mặt"
-  },
-  {
-      "id": "12345678-9abc-def0-1234-56789abcdef1",
-      "name": "Hoàng Nguyễn Huy",
-      "MSSV": "20215393",
-      "status": "có mặt"
-  },
-  {
-      "id": "0a1b2c3d-4e5f-6789-0abc-def12345678a",
-      "name": "Nhuien Tkhi Kam Tu",
-      "MSSV": "20210988",
-      "status": "có mặt"
-  },
-  {
-      "id": "abcdef12-3456-7890-abcd-ef1234567892",
-      "name": "Lie Min Kyonh",
-      "MSSV": "20210989",
-      "status": "vắng"
-  },
-  {
-      "id": "fedcba98-7654-3210-fedc-ba9876543212",
-      "name": "Trần Quang Khải",
-      "MSSV": "20215401",
-      "status": "có mặt"
-  },
-  {
-      "id": "0f1e2d3c-4b5a-6978-90ab-cdef12345680",
-      "name": "Phạm Đăng Khuê",
-      "MSSV": "20215406",
-      "status": "có mặt"
-  },
-  {
-      "id": "9a8b7c6d-5e4f-3210-1a2b-3c4d5e6f7a8d",
-      "name": "Nguyễn Hoàng Lâm",
-      "MSSV": "20210515",
-      "status": "có mặt"
-  },
-  {
-      "id": "1a2b3c4d-5e6f-7890-1234-56789abcdef2",
-      "name": "Tô Thái Linh",
-      "MSSV": "20215414",
-      "status": "có mặt"
-  },
-  {
-      "id": "abcdef01-2345-6789-0abc-def12345678b",
-      "name": "Bùi Anh Minh",
-      "MSSV": "20215422",
-      "status": "có mặt"
-  },
-  {
-      "id": "12345678-9abc-def0-1234-56789abcdef2",
-      "name": "Hoàng Trọng Minh",
-      "MSSV": "20215427",
-      "status": "có mặt"
-  },
-  {
-      "id": "0a1b2c3d-4e5f-6789-0abc-def12345678b",
-      "name": "Nguyễn Văn Nam",
-      "MSSV": "20210618",
-      "status": "có mặt"
-  },
-  {
-      "id": "abcdef12-3456-7890-abcd-ef1234567893",
-      "name": "Phạm Thị Thúy Ngần",
-      "MSSV": "20215437",
-      "status": "có mặt"
-  },
-  {
-      "id": "fedcba98-7654-3210-fedc-ba9876543213",
-      "name": "Lê Hà Phi",
-      "MSSV": "20215443",
-      "status": "có mặt"
-  },
-  {
-      "id": "0f1e2d3c-4b5a-6978-90ab-cdef12345681",
-      "name": "Thẩm Lập Phong",
-      "MSSV": "20215449",
-      "status": "có mặt"
-  },
-  {
-      "id": "9a8b7c6d-5e4f-3210-1a2b-3c4d5e6f7a8e",
-      "name": "Hà Vĩnh Phước",
-      "MSSV": "20215455",
-      "status": "có mặt"
-  },
-  {
-      "id": "1a2b3c4d-5e6f-7890-1234-56789abcdef3",
-      "name": "Hứa Hành Quân",
-      "MSSV": "20215464",
-      "status": "có mặt"
-  },
-  {
-      "id": "abcdef01-2345-6789-0abc-def12345678c",
-      "name": "Trương Đình Văn Quyền",
-      "MSSV": "20215467",
-      "status": "có mặt"
-  },
-  {
-      "id": "12345678-9abc-def0-1234-56789abcdef3",
-      "name": "Trần Cao Sơn",
-      "MSSV": "20215472",
-      "status": "có mặt"
-  },
-  {
-      "id": "0a1b2c3d-4e5f-6789-0abc-def12345678c",
-      "name": "Nguyễn Duy Tấn",
-      "MSSV": "20215478",
-      "status": "có mặt"
-  },
-  {
-      "id": "abcdef12-3456-7890-abcd-ef1234567894",
-      "name": "Phạm Đình Tú",
-      "MSSV": "20210888",
-      "status": "có mặt"
-  },
-  {
-      "id": "fedcba98-7654-3210-fedc-ba9876543214",
-      "name": "Nguyễn Quang Tuyến",
-      "MSSV": "20215510",
-      "status": "có mặt"
-  },
-  {
-      "id": "0f1e2d3c-4b5a-6978-90ab-cdef12345682",
-      "name": "Lê Thanh Thương",
-      "MSSV": "20215485",
-      "status": "có mặt"
-  },
-  {
-      "id": "9a8b7c6d-5e4f-3210-1a2b-3c4d5e6f7a8f",
-      "name": "Lương Đức Trọng",
-      "MSSV": "20215489",
-      "status": "có mặt"
-  },
-  {
-      "id": "1a2b3c4d-5e6f-7890-1234-56789abcdef4",
-      "name": "Nguyễn Văn Trường",
-      "MSSV": "20215496",
-      "status": "có mặt"
-  },
-  {
-      "id": "abcdef01-2345-6789-0abc-def12345678d",
-      "name": "Lý Quang Vũ",
-      "MSSV": "20215517",
-      "status": "vắng"
-  }
-]  
-
 const Note: React.FC<{presentCount: any, absentCount: any}> = ({presentCount, absentCount}) => (
   <View style= {styles.note}> 
     <View > 
@@ -387,9 +138,9 @@ export default function TakeAttendanceScreen() {
           })
         })
         .catch((error: any) => {
-          if (error.response) {
+          if (error.rawError) {
             // Yêu cầu đã được gửi và máy chủ đã phản hồi với mã trạng thái khác 2xx
-            const errorCode = error.response.data.meta.code;
+            const errorCode = error.rawError.meta.code;
             if(errorCode == 9994){
               const studentList =  response.data.student_accounts.map((student: any) => {
                   return {
@@ -425,8 +176,8 @@ export default function TakeAttendanceScreen() {
               })
           } else {
               // Có lỗi xảy ra khi thiết lập yêu cầu
-              console.error('Error:', error.message);
-              setErr('Hmm... Có gì đó không ổn đã xảy ra!');
+              console.error('Error-----:', error.message);
+              setErr('Có lỗi xảy ra khi thiết lập yêu cầu!');
               setStatusShow({
                 showRecord: false,
                 showErr: true,
@@ -583,7 +334,7 @@ export default function TakeAttendanceScreen() {
       {statusShow.showRecord && (<>
         {!searching && <Note presentCount={presentCount} absentCount={absentCount} />}
 
-        <View 
+        <View
           style={{
             flexDirection: 'row',
             justifyContent: 'flex-end',
