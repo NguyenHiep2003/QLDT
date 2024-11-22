@@ -334,7 +334,7 @@ export default function TakeAttendanceScreen() {
       {statusShow.showRecord && (<>
         {!searching && <Note presentCount={presentCount} absentCount={absentCount} />}
 
-        <View 
+        <View
           style={{
             flexDirection: 'row',
             justifyContent: 'flex-end',

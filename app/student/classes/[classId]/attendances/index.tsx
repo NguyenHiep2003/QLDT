@@ -3,19 +3,15 @@ import {
     View,
     Text,
     FlatList,
-    StyleSheet
+    StyleSheet,
+    ScrollView
 } from 'react-native';
-
-const DATA = {
-    "absent_dates": [
-        '2021-22-11' 
-    ]
-};
 import _ from 'lodash'
 import {getAttendanceRecord} from '@/services/api-calls/classes'
 import { useLocalSearchParams } from 'expo-router';
 import { AxiosResponse } from 'axios';
 
+//TODO: cải thiện giao điện không nghỉ học
 export default function AttendanceHistory() {
     const [data, setData] = useState<any[]>([])
     const { classId } = useLocalSearchParams();
@@ -36,16 +32,23 @@ export default function AttendanceHistory() {
                 :
                 (<>
                     <Text style={styles.title}>Bạn đã nghỉ {data.length} buổi vào các ngày</Text>
-                    <FlatList
+                    {/* <FlatList
                         data={data}
-                        keyExtractor={({index}) => index}
+                        keyExtractor={index => index.toString()}
                         renderItem={({ item }) => (
                             <View style={styles.card}>
                                 <Text style={styles.dateText}>{item}</Text>
                             </View>
                         )}
                         contentContainerStyle={styles.listContainer}
-                    />
+                    /> */}
+                    <ScrollView>
+                        {data.map((date, index) => (
+                            <View style={styles.card} key={index}>
+                                <Text style={styles.dateText}>{date.split('-').reverse().join('-')}</Text>
+                            </View>
+                        ))}
+                    </ScrollView>
                 </>)
             }
         </View>

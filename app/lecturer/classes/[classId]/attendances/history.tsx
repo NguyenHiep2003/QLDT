@@ -63,6 +63,8 @@ export default function ViewAttendanceHistoryScreen() {
     const [data, setData] = useState<any[]>([]);
     const [err, setErr] = useState('');
 
+    
+
     const { classId } = useLocalSearchParams();
 
     const handleLookup = async () => {
