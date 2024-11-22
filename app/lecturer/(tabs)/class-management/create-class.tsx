@@ -78,8 +78,10 @@ const CreateClassScreen = () => {
                 } else {
                     setErrorMessage(response.meta.message);
                 }
-            } catch (error) {
-                setErrorMessage('Có lỗi xảy ra, vui lòng thử lại sau.');
+            } catch (error: any) {
+                console.error(error.response.data.data);
+                setErrorMessage(error.response.data.data);
+                // setErrorMessage('Có lỗi xảy ra, vui lòng thử lại sau.');
             }
         }
     };
@@ -99,6 +101,7 @@ const CreateClassScreen = () => {
                 <TextInput
                     style={styles.input}
                     placeholder="Mã lớp*"
+                    placeholderTextColor="#c21c1c"
                     value={classId}
                     onChangeText={setClassId}
                 />
@@ -106,6 +109,7 @@ const CreateClassScreen = () => {
                 <TextInput
                     style={styles.input}
                     placeholder="Tên lớp*"
+                    placeholderTextColor="#c21c1c"
                     value={className}
                     onChangeText={setClassName}
                 />
@@ -164,6 +168,7 @@ const CreateClassScreen = () => {
                 <TextInput
                     style={styles.input}
                     placeholder="Số lượng sinh viên tối đa*"
+                    placeholderTextColor="#c21c1c"
                     value={maxStudents}
                     onChangeText={handleNumberInput}
                     keyboardType="numeric"

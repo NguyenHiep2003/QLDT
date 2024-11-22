@@ -30,7 +30,7 @@ export async function signIn(email: string, password: string) {
     const response: SignInResponse = await instance.post('/it4788/login', {
         email,
         password,
-        deviceId: 1,
+        device_id: 1,
     });
     const { ho, ten, id, name, active, role, class_list, avatar } =
         response.data;
