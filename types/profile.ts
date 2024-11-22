@@ -1,5 +1,5 @@
 export type TProfile = {
-    id: number;
+    id: string;
     ho: string;
     ten: string;
     email: string;
