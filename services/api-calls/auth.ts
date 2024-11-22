@@ -12,7 +12,7 @@ type ErrorResponse = {
 
 type SignInResponse = {
   data: {
-      id: number;
+      id: string;
       ho: string;
       ten: string;
       token: string;
