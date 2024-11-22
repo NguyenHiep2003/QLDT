@@ -1,9 +1,19 @@
 import Header from '@/components/Header';
+import { connectSocket } from '@/services/sockets/connection';
+import { getProfileLocal } from '@/services/storages/profile';
+import { useSocketContext } from '@/utils/socket.ctx';
 import { Stack } from 'expo-router';
+import { useEffect } from 'react';
 
 import { StyleSheet } from 'react-native';
 
 export default function StudentLayout() {
+    const { setStompClient } = useSocketContext();
+    useEffect(() => {
+        getProfileLocal().then((profile) => {
+            if (profile?.id) setStompClient(connectSocket(profile.id));
+        });
+    }, []);
     return (
         <Stack
             screenOptions={{
