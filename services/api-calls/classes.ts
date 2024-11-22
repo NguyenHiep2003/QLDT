@@ -12,6 +12,8 @@ import { UnauthorizedException } from '@/utils/exception';
 
 export async function getClassList(role: ROLES) {
     const profile = await getProfileLocal();
+    const token = await getTokenLocal()
+    console.log('token: ', token)
     if (!profile) throw new UnauthorizedException();
     const response = await instance.post('/it5023e/get_class_list', {
         role,
@@ -154,5 +156,62 @@ export async function getAttendanceRecord(classId: any) {
         return response;
     } catch (error) {
         throw new Error('Error get attendance record')
+    }
+}
+
+export async function requestAbsence(form: FormData) {
+    const profile = await getProfileLocal();
+    if (!profile) return { meta: { code: 400, message: 'Profile not found' } };
+    try{
+        const token = await getTokenLocal()
+        if(!token) throw new UnauthorizedException()
+        form.append('token', token)
+        const response = await instance.post('/it5023e/request_absence',
+            form,
+            {
+                headers: {
+                    'no-need-token': true,
+                    'Content-Type': 'multipart/form-data'
+                }
+            }
+        )
+        return response.data
+    } catch(error) {
+        throw error
+        
+    }
+}
+
+export async function getAbsenceRequests(classId: any,page: any, page_size: any, status: any = null) {
+    const profile = await getProfileLocal();
+    if (!profile) return { meta: { code: 400, message: 'Profile not found' } };
+
+    try {
+        const response = await instance.post('/it5023e/get_absence_requests', {
+            class_id: classId,
+            status: status,
+            pageable_request: {
+                page: page,
+                page_size: page_size
+            }
+        })
+        return response;
+    } catch (error) {
+        throw error
+    }
+}
+
+export async function reviewAbsenceRequest(requestId: any,status: any) {
+    const profile = await getProfileLocal();
+    if (!profile) return { meta: { code: 400, message: 'Profile not found' } };
+
+    try {
+        const response = await instance.post('/it5023e/review_absence_request', {
+            request_id: requestId,
+            status: status
+        })
+        return response;
+    } catch (error) {
+        throw error
     }
 }

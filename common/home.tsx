@@ -24,7 +24,7 @@ export function Home({ role }: { role: ROLES }) {
             setIsLoading(true);
             getClassList(role)
                 .then((classes) => {
-                    setClasses(classes);
+                    setClasses(classes.page_content);
                 })
                 .catch((err) => {
                     setUnhandledError(err);
