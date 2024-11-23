@@ -13,7 +13,7 @@ export default function Header({title='HUST'}:{title?: string}) {
     }, []);
 
     async function getUnreadNotificationCount() {
-        const response = await getUnreadCount();
+        const response: any = await getUnreadCount();
         setUnreadCount(response.data);
     }
 
