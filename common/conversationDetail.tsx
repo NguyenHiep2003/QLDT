@@ -30,7 +30,7 @@ export function ConversationDetail({
             getConversationDetails({ partnerId, conversationId }, index, count)
                 .then((response) => {
                     const messages = response.data.conversation;
-                    if(messages.length < count) setIsShowEarlyLoad(false);
+                    if (messages.length < count) setIsShowEarlyLoad(false);
                     setMessages(
                         messages.map((message) => {
                             const name = message.sender.name;
@@ -122,6 +122,7 @@ export function ConversationDetail({
     }, []);
     return (
         <GiftedChat
+            keyboardShouldPersistTaps={'never'}
             messages={messages}
             onSend={(messages) => onSend(messages)}
             user={{
@@ -137,7 +138,7 @@ export function ConversationDetail({
                 )
                     .then((response) => {
                         const messages = response.data.conversation;
-                        if(messages.length < count) setIsShowEarlyLoad(false);
+                        if (messages.length < count) setIsShowEarlyLoad(false);
                         setMessages((prev) =>
                             GiftedChat.prepend(
                                 prev,
