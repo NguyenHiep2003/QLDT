@@ -19,7 +19,7 @@ export const ClassCard = ({ data, onPress }: ClassCardProps) => {
                     activeOpacity={0.7}
                     rounded
                     containerStyle={{
-                        backgroundColor: `${getColor(avatarTitle)}`,
+                        backgroundColor: `${getColor(avatarTitle,data.class_id)}`,
                         width: 65,
                         height: 65,
                         marginRight: 10,
