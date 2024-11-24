@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, FlatList, Alert, Modal } from 'react-native';
+import {StyleSheet, View, Text, TouchableOpacity, FlatList, Alert, Modal, ScrollView} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { getNotifications, markAsRead } from "@/services/api-calls/notification";
 import { getProfile } from "@/services/api-calls/profile";
@@ -48,7 +48,7 @@ const NotificationScreen = () => {
             setIsLoading(true);
             setError(null);
 
-            const response: any = await getNotifications({ index: 0, count: 10 });
+            const response: any = await getNotifications({ index: 0, count: 20 });
             const notifications = response.data;
             for (var notification of notifications) {
                 notification.from_user = await fetchSenderName(notification.from_user);
@@ -68,7 +68,7 @@ const NotificationScreen = () => {
 
         if (notification.status === 'UNREAD') {
             try {
-                await markAsRead({ notification_ids: [notification.id] });
+                await markAsRead({ notification_id: notification.id });
                 setNotifications(prevNotifications =>
                     prevNotifications.map(n =>
                         n.id === notification.id ? { ...n, status: 'READ' } : n
@@ -97,9 +97,11 @@ const NotificationScreen = () => {
         </TouchableOpacity>
     );
 
-    const handleMarkAllAsRead = async () => {
-
-    }
+    // const handleMarkAsRead = async (id: number) => {
+    //     const response = await markAsRead({
+    //         notification_id: id
+    //     }
+    // }
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -114,15 +116,6 @@ const NotificationScreen = () => {
 
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
-                <TouchableOpacity
-                    style={styles.markAllButton}
-                    onPress={handleMarkAllAsRead}
-                >
-                    <Text style={styles.buttonText}>Đánh dấu tất cả là đã đọc</Text>
-                </TouchableOpacity>
-            </View>
-
             <FlatList
                 data={notifications}
                 renderItem={renderNotification}
@@ -145,8 +138,8 @@ const NotificationScreen = () => {
                         {selectedNotification && (
                             <>
                                 <Text style={styles.modalText}>Người gửi: {selectedNotification.from_user}</Text>
-                                <Text style={styles.modalText}>Nội dung: {selectedNotification.message}</Text>
                                 <Text style={styles.modalText}>Thời gian: {formatDate(selectedNotification.sent_time)}</Text>
+                                <Text style={styles.modalText}>Nội dung: {selectedNotification.message}</Text>
                             </>
                         )}
                         <TouchableOpacity
@@ -225,7 +218,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         padding: 20,
         borderRadius: 10,
-        alignItems: 'center',
+        // alignItems: 'center',
     },
     modalTitle: {
         fontSize: 20,
@@ -245,6 +238,7 @@ const styles = StyleSheet.create({
     closeButtonText: {
         color: 'white',
         fontWeight: 'bold',
+        textAlign: 'center',
     },
     header: {
         padding: 16,

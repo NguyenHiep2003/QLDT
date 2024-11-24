@@ -56,7 +56,7 @@ export async function markAsRead(request: markAsReadRequest) {
 
     try {
         const response: markAsReadResponse = await instance.post('/it5023e/mark_notification_as_read', {
-            notification_ids: request.notification_ids,
+            notification_id: request.notification_id,
         });
 
         return response;
