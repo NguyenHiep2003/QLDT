@@ -28,7 +28,7 @@ export async function changeProfile(form: FormData): Promise<TProfile> {
 export async function getProfile(id: number) {
     try {
         const response = await instance.post('/it4788/get_user_info', {
-            userId: id,
+            user_id: id,
         });
         return response.data;
     } catch (error) {
