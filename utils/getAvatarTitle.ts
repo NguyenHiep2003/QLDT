@@ -11,3 +11,9 @@ export function getAvatarTitle(name: string) {
         return 'De';
     }
 }
+
+export function getTitleFromName(name: string) {
+    const split = name.split(' ');
+    const title = split[0][0] + split[split.length - 1][0];
+    return title;
+}

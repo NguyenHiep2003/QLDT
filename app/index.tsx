@@ -5,9 +5,7 @@ import { TProfile } from '@/types/profile';
 import { Redirect } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Text } from 'react-native';
-import { TextEncoder } from 'text-encoding';
 
-global.TextEncoder = TextEncoder;
 export default function Index() {
     const [isLoading, setIsLoading] = useState(true);
     const [profile, setProfile] = useState<TProfile | undefined>(undefined);

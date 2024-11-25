@@ -7,13 +7,12 @@ import { useErrorContext } from '@/utils/ctx';
 import { getColor } from '@/utils/getColor';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Text } from 'react-native';
-import { Avatar } from 'react-native-elements';
+
 
 export default function StudentConversationDetailScreen() {
     const { setUnhandledError } = useErrorContext();
     const [partnerProfile, setPartnerProfile] = useState<TProfile>();
-    const { partnerId } = useLocalSearchParams();
+    const { partnerId, conversationId } = useLocalSearchParams();
     useEffect(() => {
         getProfile(partnerId as string)
             .then((profile) => {
@@ -41,49 +40,13 @@ export default function StudentConversationDetailScreen() {
                                       id={partnerId as string}
                                   ></UserAvatar>
                               ),
-                              //   partnerProfile.avatar ? (
-                              //       <Avatar
-                              //           source={{
-                              //               uri: convertDriveUrl(
-                              //                   partnerProfile.avatar
-                              //               ),
-                              //           }}
-                              //           activeOpacity={0.7}
-                              //           rounded
-                              //           containerStyle={{
-                              //               width: 40,
-                              //               height: 40,
-                              //               marginRight: 10,
-                              //               borderRadius: 100,
-                              //           }}
-                              //       ></Avatar>
-                              //   ) : (
-                              //       <Avatar
-                              //           title={
-                              //               partnerProfile.ho[0] +
-                              //               partnerProfile.ten[0]
-                              //           }
-                              //           activeOpacity={0.7}
-                              //           rounded
-                              //           containerStyle={{
-                              //               backgroundColor: `${getColor(
-                              //                   partnerProfile.ho[0] +
-                              //                       partnerProfile.ten[0],
-                              //                   partnerProfile.id
-                              //               )}`,
-                              //               width: 40,
-                              //               height: 40,
-                              //               marginRight: 10,
-                              //               borderRadius: 100,
-                              //           }}
-                              //       ></Avatar>
-                              //   ),
                           }
                         : undefined
                 }
             ></Stack.Screen>
             <ConversationDetail
                 partnerId={partnerId as string}
+                conversationId={conversationId as string}
             ></ConversationDetail>
         </>
     );
