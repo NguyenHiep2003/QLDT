@@ -5,12 +5,16 @@ export function UserAvatar({
     link,
     title,
     id,
-    marginRight = 10
+    marginRight = 10,
+    size = 40,
+    borderRadius = 100
 }: {
     link?: string;
     title: string;
     id?: string;
-    marginRight?: number
+    marginRight?: number,
+    size?: number;
+    borderRadius?: number
 }) {
     if (link)
         return (
@@ -21,10 +25,11 @@ export function UserAvatar({
                 activeOpacity={0.7}
                 rounded
                 containerStyle={{
-                    width: 40,
-                    height: 40,
+                    width: size,
+                    height: size,
                     marginRight,
-                    borderRadius: 100,
+                    borderRadius: borderRadius,
+                    overflow:'hidden'
                 }}
             ></Avatar>
         );
@@ -39,10 +44,11 @@ export function UserAvatar({
                         title ? title[0] + title[1]: '',
                         id as string
                     )}`,
-                    width: 40,
-                    height: 40,
+                    width: size,
+                    height: size,
                     marginRight,
-                    borderRadius: 100,
+                    borderRadius: borderRadius,
+                    overflow:'hidden'
                 }}
             ></Avatar>
         );
