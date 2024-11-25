@@ -26,15 +26,15 @@ export type ConversationData = {
 };
 
 export async function getConversation(
-    index = '1',
-    count = '1'
+    index = 0,
+    count = 1
 ): Promise<ConversationData> {
     return (
         await instance.post('/it5023e/get_list_conversation', {
             index,
             count,
         })
-    ).data;
+    );
 }
 
 export type TMessage = {
@@ -81,6 +81,31 @@ export async function getConversationDetails(
             index,
             count,
             mark_as_read: true,
+        });
+        return response;
+    }
+}
+
+export async function deleteMessage(
+    {
+        partnerId,
+        conversationId,
+    }: {
+        partnerId?: string;
+        conversationId?: string;
+    },
+    messageId: string | number
+): Promise<GetConversationDetailsResponse> {
+    if (conversationId) {
+        const response = await instance.post('/it5023e/delete_message', {
+            conversation_id: conversationId,
+            message_id: messageId,
+        });
+        return response;
+    } else {
+        const response = await instance.post('/it5023e/delete_message', {
+            partner_id: partnerId,
+            message_id: messageId,
         });
         return response;
     }
