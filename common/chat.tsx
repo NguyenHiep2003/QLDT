@@ -49,8 +49,9 @@ const ChatListItem = ({
                         ).toLocaleString('vi')}
                     </Text>
                 </View>
-                {userId == conversation.last_message?.sender?.id ? (
-                    <Text style={styles.lastMessage} numberOfLines={1}>
+
+                {userId != conversation.last_message?.sender?.id && conversation.last_message?.unread ? (
+                    <Text style={styles.unreadMessage} numberOfLines={1}>
                         {conversation.last_message
                             ? conversation.last_message?.message
                                 ? conversation.last_message?.message
@@ -58,7 +59,7 @@ const ChatListItem = ({
                             : undefined}
                     </Text>
                 ) : (
-                    <Text style={styles.unreadMessage} numberOfLines={1}>
+                    <Text style={styles.lastMessage} numberOfLines={1}>
                         {conversation.last_message
                             ? conversation.last_message?.message
                                 ? conversation.last_message?.message
@@ -78,7 +79,7 @@ export function Chat() {
     useFocusEffect(
         React.useCallback(() => {
             getProfileLocal().then((profile) => setProfile(profile));
-            getConversation(0, 5)
+            getConversation(0, 8)
                 .then((data) => {
                     console.log(data.data.conversations);
 
@@ -88,7 +89,7 @@ export function Chat() {
         }, [])
     );
     return (
-        <View>
+        <View style={{flex:1}}>
             <SearchBar
                 onFocus={() => {
                     router.push('/student/chat/search');
