@@ -197,7 +197,7 @@ export function ConversationDetail({
                                 setMessages((prev) =>
                                     GiftedChat.append([], prev)
                                 );
-                            });
+                            }).catch((err) => {setUnhandledError(err)});
                         break;
                 }
             }

@@ -29,12 +29,10 @@ export async function getConversation(
     index = 0,
     count = 1
 ): Promise<ConversationData> {
-    return (
-        await instance.post('/it5023e/get_list_conversation', {
-            index,
-            count,
-        })
-    );
+    return await instance.post('/it5023e/get_list_conversation', {
+        index,
+        count,
+    });
 }
 
 export type TMessage = {
@@ -67,9 +65,9 @@ export async function getConversationDetails(
     count = 15
 ): Promise<GetConversationDetailsResponse> {
     console.log(partnerId, conversationId);
-    if (conversationId) {
+    if (partnerId) {
         const response = await instance.post('/it5023e/get_conversation', {
-            conversation_id: conversationId,
+            partner_id: partnerId,
             index,
             count,
             mark_as_read: true,
@@ -77,7 +75,7 @@ export async function getConversationDetails(
         return response;
     } else {
         const response = await instance.post('/it5023e/get_conversation', {
-            partner_id: partnerId,
+            conversation_id: conversationId,
             index,
             count,
             mark_as_read: true,
@@ -96,15 +94,15 @@ export async function deleteMessage(
     },
     messageId: string | number
 ): Promise<GetConversationDetailsResponse> {
-    if (conversationId) {
+    if (partnerId) {
         const response = await instance.post('/it5023e/delete_message', {
-            conversation_id: conversationId,
+            partner_id: partnerId,
             message_id: messageId,
         });
         return response;
     } else {
         const response = await instance.post('/it5023e/delete_message', {
-            partner_id: partnerId,
+            conversation_id: conversationId,
             message_id: messageId,
         });
         return response;
