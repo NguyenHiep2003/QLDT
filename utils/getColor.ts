@@ -50,7 +50,7 @@ const distinguishableColor = [
     '#424242',
     '#616161',
     '#9E9E9E',
-    '#F5F5F5',
+    '#116f73',
     '#212121',
     // Earth Tones
     '#A1887F',
