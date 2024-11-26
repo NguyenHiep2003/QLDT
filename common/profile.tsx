@@ -19,13 +19,14 @@ import * as WebBrowser from 'expo-web-browser';
 import { convertDriveUrl } from '@/utils/convertDriveUrl';
 import { ROLES } from '@/constants/Roles';
 import { getColor } from '@/utils/getColor';
+import { useSocketContext } from '@/utils/socket.ctx';
 
 export function Profile({ role }: { role: string }) {
     const [profile, setProfile] = useState<TProfile | undefined>(undefined);
     const [dialogLogoutVisible, setDialogLogoutVisible] = useState(false);
     const { setUnhandledError } = useErrorContext();
     const [isLoading, setIsLoading] = useState(false);
-
+    const { stompClient } = useSocketContext();
     const _handlePressButtonAsync = async () => {
         await WebBrowser.openBrowserAsync(
             'https://ctsv.hust.edu.vn/#/so-tay-sv'
@@ -263,6 +264,7 @@ export function Profile({ role }: { role: string }) {
                                     await logOut();
                                     await deleteProfile();
                                     await deleteToken();
+                                    stompClient?.deactivate();
                                     router.navigate('/(auth)/sign-in');
                                 } catch (error: any) {
                                     setUnhandledError(error);
