@@ -10,6 +10,7 @@ import { UserAvatar } from '@/components/UserAvatar';
 import { getTitleFromName } from '@/utils/getAvatarTitle';
 import { TProfile } from '@/types/profile';
 import { getProfileLocal } from '@/services/storages/profile';
+import { useSocketContext } from '@/utils/socket.ctx';
 
 const ChatListItem = ({
     conversation,
@@ -50,7 +51,8 @@ const ChatListItem = ({
                     </Text>
                 </View>
 
-                {userId != conversation.last_message?.sender?.id && conversation.last_message?.unread ? (
+                {userId != conversation.last_message?.sender?.id &&
+                conversation.last_message?.unread ? (
                     <Text style={styles.unreadMessage} numberOfLines={1}>
                         {conversation.last_message
                             ? conversation.last_message?.message
@@ -60,10 +62,16 @@ const ChatListItem = ({
                     </Text>
                 ) : (
                     <Text style={styles.lastMessage} numberOfLines={1}>
-                        {conversation.last_message
-                            ? conversation.last_message?.message
+                        {userId != conversation.last_message?.sender?.id
+                            ? conversation.last_message
                                 ? conversation.last_message?.message
-                                : 'Tin nhắn đã bị xóa'
+                                    ? conversation.last_message?.message
+                                    : 'Tin nhắn đã bị xóa'
+                                : undefined
+                            : conversation.last_message
+                            ? conversation.last_message?.message
+                                ? `Bạn: ${conversation.last_message?.message}`
+                                : 'Bạn đã xóa 1 tin nhắn'
                             : undefined}
                     </Text>
                 )}
@@ -75,27 +83,65 @@ const ChatListItem = ({
 export function Chat() {
     const { setUnhandledError } = useErrorContext();
     const [conversations, setConversations] = useState<Conversation[]>([]);
+    const { stompClient } = useSocketContext();
     const [profile, setProfile] = useState<TProfile>();
+    // const [index, setIndex] = useState(0);
+    const count = 15;
+    // function handleLoadMore() {
+    //     getConversation(index + count, count)
+    //         .then((data) => {
+    //             console.log(data.data.conversations);
+
+    //             setConversations((prev) => [
+    //                 ...prev,
+    //                 ...data.data.conversations,
+    //             ]);
+    //             setIndex(index + count);
+    //         })
+    //         .catch((err) => setUnhandledError(err));
+    // }
     useFocusEffect(
         React.useCallback(() => {
-            getProfileLocal().then((profile) => setProfile(profile));
-            getConversation(0, 8)
+            getProfileLocal().then((profile) => {
+                setProfile(profile);
+                stompClient?.subscribe(
+                    `/user/${profile?.id}/inbox`,
+                    function () {
+                        getConversation(0, count)
+                            .then((data) => {
+                                // console.log(data.data.conversations);
+
+                                setConversations(data.data.conversations);
+                            })
+                            .catch((err) => setUnhandledError(err));
+                    },
+                    { id: 'subscribe in chat' }
+                );
+            });
+            getConversation(0, count)
                 .then((data) => {
-                    console.log(data.data.conversations);
+                    // console.log(data.data.conversations);
 
                     setConversations(data.data.conversations);
                 })
                 .catch((err) => setUnhandledError(err));
+            return () => {
+                stompClient?.unsubscribe('subscribe in chat');
+            };
         }, [])
     );
     return (
-        <View style={{flex:1}}>
+        <View style={{ flex: 1 }}>
             <SearchBar
                 onFocus={() => {
                     router.push('/student/chat/search');
                 }}
             ></SearchBar>
             <FlatList
+                onEndReachedThreshold={10}
+                // onEndReached={() => {
+                //     handleLoadMore();
+                // }}
                 data={conversations}
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
