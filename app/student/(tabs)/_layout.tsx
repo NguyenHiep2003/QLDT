@@ -73,6 +73,7 @@ export default function TabLayout() {
                     title: 'Trò chuyện',
                     tabBarIcon: ({ color }) => (
                         <FontAwesome size={28} name="wechat" color={color} />
+                        // <ChatIcon color={color}></ChatIcon>
                     ),
                     headerShown: false
                     // headerStyle: {
