@@ -29,6 +29,24 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
+                name="assignments"
+                options={{
+                    title: 'Bài tập',
+                    tabBarIcon: ({ color }) => (
+                        <FontAwesome size={28} name="book" color={color} />
+                    ),
+                    headerStyle: {
+                        backgroundColor: '#c21c1c',
+                    },
+                    headerTintColor: '#fff',
+                    headerTitleStyle: {
+                        fontWeight: 'bold',
+                    },
+                    headerTitleAlign: 'center',
+                    headerTitle: () => <Header title="Bài tập"></Header>,
+                }}
+            />
+            <Tabs.Screen
                 name="class-register"
                 options={{
                     title: 'Đăng ký lớp',
