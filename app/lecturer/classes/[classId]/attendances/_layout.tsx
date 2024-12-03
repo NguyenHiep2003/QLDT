@@ -45,7 +45,7 @@ import { ActivityIndicator, View } from "react-native";
       <MaterialTopTabs>
         <MaterialTopTabs.Screen name="index" options={{ title: "Điểm danh" }} initialParams={{ classId }} />
         <MaterialTopTabs.Screen name="history" options={{ title: "Lịch sử" }} initialParams={{ classId }} />
-        <MaterialTopTabs.Screen name="absence-request" options={{ title: "Đơn xin nghỉ" }} initialParams={{ classId, startDate,endDate }} />
+        <MaterialTopTabs.Screen name="absence-request" options={{ title: "Đơn xin nghỉ" }} initialParams={{ classId, startDate, endDate }} />
       </MaterialTopTabs>
     );
   }
