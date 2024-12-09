@@ -20,13 +20,13 @@ const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
 
 TaskManager.defineTask(
     BACKGROUND_NOTIFICATION_TASK,
-    ({ data, error, executionInfo }) => {
+    ({ data, error, executionInfo }): Promise<any> => {
         console.log("✅ Received a notification in the background!", {
             data,
             error,
             executionInfo,
         });
-        // Do something with the notification data
+        return Promise.resolve("Failed to handle notification");
     }
 );
 
