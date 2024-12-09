@@ -26,7 +26,7 @@ TaskManager.defineTask(
             error,
             executionInfo,
         });
-        return Promise.resolve("Failed to handle notification");
+        return Promise.resolve("Completed to handle notification");
     }
 );
 
