@@ -11,8 +11,8 @@ import * as TaskManager from "expo-task-manager";
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
         shouldShowAlert: true,
-        shouldPlaySound: true,
-        shouldSetBadge: true,
+        shouldPlaySound: false,
+        shouldSetBadge: false,
     }),
 });
 
@@ -30,7 +30,7 @@ TaskManager.defineTask(
     }
 );
 
-Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK).then(r => console.log("Received"));
+Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
 
 
 export default function Root() {
