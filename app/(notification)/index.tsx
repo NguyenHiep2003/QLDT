@@ -3,6 +3,7 @@ import {StyleSheet, View, Text, TouchableOpacity, FlatList, Alert, Modal, Scroll
 import { Ionicons } from '@expo/vector-icons';
 import {getNotifications, markAsRead, sendNotification} from "@/services/api-calls/notification";
 import { getProfile } from "@/services/api-calls/profile";
+import {getUnreadNotificationCount} from "@/components/Header";
 
 interface Notification {
     id: number,
@@ -48,7 +49,7 @@ const NotificationScreen = () => {
             setIsLoading(true);
             setError(null);
 
-            const response: any = await getNotifications({ index: 0, count: 20 });
+            const response: any = await getNotifications({ index: 0, count: 40 });
             const notifications = response.data;
             for (var notification of notifications) {
                 notification.from_user = await fetchSenderName(notification.from_user);

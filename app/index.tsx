@@ -31,7 +31,6 @@ export default function Index() {
     return (
         <View>
             <Redirect href={'/(auth)/sign-in'} />
-            <Text>{JSON.stringify(notification?.request.content.data, null, 2)}</Text>
         </View>
     );
 }
