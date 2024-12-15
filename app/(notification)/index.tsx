@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {StyleSheet, View, Text, TouchableOpacity, FlatList, Alert, Modal, ScrollView} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { getNotifications, markAsRead } from "@/services/api-calls/notification";
+import {getNotifications, markAsRead, sendNotification} from "@/services/api-calls/notification";
 import { getProfile } from "@/services/api-calls/profile";
 
 interface Notification {
@@ -24,7 +24,7 @@ const NotificationScreen = () => {
     const [user, setUser] = useState<{ [key: number]: string }>({});
 
     useEffect(() => {
-        fetchNotifications();
+        fetchNotifications()
     }, []);
 
     const fetchSenderName = async (senderId: number) => {
@@ -96,12 +96,6 @@ const NotificationScreen = () => {
             </View>
         </TouchableOpacity>
     );
-
-    // const handleMarkAsRead = async (id: number) => {
-    //     const response = await markAsRead({
-    //         notification_id: id
-    //     }
-    // }
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
