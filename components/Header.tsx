@@ -1,16 +1,22 @@
 import { Text, View } from "react-native";
 import { StyleSheet } from "react-native";
 import {Ionicons} from "@expo/vector-icons";
-import {Href, router} from "expo-router";
-import {useEffect, useState} from "react";
+import {Href, router, useFocusEffect} from "expo-router";
+import {useCallback, useEffect, useState} from "react";
 import {getUnreadCount} from "@/services/api-calls/notification";
+
+export async function getUnreadNotificationCount() {
+    const response: any = await getUnreadCount();
+
+}
 
 export default function Header({title='HUST'}:{title?: string}) {
     const [unreadCount, setUnreadCount] = useState(0);
 
-    useEffect(() => {
-        getUnreadNotificationCount();
-    }, []);
+    useFocusEffect(
+        useCallback(() => {
+            getUnreadNotificationCount();
+        }, []))
 
     async function getUnreadNotificationCount() {
         const response: any = await getUnreadCount();
