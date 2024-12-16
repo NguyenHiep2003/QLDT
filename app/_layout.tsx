@@ -1,7 +1,8 @@
 import { ErrorProvider } from '@/utils/ctx';
 import { SocketProvider } from '@/utils/socket.ctx';
 import { Slot } from 'expo-router';
-import {NotificationProvider} from "@/context/NotificationContext";
+import { NotificationProvider } from "@/context/NotificationContext";
+import { UnreadCountProvider } from "@/context/UnreadCountContext";
 // import { TextEncoder } from 'text-encoding';
 import * as Notifications from "expo-notifications";
 import * as TaskManager from "expo-task-manager";
@@ -37,11 +38,13 @@ export default function Root() {
     // Set up the auth context and render our layout inside of it.
     return (
         <NotificationProvider>
-            <ErrorProvider>
-                <SocketProvider>
-                    <Slot />
-                </SocketProvider>
-            </ErrorProvider>
+            <UnreadCountProvider>
+                <ErrorProvider>
+                    <SocketProvider>
+                        <Slot />
+                    </SocketProvider>
+                </ErrorProvider>
+            </UnreadCountProvider>
         </NotificationProvider>
     );
 }

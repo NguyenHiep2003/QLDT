@@ -4,6 +4,7 @@ import { saveProfileLocal } from '../storages/profile';
 import { getTokenLocal, saveTokenLocal } from '../storages/token';
 import { convertDriveUrl } from '@/utils/convertDriveUrl';
 import { UnauthorizedException } from '@/utils/exception';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type ErrorResponse = {
   code: number;
@@ -26,11 +27,14 @@ type SignInResponse = {
 };
 
 export async function signIn(email: string, password: string) {
+    const expoPushToken = await AsyncStorage.getItem('expoPushToken') as string
+
   try {
     const response: SignInResponse = await instance.post('/it4788/login', {
         email,
         password,
         device_id: 1,
+        fcm_token: expoPushToken
     });
     const { ho, ten, id, name, active, role, class_list, avatar } =
         response.data;

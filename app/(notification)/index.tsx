@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import {StyleSheet, View, Text, TouchableOpacity, FlatList, Alert, Modal, ScrollView} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import {getNotifications, markAsRead, sendNotification} from "@/services/api-calls/notification";
-import { getProfile } from "@/services/api-calls/profile";
-import {getUnreadNotificationCount} from "@/components/Header";
+import {View, Text, FlatList, TouchableOpacity, Modal, Alert, StyleSheet, Button} from 'react-native';
+import { useUnreadCount } from '@/context/UnreadCountContext';
+import { getNotifications, markAsRead, sendNotification } from '@/services/api-calls/notification';
+import { getProfile } from '@/services/api-calls/profile';
 
 interface Notification {
     id: number,
@@ -23,6 +22,7 @@ const NotificationScreen = () => {
     const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [user, setUser] = useState<{ [key: number]: string }>({});
+    const { setUnreadCount } = useUnreadCount();
 
     useEffect(() => {
         fetchNotifications()
@@ -42,19 +42,21 @@ const NotificationScreen = () => {
             console.log(err);
             return 'Unknown';
         }
-    }
+    };
 
     const fetchNotifications = async () => {
         try {
             setIsLoading(true);
             setError(null);
 
-            const response: any = await getNotifications({ index: 0, count: 40 });
+            const response: any = await getNotifications({ index: 0, count: 50 });
             const notifications = response.data;
-            for (var notification of notifications) {
+            for (const notification of notifications) {
                 notification.from_user = await fetchSenderName(notification.from_user);
             }
             setNotifications(notifications);
+            const unreadCount = notifications.filter((n: { status: string; }) => n.status === 'UNREAD').length;
+            setUnreadCount(unreadCount);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to fetch notifications');
             Alert.alert('Error', 'Failed to load notifications');
@@ -75,6 +77,8 @@ const NotificationScreen = () => {
                         n.id === notification.id ? { ...n, status: 'READ' } : n
                     )
                 );
+                const unreadCount = notifications.filter((n: { status: string; }) => n.status === 'UNREAD').length;
+                setUnreadCount(unreadCount);
             } catch (err) {
                 console.log(err);
                 Alert.alert('Error', 'Failed to mark notification as read');
@@ -109,8 +113,19 @@ const NotificationScreen = () => {
         return `${day}-${month}-${year} ${hours}:${minutes}`;
     };
 
+    const sendPushNoti = async () => {
+        sendNotification({
+            message: 'Đã có điểm bài kiểm tra môn Lập trình ứng dụng cho thiết bị di động',
+            toUser: '109',
+            type: 'ABSENCE',
+        })
+    }
+
     return (
         <View style={styles.container}>
+            <Button title="Send" onPress={() => sendPushNoti()}>
+
+            </Button>
             <FlatList
                 data={notifications}
                 renderItem={renderNotification}
@@ -213,7 +228,6 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         padding: 20,
         borderRadius: 10,
-        // alignItems: 'center',
     },
     modalTitle: {
         fontSize: 20,
@@ -234,22 +248,6 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
         textAlign: 'center',
-    },
-    header: {
-        padding: 16,
-        backgroundColor: 'white',
-        borderBottomWidth: 1,
-        borderBottomColor: '#c21c1c',
-    },
-    markAllButton: {
-        backgroundColor: '#007AFF',
-        padding: 10,
-        borderRadius: 8,
-        alignItems: 'center',
-    },
-    buttonText: {
-        color: 'white',
-        fontWeight: '500',
     },
 });
 
