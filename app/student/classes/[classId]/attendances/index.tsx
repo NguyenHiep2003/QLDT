@@ -2,56 +2,80 @@ import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
-    FlatList,
     StyleSheet,
-    ScrollView
+    ScrollView,
+    ActivityIndicator,
+    RefreshControl
 } from 'react-native';
 import _ from 'lodash'
 import {getAttendanceRecord} from '@/services/api-calls/classes'
 import { useLocalSearchParams } from 'expo-router';
-import { AxiosResponse } from 'axios';
+import { useErrorContext } from '@/utils/ctx';
 
-//TODO: cải thiện giao điện không nghỉ học
 export default function AttendanceHistory() {
+    const {setUnhandledError} = useErrorContext()
     const [data, setData] = useState<any[]>([])
+    const [isLoading, setIsLoading] = useState(false)
     const { classId } = useLocalSearchParams();
+
+    const getData = async () => {
+        try{
+            const res = await getAttendanceRecord(classId)
+            setData(res.absent_dates)
+        } catch(error: any){
+            setUnhandledError(error)
+        } finally{
+            setIsLoading(false)
+        }
+    }
+
     useEffect(() => {
-        getAttendanceRecord(classId)
-        .then((response)  => {
-            const axiosResponse  = response as AxiosResponse<any>
-            setData(axiosResponse.data.absent_dates)
-        })
-        .catch((error: any) => {
-            //TODO: Xử lý lỗi
-        })
+        setIsLoading(true)
+        getData()
     }, [])
+
+    const [refreshing, setRefreshing] = React.useState(false);
+
+    const onRefresh = async () => {
+      setRefreshing(true);
+      await getData()
+    setRefreshing(false);
+    }
     return (
-        <View style={styles.container}>
-            {(_.isEmpty(data))
-                ? <Text style={styles.title}>Bạn chưa nghỉ học buổi nào {"\n"} Tiếp tục phát huy nhé!</Text>
-                :
-                (<>
-                    <Text style={styles.title}>Bạn đã nghỉ {data.length} buổi vào các ngày</Text>
-                    {/* <FlatList
-                        data={data}
-                        keyExtractor={index => index.toString()}
-                        renderItem={({ item }) => (
-                            <View style={styles.card}>
-                                <Text style={styles.dateText}>{item}</Text>
-                            </View>
-                        )}
-                        contentContainerStyle={styles.listContainer}
-                    /> */}
-                    <ScrollView>
-                        {data.map((date, index) => (
-                            <View style={styles.card} key={index}>
-                                <Text style={styles.dateText}>{date.split('-').reverse().join('-')}</Text>
-                            </View>
-                        ))}
+        <>
+        {isLoading && 
+            <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                <ActivityIndicator size="large" color="#007BFF" />
+                <Text style={{ fontSize: 18, marginBottom: '20%'}} >Đang tải</Text>
+            </View>
+        }
+        {!isLoading &&
+            <View style={styles.container}>
+                {(_.isEmpty(data))
+                    ? <ScrollView
+                        contentContainerStyle={styles.container1}
+                        refreshControl={ <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> }
+                    >
+                        <Text style={styles.title1}>🎉 Bạn chưa nghỉ buổi nào!</Text>
+                        <Text style={styles.title}>💪 Tiếp tục phát huy nhé! 💪</Text>
                     </ScrollView>
-                </>)
-            }
-        </View>
+                    :
+                    (<>
+                        <Text style={styles.title}>Bạn đã nghỉ {data.length} buổi vào {data.length > 1? 'các': ''} ngày</Text>
+                        <ScrollView
+                            refreshControl={ <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> }
+                        >
+                            {data.map((date, index) => (
+                                <View style={styles.card} key={index}>
+                                    <Text style={styles.dateText}>{date.split('-').reverse().join('-')}</Text>
+                                </View>
+                            ))}
+                        </ScrollView>
+                    </>)
+                }
+            </View>
+        }
+        </>
     );
 }
 
@@ -88,5 +112,18 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#007bff',
         textAlign: 'center'
+    },
+    container1: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: "#f8f9fa",
+    },
+    title1: {
+      fontSize: 24,
+      fontWeight: "bold",
+      color: "#d32f2f",
+      textAlign: "center",
+      marginBottom: 8,
     }
 });

@@ -8,7 +8,6 @@ import {Text, View} from 'react-native';
 import { TextEncoder } from 'text-encoding';
 import {useNotification} from "@/context/NotificationContext";
 
-global.TextEncoder = TextEncoder;
 export default function Index() {
     const { expoPushToken, notification, error } = useNotification();
     const [isLoading, setIsLoading] = useState(true);

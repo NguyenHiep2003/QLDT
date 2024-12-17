@@ -5,9 +5,10 @@ import { getTokenLocal, saveTokenLocal } from '../storages/token';
 import { convertDriveUrl } from '@/utils/convertDriveUrl';
 import { UnauthorizedException } from '@/utils/exception';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getDeviceId } from '../storages/device_id';
 
 type ErrorResponse = {
-  code: number;
+  code: string;
   message: string;
 };
 
@@ -30,11 +31,13 @@ export async function signIn(email: string, password: string) {
     const expoPushToken = await AsyncStorage.getItem('expoPushToken') as string
 
   try {
+    const deviceId = await getDeviceId();
+    console.log('Your Device ID:', deviceId);
     const response: SignInResponse = await instance.post('/it4788/login', {
         email,
         password,
-        device_id: 1,
-        fcm_token: expoPushToken
+        fcm_token: expoPushToken,
+        device_id: deviceId,
     });
     const { ho, ten, id, name, active, role, class_list, avatar } =
         response.data;
@@ -58,10 +61,10 @@ export async function signIn(email: string, password: string) {
     const errorResponse: ErrorResponse = error.rawError;
     const { code, message } = errorResponse;
 
-    if (code === 1016) {
+    if (code === "1016") {
       error.setTitle("Sai thông tin đăng nhập");
       error.setContent("Email chưa được đăng ký trước đó");
-    } else if (code === 1017) {
+    } else if (code === "1017") {
       error.setTitle("Sai thông tin đăng nhập");
       error.setContent("Mật khẩu không chính xác");
     }
@@ -72,7 +75,7 @@ export async function signIn(email: string, password: string) {
 
 
 type SignUpResponse = {
-  code: number;
+  code: string;
   message: string;
   verify_code: string;
 };
@@ -82,7 +85,7 @@ type SignUpRequest = {
   ten: string;
   email: string;
   password: string;
-  uuid: number;
+  uuid: string;
   role: string;
 };
 
@@ -96,7 +99,7 @@ export async function signUp(signUpData: SignUpRequest) {
     const errorResponse: ErrorResponse = error.rawError;
     const { code, message } = errorResponse;
 
-    if (code === 9996) {
+    if (code === "9996") {
       error.setTitle("Email đã được đăng ký từ trước");
       error.setContent("Vui lòng nhập một Email khác");
     }
@@ -107,7 +110,7 @@ export async function signUp(signUpData: SignUpRequest) {
 
 
 type CheckVerifyCodeResponse = {
-  code: number;
+  code: string;
   message: string;
   userId: number;
 };
@@ -128,13 +131,13 @@ export async function CheckVerifyCode(checkVerifyCodeData: CheckVerifyCodeReques
     const errorResponse: ErrorResponse = error.rawError;
     const { code, message } = errorResponse;
 
-    if (code === 1016) {
+    if (code === "1016") {
       error.setTitle("Lỗi xác thực");
       error.setContent("Email đã được xác thực trước đó");
-    } else if (code === 9990) {
+    } else if (code === "9990") {
       error.setTitle("Lỗi email xác thực");
       error.setContent("Email chưa được đăng ký trước đó");
-    } else if (code === 9993) {
+    } else if (code === "9993") {
       error.setTitle("Lỗi mã xác thực");
       error.setContent("Mã xác thực không hợp lệ");
     }
@@ -144,7 +147,7 @@ export async function CheckVerifyCode(checkVerifyCodeData: CheckVerifyCodeReques
 }
 
 type ResendVerifyCodeResponse = {
-  code: number;
+  code: string;
   message: string;
   verify_code: string;
 };
@@ -158,13 +161,13 @@ export async function resendVerifyCode(email: string, password: string) {
     const errorResponse: ErrorResponse = error.rawError;
     const { code, message } = errorResponse;
 
-    if (code === 1019) {
+    if (code === "1019") {
       error.setTitle("Lỗi xác thực");
       error.setContent("Email đã được xác thực trước đó");
-    } else if (code === 1020) {
+    } else if (code === "1020") {
       error.setTitle("Lỗi gửi mã");
       error.setContent("Yêu cầu quá thường xuyên. Vui lòng thử lại sau");
-    } else if (code === 9990) {
+    } else if (code === "9990") {
       error.setTitle("Lỗi xác thực");
       error.setContent("Email chưa được đăng ký trước đó");
     }
@@ -180,7 +183,7 @@ type ChangePasswordRequest = {
 };
 
 type ChangePasswordResponse = {
-  code: number;
+  code: string;
   message: string;
 };
 
@@ -193,10 +196,10 @@ export async function changePassword(changePassWordRequest: ChangePasswordReques
     const errorResponse: ErrorResponse = error.rawError;
     const { code, message } = errorResponse;
 
-    if (code === 1017) {
+    if (code === "1017") {
       error.setTitle("Mật khẩu không chính xác");
       error.setContent("Mật khẩu cũ không đúng");
-    } else if (code === 1018) {
+    } else if (code === "1018") {
       error.setTitle("Mật khẩu mới gần giống mật khẩu cũ");
       error.setContent("Vui lòng chọn mật khẩu mới khác");
     }

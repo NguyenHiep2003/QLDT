@@ -18,13 +18,15 @@ import * as ImagePicker from 'expo-image-picker';
 import * as WebBrowser from 'expo-web-browser';
 import { convertDriveUrl } from '@/utils/convertDriveUrl';
 import { ROLES } from '@/constants/Roles';
+import { getColor } from '@/utils/getColor';
+import { useSocketContext } from '@/utils/socket.ctx';
 
 export function Profile({ role }: { role: string }) {
     const [profile, setProfile] = useState<TProfile | undefined>(undefined);
     const [dialogLogoutVisible, setDialogLogoutVisible] = useState(false);
     const { setUnhandledError } = useErrorContext();
     const [isLoading, setIsLoading] = useState(false);
-
+    const { stompClient } = useSocketContext();
     const _handlePressButtonAsync = async () => {
         await WebBrowser.openBrowserAsync(
             'https://ctsv.hust.edu.vn/#/so-tay-sv'
@@ -78,25 +80,45 @@ export function Profile({ role }: { role: string }) {
                 <View style={styles.core}>
                     <View style={styles.coreContent}>
                         <View>
-                            <Avatar
-                                size={100}
-                                source={
-                                    profile.avatar
-                                        ? {
-                                              uri: profile.avatar,
-                                          }
-                                        : require('@assets/images/avatar-default.jpg')
-                                }
-                            >
-                                <Avatar.Accessory
-                                    size={20}
-                                    onPress={() =>
-                                        pickImage().finally(() =>
-                                            setIsLoading(false)
-                                        )
-                                    }
-                                ></Avatar.Accessory>
-                            </Avatar>
+                            {!profile.avatar ? (
+                                <Avatar
+                                    title={profile.ho[0] + profile.ten[0]}
+                                    activeOpacity={0.7}
+                                    size={100}
+                                    containerStyle={{
+                                        backgroundColor: `${getColor(
+                                            profile.ho[0] + profile.ten[0],
+                                            profile.id
+                                        )}`,
+                                        marginRight: 10,
+                                    }}
+                                >
+                                    <Avatar.Accessory
+                                        size={20}
+                                        onPress={() =>
+                                            pickImage().finally(() =>
+                                                setIsLoading(false)
+                                            )
+                                        }
+                                    ></Avatar.Accessory>
+                                </Avatar>
+                            ) : (
+                                <Avatar
+                                    size={100}
+                                    source={{
+                                        uri: profile.avatar,
+                                    }}
+                                >
+                                    <Avatar.Accessory
+                                        size={20}
+                                        onPress={() =>
+                                            pickImage().finally(() =>
+                                                setIsLoading(false)
+                                            )
+                                        }
+                                    ></Avatar.Accessory>
+                                </Avatar>
+                            )}
                         </View>
                         <View style={styles.info}>
                             <View style={{ flexDirection: 'row' }}>
@@ -242,6 +264,7 @@ export function Profile({ role }: { role: string }) {
                                     await logOut();
                                     await deleteProfile();
                                     await deleteToken();
+                                    stompClient?.deactivate();
                                     router.navigate('/(auth)/sign-in');
                                 } catch (error: any) {
                                     setUnhandledError(error);
