@@ -29,6 +29,7 @@ instance.interceptors.response.use(
         const data = error.response?.data;
         console.log('>>>>>', data?.meta?.code ?? data?.status_code);
         console.log('error axios', JSON.stringify(error));
+        console.log('>>>>', data)
         const httpStatusCode = error.response?.status;
         if (httpStatusCode == 401)
             return Promise.reject(new UnauthorizedException(data));

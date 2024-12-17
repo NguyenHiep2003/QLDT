@@ -14,6 +14,7 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { signUp } from "@/services/api-calls/auth";
 import { useErrorContext } from "@/utils/ctx";
+import { getDeviceId } from "@/services/storages/device_id";
 
 const SignUpScreen: React.FC = () => {
   const [ho, setHo] = useState<string>("");
@@ -137,12 +138,14 @@ const SignUpScreen: React.FC = () => {
     setIsSigningIn(true);
 
     try {
+      const deviceId = await getDeviceId();
+      console.log('Your Device ID:', deviceId);
       const requestBody = {
         ho: ho,
         ten: ten,
         email: email,
         password: password,
-        uuid: 11111,
+        uuid: deviceId,
         role: role,
       };
 
