@@ -61,6 +61,8 @@ const CreateClassScreen = () => {
             setErrorMessage('Vui lòng điền đầy đủ thông tin');
         } else if (startDate >= endDate) {
             setErrorMessage('Ngày kết thúc phải sau ngày bắt đầu');
+        } else if (parseInt(maxStudents) > 50) {
+            setErrorMessage('Số lượng sinh viên tối đa không được vượt quá 50');
         } else {
             try {
                 const response = await createClass({
@@ -183,7 +185,7 @@ const CreateClassScreen = () => {
                     <Text style={styles.buttonText}>Tạo lớp học</Text>
                 </TouchableOpacity>
 
-                <Link href={'/student'} style={styles.classOpen}>
+                <Link href={'/'} style={styles.classOpen}>
                     Thông tin danh sách lớp mở
                 </Link>
             </ScrollView>
