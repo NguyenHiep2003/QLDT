@@ -22,5 +22,5 @@ expo-env.d.ts
 *lock.json
 *.env
 .idea/
-/firebase-account.json
+/firebase_account.json
 /google-services.json
