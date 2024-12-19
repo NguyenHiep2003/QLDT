@@ -19,10 +19,10 @@ import { useErrorContext } from '@/utils/ctx';
 import { ForbiddenException } from '@/utils/exception';
 
 const SignInScreen: React.FC = () => {
-    const { email: passedEmail } = useLocalSearchParams<{ email?: string }>();
+    const { email: passedEmail, password: passedPassword } = useLocalSearchParams<{ email?: string; password?: string }>();
 
     const [email, setEmail] = useState<string>(passedEmail || '');
-    const [password, setPassword] = useState<string>('');
+    const [password, setPassword] = useState<string>(passedPassword || '');
     const [isPasswordVisible, setPasswordVisible] = useState<boolean>(false);
     const [emailError, setEmailError] = useState<string>('');
     const [passwordError, setPasswordError] = useState<string>('');
@@ -33,12 +33,6 @@ const SignInScreen: React.FC = () => {
     const [forgotEmailError, setForgotEmailError] = useState<string>('');
     const { setUnhandledError } = useErrorContext(); // Dialog báo lỗi
     const passwordInputRef = useRef<TextInput>(null); // Tạo ref cho ô nhập mật khẩu
-    // Nếu có email từ tham số, focus vào ô mật khẩu
-    useEffect(() => {
-        if (passedEmail) {
-            passwordInputRef.current?.focus();
-        }
-    }, [passedEmail]);
 
     //Kiểm tra định dạng Email
     const isValidEmail = (email: string): boolean => {
