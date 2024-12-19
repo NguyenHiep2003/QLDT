@@ -9,25 +9,22 @@ import {
     Image,
     Linking,
     ActivityIndicator,
-    Alert,
     ScrollView,
     RefreshControl
 } from 'react-native';
-import {reviewAbsenceRequest, getAttendanceList, getAbsenceRequests, setAttendanceStatus} from '@/services/api-calls/classes'
 import { useLocalSearchParams } from 'expo-router';
-import {} from '@/services/api-calls/classes'
+import {getStudentAbsenceRequests} from '@/services/api-calls/classes'
 import { useFocusEffect } from '@react-navigation/native';
 import React from 'react';
 import { useErrorContext } from '@/utils/ctx';
 import _ from 'lodash';
-import {Divider} from './index'
+import {Divider} from '@/app/lecturer/classes/[classId]/attendances/index'
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Dropdown } from 'react-native-element-dropdown';
 
 const RequestAbsenceCard: React.FC<{
     status: any,
-    name: any,
-    MSSV: any,
+    className: any,
     title: any,
     reason: any,
     DateTime: any,
@@ -35,19 +32,16 @@ const RequestAbsenceCard: React.FC<{
     selectedItemId: any,
     onSelect: (id: any) => void,
     fileUrl: any,
-    whenReview: (id: any,studentId: any, status: any, dateTime: any) => void
 }> = ({
     status,
-    name,
-    MSSV,
+    className,
     title,
     reason,
     DateTime,
     id,
     selectedItemId,
     onSelect,
-    fileUrl,
-    whenReview
+    fileUrl
 }) => (
     <TouchableOpacity style={[styles.requestAbsenceCard, {borderColor: status === 'PENDING'? '#f1c40f' : 'white'}]} onPress={() => onSelect(id)}>
         <View style={[styles.statusContainer, {backgroundColor: status === 'ACCEPTED'? '#e0f6f1' :(status === 'PENDING'? '#fdf6dc' : '#fee9e4')}]} >
@@ -57,14 +51,13 @@ const RequestAbsenceCard: React.FC<{
             </Text>
         </View>
         <View>
-            <Text style={styles.cardTitle} numberOfLines={2} ellipsizeMode="tail">Tên sinh viên: <Text style={{color: '#000'}}>{name}</Text></Text>
-            <Text style={styles.cardTitle} numberOfLines={2} ellipsizeMode="tail">MSSV: <Text style={{color: '#000'}}>{MSSV}</Text></Text>
+            <Text style={styles.cardTitle} numberOfLines={2} ellipsizeMode="tail">Lớp: <Text style={{color: '#000'}}>{className}</Text></Text>
             <Text style={styles.cardTitle} numberOfLines={2} ellipsizeMode="tail">Ngày xin nghỉ: <Text style={{color: '#000'}}>{DateTime.split('-').reverse().join('-')}</Text></Text>
         </View>
         {(selectedItemId == id) && <View style={{}}>
             <View>
                 {title && <Text style={styles.cardTitle} numberOfLines={2} ellipsizeMode="tail">Tiêu đề: <Text style={{color: '#000'}}>{title}</Text></Text>}
-                <Text style={styles.cardTitle} >Lý do: <Text style={{color: '#000'}}>{reason}</Text></Text>
+                {reason && <Text style={styles.cardTitle} >Lý do: <Text style={{color: '#000'}}>{reason}</Text></Text>}
                 
                 {fileUrl && <>
                     <Text style={styles.cardTitle}>Minh chứng:</Text>
@@ -77,68 +70,7 @@ const RequestAbsenceCard: React.FC<{
                     </TouchableOpacity>
                 </>}
             </View>
-            {status == 'PENDING' &&<View style={styles.groupButtonReview}>
-                <TouchableOpacity
-                    style={styles.buttonReject}
-                    onPress= {() => {
-                        Alert.alert(
-                            'Xác nhận từ chối !',
-                            'Bạn chắc chắn từ chối đơn xin nghỉ?',
-                            [
-                              {
-                                text: 'Cancel',
-                                onPress: () => {},
-                                style:'cancel'
-                              },
-                              {
-                                text: 'OK',
-                                onPress: () => {whenReview(id, MSSV,  'REJECTED', DateTime)}
-                              },
-                            ],
-                            { cancelable: false }
-                        )
-                        }
-                    }
-                >
-                    <Text style={{color: '#fa572f', fontWeight: 'bold', fontSize: 16}}>Từ chối</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.buttonAprove}
-                    onPress= {() => {
-                        Alert.alert(
-                            'Xác nhận đồng ý !',
-                            'Bạn chắc chắn đồng ý đơn xin nghỉ?',
-                            [
-                              {
-                                text: 'Cancel',
-                                onPress: () => {},
-                                style:'cancel'
-                              },
-                              {
-                                text: 'OK',
-                                onPress: () => {whenReview(id, MSSV, 'ACCEPTED', DateTime)}
-                              },
-                            ],
-                            { cancelable: false }
-                        )
-                        }
-                    }
-                >
-                    <Text style={{color: '#0e8f70', fontWeight: 'bold', fontSize: 16}}>Đồng ý</Text>
-                </TouchableOpacity>
-            </View>}
         </View>}
-    </TouchableOpacity>
-)
-
-const StatusBar: React.FC<{ status: any, statusSelected: any, onselect: (status: any) => void }> = ({ status, statusSelected, onselect }) => (
-    <TouchableOpacity onPress={() => onselect(status)}>
-        <Text style={statusSelected == status ? styles.statusbarSeledted : styles.statusBar}>
-            {(status == 'PENDING') ? 'Chờ phê duyệt'
-                : (status == 'ACCEPTED') ? 'Đã xác nhận'
-                : 'Đã từ chối'
-            }
-        </Text>
     </TouchableOpacity>
 )
 
@@ -159,7 +91,7 @@ export default function AbsenceRequestScreen() {
     const [refreshing, setRefreshing] = React.useState(false);
 
     const page_size = '10'
-    const {classId, startDate,endDate } = useLocalSearchParams()
+    const {classId, className, startDate,endDate } = useLocalSearchParams()
     const dataDropdown = [
         { label: 'Tất cả', value: 'null' },
         { label: 'Chờ phê duyệt', value: 'PENDING' },
@@ -171,7 +103,7 @@ export default function AbsenceRequestScreen() {
         setIsLoading(true)
         const dateFilter = date ? getLocalDateString(date) : null
         setPage(0)
-        getAbsenceRequests(classId, '0', page_size, statusSelected, dateFilter)
+        getStudentAbsenceRequests(classId, '0', page_size, statusSelected, dateFilter)
             .then((response:any) => {
                 setData(response.page_content)
                 setPageInfo(response.page_info)
@@ -181,10 +113,9 @@ export default function AbsenceRequestScreen() {
             }) 
             .finally(() => {
                 setIsLoading(false)
-            })  
+            })
+            
     }
-
-    
 
     useEffect(() => {
         if(focused){
@@ -216,7 +147,7 @@ export default function AbsenceRequestScreen() {
     const handleSelectItem = (id: any) => {
         setSelectedItemId(prevId => (prevId === id ? null : id)); // Nếu thẻ đang mở được chọn lại thì đóng, nếu chọn thẻ khác thì mở thẻ đó
     }
-    const handleSelectStatus = async (status: any) => {
+    const handleSelectStatus = (status: any) => {
         if(status == 'null') status = null
         setStatusSelected((preStatus) => {
             if(preStatus != status) {
@@ -231,7 +162,7 @@ export default function AbsenceRequestScreen() {
     const handleChangeFilter = async (status: any, dateFilter: any) => {
         setIsLoading(true)
         setPage(0)
-        getAbsenceRequests(classId, '0', page_size, status, dateFilter)
+        getStudentAbsenceRequests(classId, '0', page_size, status, dateFilter)
             .then((response:any) => {
                 setData(response.page_content)
                 setPageInfo(response.page_info)
@@ -242,41 +173,6 @@ export default function AbsenceRequestScreen() {
             .finally(() => {
                 setIsLoading(false)
             })
-    }
-
-    const handleReviewAbsenceRequest = async (id: any,studentId: any, status: any, dateTime: any) => {
-        setRequesting(true)
-        try{
-            const res = await reviewAbsenceRequest(id.toString(), status)
-            setData((prevData) =>
-                prevData.map((item) =>
-                    item.id === id ? { ...item, status } : item // Cập nhật trạng thái nếu ID khớp
-                )
-            )
-            if(status == 'ACCEPTED'){ //gọi thêm API để ghi vào attendent record nếu có
-                try{
-                    const attendanceRecord = await getAttendanceList(classId, dateTime, null, null)
-                    const studentAbsence = attendanceRecord.attendance_student_details.find((record: any) => record.student_id == studentId && record.status == 'UNEXCUSED_ABSENCE')
-                    if(studentAbsence) await setAttendanceStatus('EXCUSED_ABSENCE', studentAbsence.attendance_id)
-                } catch(error: any) {
-                    const errorCode = error.rawError?.meta?.code;
-                    if(errorCode == 9994) return
-                    else if(errorCode == 1004){
-                        error.setTitle("Cảnh báo !");
-                        error.setContent("Thời gian sinh viên xin nghỉ không thuộc thời gian mở lớp!");
-                    } else {
-                        error.setTitle("Lỗi đồng bộ !");
-                        error.setContent("Đồng bộ xin nghỉ với bản ghi điểm danh thất bại!");
-                    }
-                    setUnhandledError(error)
-                }
-            }
-        } catch(error: any){
-            setUnhandledError(error)
-        } finally {
-            setRequesting(false)
-        }
-        
     }
 
     const getLocalDateString = (utcDate: Date) => {
@@ -302,31 +198,19 @@ export default function AbsenceRequestScreen() {
         }
     };
 
-
-    // const onRefresh = React.useCallback(() => {
-    //     setRefreshing(true);
-    //     getData()
-    //     setRefreshing(false);
-    // }, []);
-
     const onRefresh = async () => {
         setRefreshing(true);
         await getData()
         setRefreshing(false);
     }
 
-    // function delay(time: any) {
-    //     return new Promise(resolve => setTimeout(resolve, time));
-    // }
-
     const handleLoadMore = async () => {
-        if (page < pageInfo.total_page - 1 && page == pageInfo.page) {
+        if (page < pageInfo.total_page - 1) {
             const nextPage = page + 1;
             setPage(nextPage);
             setIsLoadingMore(true);
-            // await delay(5000);
             try {
-                const response = await getAbsenceRequests(classId, nextPage.toString(), page_size, statusSelected, date ? getLocalDateString(date) : null);
+                const response = await getStudentAbsenceRequests(classId, nextPage, page_size, statusSelected, date ? getLocalDateString(date) : null)
                 setData(prevData => [...prevData, ...response.page_content]);
                 setPageInfo(response.page_info);
             } catch (error: any) {
@@ -336,7 +220,6 @@ export default function AbsenceRequestScreen() {
             }
         }
     };
-
     return (
         <SafeAreaView style={styles.container}>
             {requesting && (
@@ -344,20 +227,8 @@ export default function AbsenceRequestScreen() {
                     <ActivityIndicator size="large" color="#007BFF" />
                 </View>
             )}
-            {/* <View
-                style={{
-                    paddingVertical: 15,
-                    flexDirection: 'row',
-                    justifyContent: 'space-around'
-                }}
-            >
-                <StatusBar status={'PENDING'} statusSelected={statusSelected} onselect={handleSelectStatus}/>
-                <StatusBar status={'ACCEPTED'} statusSelected={statusSelected} onselect={handleSelectStatus}/>
-                <StatusBar status={'REJECTED'} statusSelected={statusSelected} onselect={handleSelectStatus}/>
 
-            </View> */}
-            {/* <Divider /> */}
-
+            {!isLoading && !_.isEmpty(data) && (
             <View style={{flexDirection: 'row', justifyContent: 'space-between', padding: 15, paddingBottom: 4, alignItems: 'center'}}>
                 <View style={styles.container1}>
                     <Text style={[styles.label, isFocus && { color: 'blue' }]}> Trạng thái </Text>
@@ -404,17 +275,14 @@ export default function AbsenceRequestScreen() {
 
                 
             </View>
-            
+            )}
 
-            
             {isLoading && !requesting && (
                 <View style={{alignSelf: 'center',position: 'absolute', top: '40%'}}>
                     <ActivityIndicator size="large" color="#007BFF" />
                     <Text style={{fontSize: 18, marginBottom: '20%'}}>Đang tải</Text>
                 </View>
             )}
-
-            
 
             {!isLoading && !_.isEmpty(data) &&
                 <FlatList
@@ -423,29 +291,28 @@ export default function AbsenceRequestScreen() {
                     renderItem={({item}) => 
                         <RequestAbsenceCard
                             status={item.status}
-                            name={`${item.student_account.first_name} ${item.student_account.last_name}`}
-                            MSSV={`${item.student_account.student_id}`}
+                            className={className}
                             title={item.title}
                             reason={item.reason}
                             DateTime={item.absence_date}
                             id={item.id}
                             selectedItemId={selectedItemId || ''}
                             onSelect={handleSelectItem}
-                            fileUrl={item.file_url}
-                            whenReview={handleReviewAbsenceRequest}/>
+                            fileUrl={item.file_url} />
                     }
                     onRefresh={onRefresh}
                     refreshing={refreshing}
                     keyExtractor={item => item.id}
                     onEndReached={handleLoadMore}
-                    // onEndReachedThreshold={0.9}
+                    // onEndReachedThreshold={0.7}
                     ListFooterComponent={isLoadingMore ? <ActivityIndicator size="large" color="#007BFF" /> : null}
                     ListFooterComponentStyle={{marginBottom: '10%'}}
-                />
+                >
+                </FlatList>
             }
 
             {_.isEmpty(data) && !isLoading && !requesting &&
-                <ScrollView 
+                <ScrollView
                     contentContainerStyle={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
                     refreshControl={ <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> }
                 >
