@@ -150,8 +150,9 @@ const SignUpScreen: React.FC = () => {
       };
 
       const response = await signUp(requestBody);
-      console.log("Mã xác minh:", response.verify_code);
-      router.push({ pathname: "/(auth)/verify-code", params: { email, password } });
+      const verify_code = response.verify_code;
+      console.log("Mã xác minh:", verify_code);
+      router.push({ pathname: "/(auth)/verify-code", params: { email, password, verify_code } });
 
     } catch (error: any) {
       setUnhandledError(error);
