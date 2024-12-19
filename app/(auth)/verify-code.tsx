@@ -8,10 +8,15 @@ import { useErrorContext } from "@/utils/ctx";
 import { GeneralErrorDialog } from "@/components/GeneralErrorDialog";
 
 const VerifyCodeScreen: React.FC = () => {
-  const [code, setCode] = useState<string>("");
+  const { email, password, verify_code, fromSignIn } = useLocalSearchParams() as {
+    email: string;
+    password: string;
+    verify_code: string;
+    fromSignIn: string;
+  };
+  const [code, setCode] = useState<string>(verify_code || "");
   const [codeError, setCodeError] = useState<String>("");
 
-  const { email, password, fromSignIn } = useLocalSearchParams();
   const isFromSignIn = fromSignIn === "true";
 
   const navigation = useNavigation();
@@ -61,11 +66,10 @@ const VerifyCodeScreen: React.FC = () => {
 
     //Nếu đúng định dạng
     return true;
-  }
+  };
 
   const [isChecking, setIsChecking] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false); //Dùng để bật/tắt animation bàn tay
-
 
   const handleCheckVerifyCode = async () => {
     if (isChecking) return;
@@ -99,10 +103,9 @@ const VerifyCodeScreen: React.FC = () => {
 
         router.replace({
           pathname: "/(auth)/sign-in",
-          params: { email: Array.isArray(email) ? email[0] : email },
+          params: { email, password },
         });
       }, 3000);
-
     } catch (error: any) {
       setUnhandledError(error);
     } finally {
@@ -159,13 +162,13 @@ const VerifyCodeScreen: React.FC = () => {
 
       // Nếu thành công, bắt đầu đếm ngược
       setResendTimer(120);
+      setCode(response.verify_code);
       setErrorDialog({
         isVisible: true,
         title: "Thành công",
         content: "Mã xác thực đã được gửi lại. Vui lòng kiểm tra email của bạn!",
         onClickPositiveBtn: () => setErrorDialog({ ...errorDialog, isVisible: false }),
       });
-
     } catch (error: any) {
       setUnhandledError(error);
     } finally {
