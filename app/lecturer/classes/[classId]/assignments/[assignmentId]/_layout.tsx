@@ -1,7 +1,7 @@
 import Header from "@/components/Header";
 import { Stack } from "expo-router";
 
-export default function AssignmentLayout() {
+export default function AssignmentDetailLayout() {
   return (
     <Stack>
       <Stack.Screen
@@ -15,11 +15,11 @@ export default function AssignmentLayout() {
             fontWeight: "bold",
           },
           headerTitleAlign: "center",
-          headerTitle: () => <Header title="Danh sách bài tập"></Header>,
+          headerTitle: () => <Header title="Chi tiết bài tập"></Header>,
         }}
       ></Stack.Screen>
       <Stack.Screen
-        name="create-survey"
+        name="edit-survey"
         options={{
           headerStyle: {
             backgroundColor: "#c21c1c",
@@ -29,10 +29,9 @@ export default function AssignmentLayout() {
             fontWeight: "bold",
           },
           headerTitleAlign: "center",
-          headerTitle: () => <Header title="Tạo bài tập"></Header>,
+          headerTitle: () => <Header title="Chỉnh sửa bài tập"></Header>,
         }}
       ></Stack.Screen>
-      <Stack.Screen name="[assignmentId]" options={{ headerShown: false }}></Stack.Screen>
     </Stack>
   );
 }
