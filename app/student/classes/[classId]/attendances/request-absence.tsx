@@ -12,12 +12,13 @@ import { Text,
 } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import * as FileSystem from 'expo-file-system';
 import {requestAbsence} from '@/services/api-calls/classes'
 import { useLocalSearchParams } from 'expo-router';
 import _ from 'lodash'
+import { useErrorContext } from '@/utils/ctx';
 
 export default function RequestAbsenceScreen() {
+  const {setUnhandledError} = useErrorContext()
   const [requesting, setRequesting] = useState(false)
   const [textTitle, onChangeTextTitle] = useState('');
   const [textReason, onChangeTextReason] = useState('');
@@ -55,10 +56,12 @@ export default function RequestAbsenceScreen() {
           Alert.alert('Tệp trùng lặp', 'Tập tin này đã được chọn.');
           return;
         }
-        setSelectedFile(prevFiles => [...prevFiles, result]);
+        setSelectedFile([result]);
       }
     } catch (err) {
       console.error('Error selecting file:', err);
+      Alert.alert('Lỗi', 'Có lỗi xảy ra, vui lòng thử lại sau!');
+      return;
     }
   };
 
@@ -67,10 +70,6 @@ export default function RequestAbsenceScreen() {
   };
 
   const handleSubmit = async () => {
-    if (!textReason.trim()) {
-      setErr('"Lý do" không được để trống!!!')
-      return;
-    }
     const formData = new FormData()
     formData.append('title', textTitle)
     formData.append('reason', textReason)
@@ -91,17 +90,13 @@ export default function RequestAbsenceScreen() {
     setRequesting(true)
     try{
       const res = await requestAbsence(formData)
-      Alert.alert(
-        'Thành công',
-        'Gửi yêu cầu xin nghỉ thành công'
-      )
+      Alert.alert( 'Thành công', 'Gửi yêu cầu xin nghỉ thành công' )
       onChangeTextTitle('')
       onChangeTextReason('')
       setSelectedFile([])
       setDateAbsence(new Date(Date.now()))
     } catch(error: any) {
-      console.log('error: ', error.rawError)
-      // TODO: Xử lý lỗi
+      setUnhandledError(error)
     } finally {
       setErr('')
       setRequesting(false)
@@ -191,7 +186,7 @@ export default function RequestAbsenceScreen() {
               onPress={() =>setShowDatePicker(true)}
               style={{
                   borderRadius: 8,
-                  marginVertical: 10,
+                  marginVertical: 16,
                   backgroundColor: 'white',
                   paddingHorizontal: 12,
                   paddingVertical: 4,
@@ -204,7 +199,7 @@ export default function RequestAbsenceScreen() {
               }}
             >
               <View style={{ marginRight: 20, paddingVertical: 8 }}>
-                  <Text style={{ marginTop: 3, fontSize: 16 }}>
+                  <Text style={{ fontSize: 16 }}>
                       <Text style={{ color: '#b71c1c' }}> Ngày nghỉ phép:</Text>
                       {'  '}
                       {dateAbsence == null
@@ -227,6 +222,10 @@ export default function RequestAbsenceScreen() {
                 paddingHorizontal: 20
               }}
               onPress={() => {
+                if (!textReason.trim()) {
+                  setErr('"Lý do" không được để trống!!!')
+                  return;
+                }
                 Alert.alert(
                   'Xác nhận gửi yêu cầu xin nghỉ!',
                   'Bạn có chắc chắn muốn gửi yêu cầu xin nghỉ không?',
@@ -238,7 +237,7 @@ export default function RequestAbsenceScreen() {
                     },
                     {
                       text: 'OK',
-                      onPress: () => {handleSubmit()}
+                      onPress: () => { handleSubmit() }
                     },
                   ],
                   { cancelable: false } // Không cho phép đóng hộp thoại bằng cách nhấn ra ngoài
@@ -253,8 +252,7 @@ export default function RequestAbsenceScreen() {
                       testID="dateTimePicker"
                       value={dateAbsence == null ? new Date(Date.now()) : dateAbsence}
                       mode={'date'}
-                      minimumDate={new Date(Date.now())}
-                      // TODO: giới hạn dưới bằng ngày bắt đầu lớp học
+                      minimumDate={new Date(Date.now())} // giới hạn dưới bằng ngày bắt đầu lớp học
                       onChange={(event: any, selectedDate: any) => {
                         const currentDate = selectedDate;
                         setShowDatePicker(false);

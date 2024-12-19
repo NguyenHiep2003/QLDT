@@ -53,7 +53,7 @@ export function ConversationSearch() {
     const onChangeText = (text: string) => {
         setSearch(text);
         setIsEmpty(false);
-        if (text.length > 2) {
+        if (text.length > 1) {
             handleSearch(text);
         } else {
             setData([]);
