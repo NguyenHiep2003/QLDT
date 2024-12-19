@@ -35,7 +35,7 @@ export default function AuthLayout() {
                 name="verify-code"
                 options={{
                     headerShown: true,
-                    headerTitle: (props) => <Header />,
+                    headerTitle: "Nhập mã xác thực",
                     headerStyle: {
                         backgroundColor: '#c21c1c',
                     },

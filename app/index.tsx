@@ -4,9 +4,12 @@ import { getTokenLocal } from '@/services/storages/token';
 import { TProfile } from '@/types/profile';
 import { Redirect } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Text } from 'react-native';
+import {Text, View} from 'react-native';
+import { TextEncoder } from 'text-encoding';
+import {useNotification} from "@/context/NotificationContext";
 
 export default function Index() {
+    const { expoPushToken, notification, error } = useNotification();
     const [isLoading, setIsLoading] = useState(true);
     const [profile, setProfile] = useState<TProfile | undefined>(undefined);
     const [token, setToken] = useState<string | null | undefined>(undefined);
@@ -24,5 +27,9 @@ export default function Index() {
             return <Redirect href={'/lecturer'} />;
         else return <Redirect href={'/student'} />;
     }
-    return <Redirect href={'/(auth)/sign-in'} />;
+    return (
+        <View>
+            <Redirect href={'/(auth)/sign-in'} />
+        </View>
+    );
 }

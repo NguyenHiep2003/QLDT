@@ -22,7 +22,7 @@ export type getNotificationResponse = {
 
 export type sendNotificationRequest = {
     message: string;
-    to_user: number;
+    toUser: string;
     type: string;
 }
 
@@ -35,7 +35,7 @@ export type sendNotificationResponse = {
 }
 
 export type markAsReadRequest = {
-    notification_ids: number[];
+    notification_id: number;
 }
 
 export type markAsReadResponse = {
