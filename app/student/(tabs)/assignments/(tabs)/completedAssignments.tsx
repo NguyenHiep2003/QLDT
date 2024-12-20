@@ -11,34 +11,31 @@ function groupAssignmentsByDate(assignments: Assignment[]) {
   // Tạo bản đồ nhóm bài tập theo ngày
   const map = new Map<string, Assignment[]>();
   assignments.forEach((assignment) => {
-    assignment.deadline = assignment.deadline + "Z"; // chờ backend fix là bỏ
+    assignment.deadline = assignment.deadline;
     const dateKey = new Date(assignment.deadline).toLocaleDateString('vi-VN', {
       timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     });
-
-    console.log(dateKey)
 
     if (!map.has(dateKey)) {
       map.set(dateKey, []);
     }
     map.get(dateKey)!.push(assignment);
-    console.log(assignment.deadline);
   });
 
   // Chuyển bản đồ thành mảng
   map.forEach((data, title) => {
     // **Sắp xếp các bài tập theo thời gian deadline**
-    data.sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime());
+    data.sort((a, b) => new Date(b.deadline).getTime() - new Date(a.deadline).getTime());
     grouped.push({ title, data });
   });
 
-  // Sắp xếp các nhóm theo ngày gần nhất
+  // Sắp xếp các nhóm theo ngày nộp lớn nhất
   grouped.sort((a, b) => {
     const [dayA, monthA, yearA] = a.title.split('/').map(Number); // Tách ngày/tháng/năm
     const [dayB, monthB, yearB] = b.title.split('/').map(Number);
 
     // So sánh đối tượng Date
-    return new Date(yearA, monthA - 1, dayA).getTime() - new Date(yearB, monthB - 1, dayB).getTime();
+    return new Date(yearB, monthB- 1, dayB).getTime() - new Date(yearA, monthA - 1, dayA).getTime();
   });
 
   return grouped;
@@ -129,6 +126,7 @@ const CompletedAssignment: React.FC = () => {
       renderItem={({ item }) => (
         <AssignmentCard
           className={`${item.class_name}`}
+          classId={`${item.class_id}`}
           assignmentTitle={item.title}
           //dueDate={new Date(item.deadline).toLocaleDateString('vi-VN')}
           dueTime={new Date(item.deadline).toLocaleTimeString('vi-VN', {
@@ -138,7 +136,7 @@ const CompletedAssignment: React.FC = () => {
           isSubmitted={item.is_submitted}
           onPress={() => {
             router.push({
-              pathname: '/student/classes/[classId]/assignments/[assignmentId]',
+              pathname: '/student/(tabs)/assignments/[assignmentId]',
               params: { classId: item.class_id, assignmentId: item.id, assignment: JSON.stringify(item)},
             });
           }}

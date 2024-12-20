@@ -64,7 +64,12 @@ const SurveysScreen = () => {
       >
         <View style={styles.surveyContent}>
           <Text style={styles.surveyTitle}>{truncateText(item.title, 35)}</Text>
-          <Text style={styles.surveyDescription}>{truncateText(item.description, 45)}</Text>
+          {item.description ? (
+            <Text style={styles.surveyDescription}>{truncateText(item.description, 45)}</Text>
+          ) : (
+            <Text style={styles.noFile}>Chưa có mô tả</Text>
+          )}
+
           <Text style={[styles.surveyDeadline, isExpired ? styles.expiredSurveyText : styles.activeSurveyText]}>
             Deadline: {new Date(item.deadline).toLocaleDateString("vi-VN")}{" "}
             {new Date(item.deadline).toLocaleTimeString("vi-VN", {
@@ -98,6 +103,9 @@ const SurveysScreen = () => {
     return (
       <View style={styles.center}>
         <Text style={styles.noDataText}>Chưa có bài tập nào</Text>
+        <TouchableOpacity style={styles.createButton} onPress={handleCreateSurvey}>
+          <Text style={styles.createButtonText}>Tạo bài tập mới</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -158,6 +166,12 @@ const styles = StyleSheet.create({
   surveyDescription: {
     fontSize: 14,
     color: "#757575",
+    marginBottom: 6,
+  },
+  noFile: {
+    fontSize: 14,
+    fontStyle: "italic",
+    color: "#aaa",
     marginBottom: 6,
   },
   surveyDeadline: {

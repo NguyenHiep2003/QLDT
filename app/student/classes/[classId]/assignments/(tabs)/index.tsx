@@ -4,25 +4,22 @@ import AssignmentCard from '@/components/AssignmentCard';
 import { Assignment, fetchAssignments } from '@/services/api-calls/assignments';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useErrorContext } from '@/utils/ctx';
-function groupAssignmentsByDate(assignments: Assignment[]) {
 
+function groupAssignmentsByDate(assignments: Assignment[]) {
   const grouped: { title: string; data: Assignment[] }[] = [];
 
   // Tạo bản đồ nhóm bài tập theo ngày
   const map = new Map<string, Assignment[]>();
   assignments.forEach((assignment) => {
-    assignment.deadline = assignment.deadline + "Z"; // chờ backend fix là bỏ
+    assignment.deadline = assignment.deadline;
     const dateKey = new Date(assignment.deadline).toLocaleDateString('vi-VN', {
       timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     });
-
-    console.log(dateKey)
 
     if (!map.has(dateKey)) {
       map.set(dateKey, []);
     }
     map.get(dateKey)!.push(assignment);
-    console.log(assignment.deadline);
   });
 
   // Chuyển bản đồ thành mảng
@@ -140,6 +137,7 @@ const UpcomingAssignments: React.FC = () => {
       renderItem={({ item }) => (
         <AssignmentCard
           className={`${item.class_name}`}
+          classId={`${item.class_id}`}
           assignmentTitle={item.title}
           //dueDate={new Date(item.deadline).toLocaleDateString('vi-VN')}
           dueTime={new Date(item.deadline).toLocaleTimeString('vi-VN', {
