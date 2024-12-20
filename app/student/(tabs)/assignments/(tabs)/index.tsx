@@ -4,25 +4,22 @@ import AssignmentCard from '@/components/AssignmentCard';
 import { Assignment, fetchAssignments } from '@/services/api-calls/assignments';
 import { router, useFocusEffect } from 'expo-router';
 import { useErrorContext } from '@/utils/ctx';
-
 function groupAssignmentsByDate(assignments: Assignment[]) {
+
   const grouped: { title: string; data: Assignment[] }[] = [];
 
   // Tạo bản đồ nhóm bài tập theo ngày
   const map = new Map<string, Assignment[]>();
   assignments.forEach((assignment) => {
-    assignment.deadline = assignment.deadline + "Z"; // chờ backend fix là bỏ
+    assignment.deadline = assignment.deadline;
     const dateKey = new Date(assignment.deadline).toLocaleDateString('vi-VN', {
       timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     });
-
-    console.log(dateKey)
 
     if (!map.has(dateKey)) {
       map.set(dateKey, []);
     }
     map.get(dateKey)!.push(assignment);
-    console.log(assignment.deadline);
   });
 
   // Chuyển bản đồ thành mảng
@@ -40,11 +37,11 @@ function groupAssignmentsByDate(assignments: Assignment[]) {
     // So sánh đối tượng Date
     return new Date(yearA, monthA - 1, dayA).getTime() - new Date(yearB, monthB - 1, dayB).getTime();
   });
-
+  
   return grouped;
 }
 
-const OverdueAssignments: React.FC = () => {
+const UpcomingAssignments: React.FC = () => {
   const [sections, setSections] = useState<{ title: string; data: Assignment[] }[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false); // Trạng thái làm mới
@@ -53,7 +50,7 @@ const OverdueAssignments: React.FC = () => {
   const loadAssignments = async () => {
     try {
       setLoading(true);
-      const data = await fetchAssignments('PASS_DUE');
+      const data = await fetchAssignments('UPCOMING');
       const groupedData = groupAssignmentsByDate(data);
       setSections(groupedData);
     } catch (err: any) {
@@ -67,7 +64,7 @@ const OverdueAssignments: React.FC = () => {
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      const data = await fetchAssignments('PASS_DUE');
+      const data = await fetchAssignments('UPCOMING');
       const groupedData = groupAssignmentsByDate(data);
       setSections(groupedData);
     } catch (err: any) {
@@ -122,9 +119,9 @@ const OverdueAssignments: React.FC = () => {
         if (diffDays > 0) {
           comparisonText = `Còn ${diffDays} ngày`;
         } else if (diffDays === 0) {
-          comparisonText = `Quá hạn hôm nay`;
+          comparisonText = `Hết hạn hôm nay`;
         } else {
-          comparisonText = `Đến hạn ${Math.abs(diffDays)} ngày trước`;
+          comparisonText = `Quá hạn ${Math.abs(diffDays)} ngày`;
         }
       
         return (
@@ -138,6 +135,7 @@ const OverdueAssignments: React.FC = () => {
       renderItem={({ item }) => (
         <AssignmentCard
           className={`${item.class_name}`}
+          classId={`${item.class_id}`}
           assignmentTitle={item.title}
           //dueDate={new Date(item.deadline).toLocaleDateString('vi-VN')}
           dueTime={new Date(item.deadline).toLocaleTimeString('vi-VN', {
@@ -145,11 +143,10 @@ const OverdueAssignments: React.FC = () => {
             minute: '2-digit',
           })}
           isSubmitted={item.is_submitted}
-          isOverdue={true}
           onPress={() => {
             router.push({
-              pathname: '/student/classes/[classId]/assignments/[assignmentId]',
-              params: { classId: item.class_id, assignmentId: item.id, assignment: JSON.stringify(item), overdue: "true"},
+              pathname: '/student/(tabs)/assignments/[assignmentId]',
+              params: { classId: item.class_id, assignmentId: item.id, assignment: JSON.stringify(item)},
             });
           }}
         />
@@ -205,4 +202,4 @@ const styles = StyleSheet.create({
   },  
 });
 
-export default OverdueAssignments;
+export default UpcomingAssignments;

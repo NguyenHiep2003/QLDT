@@ -7,6 +7,7 @@ import { getColor } from '@/utils/getColor';
 
 interface AssignmentCardProps {
   className: string;
+  classId: string;
   assignmentTitle: string;
   dueDate?: string;
   dueTime: string;
@@ -18,6 +19,7 @@ interface AssignmentCardProps {
 
 const AssignmentCard: React.FC<AssignmentCardProps> = ({
   className,
+  classId,
   assignmentTitle,
   dueTime,
   isSubmitted,
@@ -25,7 +27,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
   onPress,
 }) => {
   const avatarTitle = getAvatarTitle(className);
-  const avatarColor = getColor(avatarTitle);
+  const avatarColor = getColor(avatarTitle, classId);
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
