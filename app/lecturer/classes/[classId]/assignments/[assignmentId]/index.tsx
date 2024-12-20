@@ -297,7 +297,12 @@ const SurveyDetailsScreen = () => {
           {new Date(deadline).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
         </Text>
         <Text style={styles.sectionTitle}>Hướng dẫn:</Text>
-        <Text style={styles.description}>{description || "Không có hướng dẫn nào"}</Text>
+        {description ? (
+          <Text style={styles.description}>{description}</Text>
+        ) : (
+          <Text style={styles.noFile}>Chưa có mô tả</Text>
+        )}
+
         <Text style={styles.sectionTitle}>Tài liệu từ giảng viên:</Text>
         {file_url ? (
           <TouchableOpacity
