@@ -10,6 +10,7 @@ import {
     TextInput,
     TouchableOpacity,
     Keyboard,
+    Alert,
 } from "react-native";
 import {
     getBasicClassInfo,
@@ -25,17 +26,18 @@ const CreateClass = () => {
         "Mã lớp",
         "Tên lớp",
         "Loại lớp",
-        "Giảng viên",
-        "Số sinh viên",
         "Ngày bắt đầu",
         "Ngày kết thúc",
+        "Tình trạng",
         "Trạng thái",
     ];
+
     const [classCode, setClassCode] = useState<string>("");
     const [registeredClasses, setRegisteredClasses] = useState<
         getClassInfoResponse["data"][]
     >([]);
     const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
+    const [isAllSelected, setIsAllSelected] = useState<boolean>(false);
 
     const handleRegister = async () => {
         if (classCode) {
@@ -64,11 +66,24 @@ const CreateClass = () => {
         }
     };
 
+    const handleSelectAll = () => {
+        if (isAllSelected) {
+            setSelectedClasses([]);
+        } else {
+            const allClassIds = registeredClasses.map((cls) => cls.class_id);
+            setSelectedClasses(allClassIds);
+        }
+        setIsAllSelected(!isAllSelected);
+    };
+
     const handleSendRegister = async () => {
         try {
             const class_ids = registeredClasses.map((cls) => cls.class_id);
             const data = await registerClass(class_ids);
-            console.log("Gửi đăng ký thành công:", data);
+            Alert.alert("Gửi đăng ký thành công");
+
+            updateClassStatusRegister(data);
+            console.log("Gửi đăng ký thành công:", registeredClasses);
         } catch (error) {
             console.error("Gửi đăng ký thất bại:", error);
         }
@@ -80,6 +95,28 @@ const CreateClass = () => {
         );
         setRegisteredClasses(filteredClasses);
         setSelectedClasses([]);
+    };
+
+    const formatDate = (dateString: any) => {
+        const [year, month, day] = dateString.split("-");
+        return `${day}/${month}/${year}`;
+    };
+
+    const updateClassStatusRegister = (
+        response: { class_id: string; status: string }[]
+    ) => {
+        console.log("response:", response);
+        const updatedClasses = registeredClasses.map((cls) => {
+            const found = response.find(
+                (item) => item.class_id === cls.class_id
+            );
+            if (found) {
+                console.log("found:", found);
+                return { ...cls, statusRegister: found.status }; // Update statusRegister
+            }
+            return cls;
+        });
+        setRegisteredClasses(updatedClasses);
     };
 
     return (
@@ -111,6 +148,7 @@ const CreateClass = () => {
                                     (header === "Mã lớp" ||
                                         header === "Loại lớp" ||
                                         header === "Số sinh viên" ||
+                                        header === "Tình trạng" ||
                                         header === "Trạng thái") &&
                                         styles.headerCellClassCode,
                                 ]}
@@ -118,6 +156,14 @@ const CreateClass = () => {
                                 <Text style={styles.headerText}>{header}</Text>
                             </View>
                         ))}
+                        <View style={styles.CheckboxHeaderCell}>
+                            <Checkbox
+                                color={"#fcf"}
+                                value={isAllSelected}
+                                onValueChange={handleSelectAll}
+                                style={styles.checkbox}
+                            />
+                        </View>
                     </View>
 
                     {/* Table Body */}
@@ -140,24 +186,15 @@ const CreateClass = () => {
                                         {item.class_type}
                                     </Text>
                                 </View>
+
                                 <View style={styles.cell}>
                                     <Text style={styles.classCode}>
-                                        {item.lecturer_name}
-                                    </Text>
-                                </View>
-                                <View style={styles.cellClassCode}>
-                                    <Text style={styles.classCode}>
-                                        {item.student_count}
+                                        {formatDate(item.start_date)}
                                     </Text>
                                 </View>
                                 <View style={styles.cell}>
                                     <Text style={styles.classCode}>
-                                        {item.start_date}
-                                    </Text>
-                                </View>
-                                <View style={styles.cell}>
-                                    <Text style={styles.classCode}>
-                                        {item.end_date}
+                                        {formatDate(item.end_date)}
                                     </Text>
                                 </View>
                                 <View style={styles.cellClassCode}>
@@ -165,6 +202,17 @@ const CreateClass = () => {
                                         {item.status}
                                     </Text>
                                 </View>
+
+                                <View style={styles.cellClassCode}>
+                                    <Text style={styles.classCode}>
+                                        {item.statusRegister
+                                            ? item.statusRegister === "SUCCESS"
+                                                ? "Thành công"
+                                                : "Hết chỗ"
+                                            : ""}
+                                    </Text>
+                                </View>
+
                                 <View style={styles.CheckboxCell}>
                                     <Checkbox
                                         color={"#B71C1C"}
@@ -339,6 +387,16 @@ const styles = StyleSheet.create({
     CheckboxCell: {
         width: 60,
         height: 70,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: "#ddd",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+
+    CheckboxHeaderCell: {
+        width: 60,
+
         padding: 16,
         borderWidth: 1,
         borderColor: "#ddd",

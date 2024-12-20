@@ -15,6 +15,7 @@ export async function getClassList(role: ROLES) {
     const token = await getTokenLocal()
     console.log('token: ', token)
     if (!profile) throw new UnauthorizedException();
+    
     const response = await instance.post('/it5023e/get_class_list', {
         role,
         account_id: profile.id,
@@ -370,6 +371,42 @@ export async function reviewAbsenceRequest(requestId: any,status: any) {//SGHB -
     }
 }
 
+export async function getOpenClassList(pageable_request: any) {
+    const profile = await getProfileLocal();
+    if (!profile) return { meta: { code: 400, message: 'Profile not found' } };
+
+    try {
+        const response = await instance.post('/it5023e/get_open_classes', {
+            pageable_request: pageable_request
+        })
+        return response;
+    } catch (error) {
+        throw error
+    }
+
+}
+
+export async function getOpenClassByFilter(request: any) {
+    const profile = await getProfileLocal();
+    if (!profile) return { meta: { code: 400, message: 'Profile not found' } };
+    console.log("request", request)
+
+    try {
+        
+        const response = await instance.post('/it5023e/get_classes_by_filter', {
+        class_id: request.class_id,
+        status: request.status,
+        class_name: request.class_name,
+        class_type: request.class_type, 
+        pageable_request : request.pageable_request
+        })
+        
+        return response;
+    } catch (error) {    
+        throw error
+    }
+
+}
 export async function getAttendanceDates(class_id: any){//SGHB - checked
     const profile = await getProfileLocal();
     if (!profile) return { meta: { code: 400, message: 'Profile not found' } };
