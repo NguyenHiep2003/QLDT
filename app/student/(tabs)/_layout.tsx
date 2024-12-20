@@ -43,7 +43,7 @@ export default function TabLayout() {
                         fontWeight: 'bold',
                     },
                     headerTitleAlign: 'center',
-                    headerTitle: () => <Header title="Bài tập"></Header>,
+                    headerShown: false
                 }}
             />
             <Tabs.Screen

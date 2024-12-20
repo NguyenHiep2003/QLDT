@@ -6,7 +6,7 @@ import { getClassInfo } from "./classes";
 export type Assignment = {
   id: number;
   title: string;
-  description: string;
+  description?: string;
   lecturer_id: string;
   deadline: string;
   file_url?: string;
@@ -103,7 +103,6 @@ export async function fetchSubmission(assignment_id: string) {
     const { code, message } = meta;
 
     if (code === "9994") {
-      console.log(errorResponse);
       error.setIsVisible(false);
     }
     throw error;
@@ -148,7 +147,7 @@ export async function submitSurvey(formData: FormData) {
 export type Survey = {
   id: number;
   title: string;
-  description: string;
+  description?: string;
   lecturer_id: string;
   deadline: string;
   file_url?: string;
@@ -185,6 +184,7 @@ export async function fetchSurveys(classId: string) {
         };
       });
     }
+    console.log(surveys.length)
 
     return surveys;
   } catch (error: any) {

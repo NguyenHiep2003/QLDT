@@ -7,15 +7,7 @@ export default function ClassLayout() {
             <Stack.Screen
                 name="assignments"
                 options={{
-                    headerStyle: {
-                        backgroundColor: '#c21c1c',
-                    },
-                    headerTintColor: '#fff',
-                    headerTitleStyle: {
-                        fontWeight: 'bold',
-                    },
-                    headerTitleAlign: 'center',
-                    headerTitle: () => <Header title="Bài tập"></Header>,
+                    headerShown: false
                 }}
             ></Stack.Screen>
             <Stack.Screen
