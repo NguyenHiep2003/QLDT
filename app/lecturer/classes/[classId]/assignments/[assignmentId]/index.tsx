@@ -19,6 +19,7 @@ import { Toast } from "toastify-react-native";
 import ToastContainer from "toastify-react-native";
 import { getClassInfo } from "@/services/api-calls/classes";
 import { StudentInfo } from "@/components/StudentList";
+import { sendNotification } from "@/services/api-calls/notification";
 
 // Component hiển thị thông tin bài nộp
 const SubmissionItem = ({
@@ -33,7 +34,7 @@ const SubmissionItem = ({
   submission: Submission;
   isExpanded: boolean;
   toggleDetail: (id: string) => void;
-  handleGrade: (id: string) => void;
+  handleGrade: (id: string, account_id: string) => void;
   gradingInput: { [key: string]: string };
   setGradingInput: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>;
   isGrading: boolean;
@@ -105,7 +106,7 @@ const SubmissionItem = ({
             <TouchableOpacity
               disabled={isGrading}
               style={[styles.gradeButton, isGrading && styles.disabledButton]}
-              onPress={() => handleGrade(submission.id)}
+              onPress={() => handleGrade(submission.id, submission.student_account.account_id)}
             >
               {isGrading ? (
                 <ActivityIndicator color="#FFFFFF" />
@@ -126,8 +127,9 @@ const SubmissionItem = ({
 };
 
 const SurveyDetailsScreen = () => {
-  const { classId, assignmentId, survey } = useLocalSearchParams() as {
+  const { classId, className, assignmentId, survey } = useLocalSearchParams() as {
     classId: string;
+    className: string;
     assignmentId: string;
     survey: string;
   };
@@ -160,10 +162,9 @@ const SurveyDetailsScreen = () => {
         style: "destructive",
         onPress: async () => {
           try {
-            // Thêm API xóa bài kiểm tra
-            await deleteSurvey(assignmentId); // Giả sử `deleteSurvey` là API xóa
+            await deleteSurvey(assignmentId);
             Alert.alert("Thành công", "Bài kiểm tra đã được xóa.");
-            router.back(); // Điều hướng về danh sách lớp
+            router.back();
           } catch (err: any) {
             setUnhandledError(err);
           }
@@ -241,7 +242,7 @@ const SurveyDetailsScreen = () => {
     setExpandedSubmissionId((prev) => (prev === id ? null : id));
   }, []);
 
-  const handleGradeSubmission = async (id: string) => {
+  const handleGradeSubmission = async (id: string, account_id: string) => {
     if (isGrading) return;
 
     const grade = gradingInput[id];
@@ -272,6 +273,12 @@ const SurveyDetailsScreen = () => {
         delete updated[id];
         return updated;
       });
+      
+      await sendNotification({
+        message: `Đã có điểm bài tập ${title}, lớp ${className}`,
+        toUser: account_id,
+        type: "ASSIGNMENT_GRADE",
+      })
     } catch (error: any) {
       setUnhandledError(error);
     } finally {
