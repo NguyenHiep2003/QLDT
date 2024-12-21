@@ -51,14 +51,13 @@ const SurveysScreen = () => {
 
   const renderSurvey = ({ item }: { item: Survey }) => {
     const isExpired = new Date(item.deadline) < new Date();
-
     return (
       <TouchableOpacity
         style={[styles.surveyItem]}
         onPress={() =>
           router.push({
             pathname: "/lecturer/classes/[classId]/assignments/[assignmentId]",
-            params: { classId: classId, assignmentId: item.id, survey: JSON.stringify(item) },
+            params: { classId: classId, className: item.class_name, assignmentId: item.id, survey: JSON.stringify(item) },
           })
         }
       >

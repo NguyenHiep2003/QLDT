@@ -2,6 +2,7 @@ import { UnauthorizedException } from "@/utils/exception";
 import { getTokenLocal } from "../storages/token";
 import instance from "./axios";
 import { getClassInfo } from "./classes";
+import { sendNotification } from "@/services/api-calls/notification";
 
 export type Assignment = {
   id: number;
@@ -50,7 +51,7 @@ export async function fetchAssignments(typeOfAssignments: string, classId?: stri
             class_name: classInfoResponse.data.class_name, // Gắn `class_name` vào assignment
           };
         } catch (error) {
-          console.error(`Error fetching class info for class_id: ${assignment.class_id}`, error);
+          console.log(`Error fetching class info for class_id: ${assignment.class_id}`, error);
           return {
             ...assignment,
             class_name: "Lớp học không xác định", // Xử lý mặc định nếu lỗi
@@ -62,7 +63,7 @@ export async function fetchAssignments(typeOfAssignments: string, classId?: stri
     return assignmentsWithClassNames;
   } catch (error: any) {
     // Xử lý lỗi
-    console.error("Error fetching assignments:", error.message);
+    console.log("Error fetching assignments:", error.message);
     throw error;
   }
 }
@@ -77,7 +78,7 @@ export type Submission = {
   student_account: StudentAccount;
 };
 
-type StudentAccount = {
+export type StudentAccount = {
   account_id: string;
   last_name: string;
   first_name: string;
@@ -138,11 +139,15 @@ export async function submitSurvey(formData: FormData) {
       err.setTitle("Đã quá hạn nộp bài");
       err.setContent("Bạn không thể nộp bài nữa");
     }
-    console.error(errorResponse);
+    console.log(errorResponse);
     throw err;
   }
 }
-
+//
+//
+//
+//
+//
 //api-lecturer
 export type Survey = {
   id: number;
@@ -166,30 +171,30 @@ export async function fetchSurveys(classId: string) {
 
     // Gửi request đến API
     const response: SurveyResponse = await instance.post("/it5023e/get_all_surveys", requestBody);
-    const surveys = response.data.reverse();
+    var surveys = response.data.reverse();
 
     try {
       const classInfoResponse = await getClassInfo({ class_id: classId });
-      surveys.map((survey) => {
+      const className = classInfoResponse.data.class_name;
+      surveys = surveys.map((survey) => {
         return {
           ...survey,
-          class_name: classInfoResponse.data.class_name, // Gắn `class_name` vào survey
+          class_name: className, // Gắn `class_name` vào survey
         };
       });
-    } catch (error: any) {
-      surveys.map((survey) => {
+    } catch {
+      surveys = surveys.map((survey) => {
         return {
           ...survey,
           class_name: "",
         };
       });
     }
-    console.log(surveys.length)
-
+    
     return surveys;
   } catch (error: any) {
     // Xử lý lỗi
-    console.error("Error fetching surveys:", error.message);
+    console.log("Error fetching surveys:", error.message);
     throw error;
   }
 }
