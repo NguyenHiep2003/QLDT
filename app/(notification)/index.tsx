@@ -71,14 +71,14 @@ const NotificationScreen = () => {
 
         if (notification.status === 'UNREAD') {
             try {
+                const unreadCount = notifications.filter((n: { status: string; }) => n.status === 'UNREAD').length;
+                setUnreadCount(unreadCount);
                 await markAsRead({ notification_id: notification.id });
                 setNotifications(prevNotifications =>
                     prevNotifications.map(n =>
                         n.id === notification.id ? { ...n, status: 'READ' } : n
                     )
                 );
-                const unreadCount = notifications.filter((n: { status: string; }) => n.status === 'UNREAD').length;
-                setUnreadCount(unreadCount);
             } catch (err) {
                 console.log(err);
                 Alert.alert('Error', 'Failed to mark notification as read');
@@ -114,7 +114,7 @@ const NotificationScreen = () => {
     };
 
     const sendPushNoti = async () => {
-        sendNotification({
+        await sendNotification({
             message: 'Đã có điểm bài kiểm tra môn Lập trình ứng dụng cho thiết bị di động',
             toUser: '109',
             type: 'ABSENCE',

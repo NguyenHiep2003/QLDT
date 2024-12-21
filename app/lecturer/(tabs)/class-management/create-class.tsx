@@ -5,6 +5,7 @@ import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { Link } from 'expo-router';
 import {createClass} from "@/services/api-calls/classes";
 import {createClassResponse} from "@/types/createClassRequest";
+import {useErrorContext} from "@/utils/ctx";
 
 const CreateClassScreen = () => {
     const [className, setClassName] = useState('');
@@ -15,7 +16,7 @@ const CreateClassScreen = () => {
     const [maxStudents, setMaxStudents] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [openClassType, setOpenClassType] = useState(false);
-
+    const {setUnhandledError} = useErrorContext()
 
     const classTypeItems = [
         { label: 'LT', value: 'LT' },
@@ -63,28 +64,32 @@ const CreateClassScreen = () => {
             setErrorMessage('Ngày kết thúc phải sau ngày bắt đầu');
         } else if (parseInt(maxStudents) > 50) {
             setErrorMessage('Số lượng sinh viên tối đa không được vượt quá 50');
+        } else if (classId.length != 6) {
+            setErrorMessage('Mã lớp phải có 6 ký tự');
         } else {
-            try {
-                const response = await createClass({
-                    class_id: classId,
-                    class_type: classType,
-                    class_name: className,
-                    start_date: startDate.toISOString().slice(0,10),
-                    end_date: endDate.toISOString().slice(0,10),
-                    max_student_amount: parseInt(maxStudents)
-                });
-
-                if (response.meta.code === 1000) {
+            await createClass({
+                class_id: classId,
+                class_type: classType,
+                class_name: className,
+                start_date: startDate.toISOString().slice(0,10),
+                end_date: endDate.toISOString().slice(0,10),
+                max_student_amount: parseInt(maxStudents)
+            }).then((response: any) => {
+                if (response.meta.code === '1000') {
                     Alert.alert('Thành công', 'Lớp học đã được tạo');
                     setErrorMessage('');
-                } else {
-                    setErrorMessage(response.meta.message);
                 }
-            } catch (error: any) {
-                console.error(error.response.data.data);
-                setErrorMessage(error.response.data.data);
-                // setErrorMessage('Có lỗi xảy ra, vui lòng thử lại sau.');
-            }
+            }).catch((error: any) => {
+                const errorCode = error.rawError?.meta?.code;
+                if(errorCode == 1004){
+                    error.setTitle("Lỗi");
+                    error.setContent("Mã lớp đã tồn tại");
+                } else {
+                    error.setTitle("Lỗi");
+                    error.setContent("Có lỗi xảy ra, vui lòng thử lại sau");
+                }
+                setUnhandledError(error)
+            })
         }
     };
 
@@ -185,9 +190,9 @@ const CreateClassScreen = () => {
                     <Text style={styles.buttonText}>Tạo lớp học</Text>
                 </TouchableOpacity>
 
-                <Link href={'/'} style={styles.classOpen}>
-                    Thông tin danh sách lớp mở
-                </Link>
+                {/*<Link href={'/'} style={styles.classOpen}>*/}
+                {/*    Thông tin danh sách lớp mở*/}
+                {/*</Link>*/}
             </ScrollView>
         </SafeAreaView>
     );
