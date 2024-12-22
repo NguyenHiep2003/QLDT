@@ -34,7 +34,7 @@ const NotificationScreen = () => {
         }
 
         try {
-            const response = await getProfile(senderId);
+            const response = await getProfile(senderId.toString());
             const fullName = response.name;
             setUser(prevUser => ({ ...prevUser, [senderId]: fullName }));
             return fullName;

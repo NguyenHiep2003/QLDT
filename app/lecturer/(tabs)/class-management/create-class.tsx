@@ -8,11 +8,17 @@ import {createClassResponse} from "@/types/createClassRequest";
 import {useErrorContext} from "@/utils/ctx";
 
 const CreateClassScreen = () => {
+    const calculateEndDate = (start: any) => {
+        const end = new Date(start);
+        end.setDate(end.getDate() + (17 * 7));
+        return end;
+    };
+
     const [className, setClassName] = useState('');
     const [classId, setClassId] = useState('');
     const [classType, setClassType] = useState(null);
     const [startDate, setStartDate] = useState(new Date());
-    const [endDate, setEndDate] = useState(new Date());
+    const [endDate, setEndDate] = useState(calculateEndDate(startDate));
     const [maxStudents, setMaxStudents] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [openClassType, setOpenClassType] = useState(false);
@@ -24,15 +30,15 @@ const CreateClassScreen = () => {
         { label: 'LT+BT', value: 'LT_BT' }
     ];
 
+
     const showStartDatePicker = () => {
         DateTimePickerAndroid.open({
             value: startDate,
             onChange: (event, selectedDate) => {
                 if (event.type === 'set' && selectedDate) {
                     setStartDate(selectedDate);
-                    if (endDate < selectedDate) {
-                        setEndDate(selectedDate);
-                    }
+                    const newEndDate = calculateEndDate(selectedDate);
+                    setEndDate(newEndDate);
                 }
             },
             mode: 'date',
