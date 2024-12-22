@@ -49,7 +49,7 @@ export type markAsReadResponse = {
 export type getUnreadCountResponse = {
     data: number;
     meta: {
-        code: number;
+        code: string;
         message: string;
     }
 }

@@ -55,8 +55,9 @@ export function Profile({ role }: { role: string }) {
                 setIsLoading(true);
                 const newProfile = await changeProfile(form);
                 newProfile.avatar = convertDriveUrl(newProfile.avatar);
+                if (profile)
+                    saveProfileLocal({ ...profile, avatar: newProfile.avatar });
                 setProfile(newProfile);
-                saveProfileLocal(newProfile);
             }
         } catch (error) {
             console.log('🚀 ~ pickImage ~ error:', error);
@@ -199,7 +200,9 @@ export function Profile({ role }: { role: string }) {
                     <ListItem
                         style={{ marginBottom: 5 }}
                         onPress={() => {
-                            router.navigate('/student/changePassword');
+                            if (role == ROLES.STUDENT)
+                                router.push('/student/changePassword');
+                            else router.push('/lecturer/changePassword');
                         }}
                     >
                         <Icon
@@ -264,7 +267,8 @@ export function Profile({ role }: { role: string }) {
                                     await logOut();
                                     await deleteProfile();
                                     await deleteToken();
-                                    if(stompClient?.connected) stompClient?.deactivate();
+                                    if (stompClient?.connected)
+                                        stompClient?.deactivate();
                                     router.navigate('/(auth)/sign-in');
                                 } catch (error: any) {
                                     setUnhandledError(error);

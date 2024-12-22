@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {View, Text, FlatList, TouchableOpacity, Modal, Alert, StyleSheet, Button} from 'react-native';
 import { useUnreadCount } from '@/context/UnreadCountContext';
-import { getNotifications, markAsRead, sendNotification } from '@/services/api-calls/notification';
+import {getNotifications, getUnreadCount, markAsRead, sendNotification} from '@/services/api-calls/notification';
 import { getProfile } from '@/services/api-calls/profile';
 
 interface Notification {
@@ -24,8 +24,16 @@ const NotificationScreen = () => {
     const [user, setUser] = useState<{ [key: number]: string }>({});
     const { setUnreadCount } = useUnreadCount();
 
+    const [unread, setUnread] = useState(0);
+
     useEffect(() => {
         fetchNotifications()
+        getUnreadCount().then((response: any) => {
+            console.log("Initial unread: " + response.data)
+            const initialUnread = response.data;
+            console.log("Initial unread: " + initialUnread)
+            setUnread(initialUnread)
+        })
     }, []);
 
     const fetchSenderName = async (senderId: number) => {
@@ -34,7 +42,7 @@ const NotificationScreen = () => {
         }
 
         try {
-            const response = await getProfile(senderId);
+            const response = await getProfile(senderId.toString());
             const fullName = response.name;
             setUser(prevUser => ({ ...prevUser, [senderId]: fullName }));
             return fullName;
@@ -71,14 +79,17 @@ const NotificationScreen = () => {
 
         if (notification.status === 'UNREAD') {
             try {
+                console.log("Unread: " + unread)
+                const updatedUnread = unread - 1;
+                setUnread(updatedUnread);
+                setUnreadCount(updatedUnread);
+                console.log("Unread: " + unread)
                 await markAsRead({ notification_id: notification.id });
                 setNotifications(prevNotifications =>
                     prevNotifications.map(n =>
                         n.id === notification.id ? { ...n, status: 'READ' } : n
                     )
                 );
-                const unreadCount = notifications.filter((n: { status: string; }) => n.status === 'UNREAD').length;
-                setUnreadCount(unreadCount);
             } catch (err) {
                 console.log(err);
                 Alert.alert('Error', 'Failed to mark notification as read');
@@ -114,7 +125,7 @@ const NotificationScreen = () => {
     };
 
     const sendPushNoti = async () => {
-        sendNotification({
+        await sendNotification({
             message: 'Đã có điểm bài kiểm tra môn Lập trình ứng dụng cho thiết bị di động',
             toUser: '109',
             type: 'ABSENCE',
