@@ -84,7 +84,7 @@ export default function AbsenceRequestScreen() {
     const [showDatePicker, setShowDatePicker] = useState(false)
     const [date, setDate] = useState<Date | null>(null)
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
-    const [statusSelected, setStatusSelected] = useState<string | null>('PENDING')
+    const [statusSelected, setStatusSelected] = useState<string | null>('ACCEPTED')
     const [pageInfo, setPageInfo] = useState<any>({})
     const [page, setPage] = useState(0)
     const {setUnhandledError} = useErrorContext()
@@ -119,7 +119,6 @@ export default function AbsenceRequestScreen() {
 
     useEffect(() => {
         if(focused){
-            console.log('reload...')
             setFocused(false)
             getData()
         }
@@ -127,19 +126,9 @@ export default function AbsenceRequestScreen() {
 
     useFocusEffect(
         React.useCallback(() => {
-            console.log("Absence Request Screen is focused");
             setFocused(true)
-
-            // Optional: Refresh data or perform other actions when the screen is focused
-            // const refreshData = async () => {
-            //     // Your data refreshing logic here
-            // };
-            // refreshData();
-
             return () => {
                 setFocused(false)
-                console.log("Absence Request Screen is being left");
-                // Optional: Cleanup or other actions when the screen is left
             };
         }, [])
     );
@@ -228,7 +217,6 @@ export default function AbsenceRequestScreen() {
                 </View>
             )}
 
-            {!isLoading && !_.isEmpty(data) && (
             <View style={{flexDirection: 'row', justifyContent: 'space-between', padding: 15, paddingBottom: 4, alignItems: 'center'}}>
                 <View style={styles.container1}>
                     <Text style={[styles.label, isFocus && { color: 'blue' }]}> Trạng thái </Text>
@@ -275,7 +263,6 @@ export default function AbsenceRequestScreen() {
 
                 
             </View>
-            )}
 
             {isLoading && !requesting && (
                 <View style={{alignSelf: 'center',position: 'absolute', top: '40%'}}>
