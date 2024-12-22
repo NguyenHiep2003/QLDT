@@ -10,6 +10,7 @@ import {
     TextInput,
     TouchableOpacity,
     Keyboard,
+    Alert,
 } from "react-native";
 import {
     getBasicClassInfo,
@@ -20,7 +21,7 @@ import {
 import RNPickerSelect from "react-native-picker-select";
 import {
     getClassInfoRequest,
-    getClassInfoResponse,
+    getClassOpenResponse,
 } from "@/types/createClassRequest";
 import { set } from "lodash";
 import { Icon } from "react-native-elements";
@@ -40,7 +41,7 @@ const OpenClasses = () => {
     const [className, setClassName] = useState<string>("");
     // const [classID, setClassID] = useState<string>("");
     const [openClasses, setOpenClasses] = useState<
-        getClassInfoResponse["data"][]
+        getClassOpenResponse["data"]["page_content"]
     >([]);
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
@@ -55,7 +56,14 @@ const OpenClasses = () => {
                     page_size: 10,
                 };
                 const data = await getOpenClassList(pageable_request);
-                setOpenClasses(data.data?.page_content);
+                if ("data" in data) {
+                    setOpenClasses(data.data.page_content);
+                } else {
+                    Alert.alert(
+                        "Không tìm thấy dữ liệu lớp:",
+                        data.meta.message
+                    );
+                }
             } catch (error) {
                 console.error("Lấy danh sách lớp thất bại:", error);
             }
@@ -76,9 +84,15 @@ const OpenClasses = () => {
                     status: selectedStatus ? selectedStatus : null,
                     pageable_request: pageable_request,
                 });
-                setTotalPages(data.data?.page_info?.total_page);
-
-                setOpenClasses(data.data?.page_content);
+                if ("data" in data) {
+                    setTotalPages(data.data?.page_info?.total_page as any);
+                    setOpenClasses(data.data?.page_content);
+                } else {
+                    Alert.alert(
+                        "Không tìm thấy dữ liệu lớp:",
+                        data.meta.message
+                    );
+                }
             } catch (error) {
                 console.error("Lấy danh sách lớp thất bại:", error);
             }
@@ -101,8 +115,15 @@ const OpenClasses = () => {
                     pageable_request: pageable_request,
                 });
                 Keyboard.dismiss();
-                setTotalPages(data.data?.page_info?.total_page);
-                setOpenClasses(data.data?.page_content);
+                if ("data" in data) {
+                    setTotalPages(data.data?.page_info?.total_page as any);
+                    setOpenClasses(data.data?.page_content);
+                } else {
+                    Alert.alert(
+                        "Không tìm thấy dữ liệu lớp:",
+                        data.meta.message
+                    );
+                }
                 setCurrentPage(0);
             } catch (error) {
                 console.error("Lấy danh sách lớp thất bại:", error);
@@ -254,51 +275,57 @@ const OpenClasses = () => {
 
                     {/* Table Body */}
                     <ScrollView style={styles.verticalScroll}>
-                        {openClasses.map((item, index) => (
-                            <View key={index} style={styles.classRow}>
-                                <View style={styles.cellClassCode}>
-                                    <Text style={styles.classCode}>
-                                        {item.class_id}
-                                    </Text>
-                                </View>
+                        {openClasses.length > 0 ? (
+                            openClasses.map((item, index) => (
+                                <View key={index} style={styles.classRow}>
+                                    <View style={styles.cellClassCode}>
+                                        <Text style={styles.classCode}>
+                                            {item.class_id}
+                                        </Text>
+                                    </View>
 
-                                <View style={styles.cell}>
-                                    <Text style={styles.classCode}>
-                                        {item.class_name}
-                                    </Text>
+                                    <View style={styles.cell}>
+                                        <Text style={styles.classCode}>
+                                            {item.class_name}
+                                        </Text>
+                                    </View>
+                                    <View style={styles.cellClassCode}>
+                                        <Text style={styles.classCode}>
+                                            {item.class_type}
+                                        </Text>
+                                    </View>
+                                    <View style={styles.cell}>
+                                        <Text style={styles.classCode}>
+                                            {item.lecturer_name}
+                                        </Text>
+                                    </View>
+                                    <View style={styles.cellClassCode}>
+                                        <Text style={styles.classCode}>
+                                            {item.student_count}
+                                        </Text>
+                                    </View>
+                                    <View style={styles.cell}>
+                                        <Text style={styles.classCode}>
+                                            {formatDate(item.start_date)}
+                                        </Text>
+                                    </View>
+                                    <View style={styles.cell}>
+                                        <Text style={styles.classCode}>
+                                            {formatDate(item.end_date)}
+                                        </Text>
+                                    </View>
+                                    <View style={styles.cellClassCode}>
+                                        <Text style={styles.classCode}>
+                                            {item.status}
+                                        </Text>
+                                    </View>
                                 </View>
-                                <View style={styles.cellClassCode}>
-                                    <Text style={styles.classCode}>
-                                        {item.class_type}
-                                    </Text>
-                                </View>
-                                <View style={styles.cell}>
-                                    <Text style={styles.classCode}>
-                                        {item.lecturer_name}
-                                    </Text>
-                                </View>
-                                <View style={styles.cellClassCode}>
-                                    <Text style={styles.classCode}>
-                                        {item.student_count}
-                                    </Text>
-                                </View>
-                                <View style={styles.cell}>
-                                    <Text style={styles.classCode}>
-                                        {formatDate(item.start_date)}
-                                    </Text>
-                                </View>
-                                <View style={styles.cell}>
-                                    <Text style={styles.classCode}>
-                                        {formatDate(item.end_date)}
-                                    </Text>
-                                </View>
-                                <View style={styles.cellClassCode}>
-                                    <Text style={styles.classCode}>
-                                        {item.status}
-                                    </Text>
-                                </View>
-                            </View>
-                        ))}
+                            ))
+                        ) : (
+                            <Text style={styles.noDataText}>
+                                Không có dữ liệu lớp nào được tìm thấy.
+                            </Text>
+                        )}
                     </ScrollView>
                 </View>
             </ScrollView>
@@ -584,6 +611,12 @@ const styles = StyleSheet.create({
         color: "#ccc",
         fontSize: 24,
         fontWeight: "bold",
+    },
+    noDataText: {
+        marginLeft: 40,
+        marginVertical: 20,
+        fontSize: 16,
+        color: "#B71C1C",
     },
 });
 

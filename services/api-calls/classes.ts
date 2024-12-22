@@ -6,9 +6,11 @@ import {
     createClassRequest,
     createClassResponse, editClassRequest, editClassResponse,
     getClassInfoRequest,
-    getClassInfoResponse
+    getClassInfoResponse,
+    getClassOpenResponse,
 } from "@/types/createClassRequest";
 import { UnauthorizedException } from '@/utils/exception';
+
 
 export async function getClassList(role: ROLES) {
     const profile = await getProfileLocal();
@@ -371,12 +373,12 @@ export async function reviewAbsenceRequest(requestId: any,status: any) {//SGHB -
     }
 }
 
-export async function getOpenClassList(pageable_request: any) {
+export async function getOpenClassList(pageable_request: any):  Promise<getClassOpenResponse | { meta: { code: number; message: string } }>{
     const profile = await getProfileLocal();
     if (!profile) return { meta: { code: 400, message: 'Profile not found' } };
 
     try {
-        const response = await instance.post('/it5023e/get_open_classes', {
+        const response: getClassOpenResponse = await instance.post('/it5023e/get_open_classes', {
             pageable_request: pageable_request
         })
         return response;
@@ -386,14 +388,14 @@ export async function getOpenClassList(pageable_request: any) {
 
 }
 
-export async function getOpenClassByFilter(request: any) {
+export async function getOpenClassByFilter(request: any):  Promise<getClassOpenResponse | { meta: { code: number; message: string } }>{
     const profile = await getProfileLocal();
     if (!profile) return { meta: { code: 400, message: 'Profile not found' } };
     console.log("request", request)
 
     try {
         
-        const response = await instance.post('/it5023e/get_classes_by_filter', {
+        const response: getClassOpenResponse = await instance.post('/it5023e/get_classes_by_filter', {
         class_id: request.class_id,
         status: request.status,
         class_name: request.class_name,
