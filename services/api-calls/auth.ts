@@ -1,11 +1,11 @@
-import { TProfile } from '@/types/profile';
-import instance from './axios';
-import { saveProfileLocal } from '../storages/profile';
-import { getTokenLocal, saveTokenLocal } from '../storages/token';
-import { convertDriveUrl } from '@/utils/convertDriveUrl';
-import { UnauthorizedException } from '@/utils/exception';
+import { TProfile } from "@/types/profile";
+import instance from "./axios";
+import { saveProfileLocal } from "../storages/profile";
+import { getTokenLocal, saveTokenLocal } from "../storages/token";
+import { convertDriveUrl } from "@/utils/convertDriveUrl";
+import { UnauthorizedException } from "@/utils/exception";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getDeviceId } from '../storages/device_id';
+import { getDeviceId } from "../storages/device_id";
 
 type ErrorResponse = {
   code: string;
@@ -14,65 +14,65 @@ type ErrorResponse = {
 
 type SignInResponse = {
   data: {
-      id: string;
-      ho: string;
-      ten: string;
-      token: string;
-      name: string;
-      active: string;
-      email: string;
-      role: string;
-      class_list: any[];
-      avatar: string;
+    id: string;
+    ho: string;
+    ten: string;
+    token: string;
+    name: string;
+    active: string;
+    email: string;
+    role: string;
+    class_list: any[];
+    avatar: string;
   };
 };
 
 export async function signIn(email: string, password: string) {
-    const expoPushToken = await AsyncStorage.getItem('expoPushToken') as string
+  const expoPushToken = (await AsyncStorage.getItem("expoPushToken")) as string;
 
   try {
     const deviceId = await getDeviceId();
-    console.log('Your Device ID:', deviceId);
-    const response: SignInResponse = await instance.post('/it4788/login', {
-        email,
-        password,
-        fcm_token: expoPushToken,
-        device_id: deviceId,
+    console.log("Your Device ID:", deviceId);
+    const response: SignInResponse = await instance.post("/it4788/login", {
+      email,
+      password,
+      fcm_token: expoPushToken,
+      device_id: deviceId,
     });
-    const { ho, ten, id, name, active, role, class_list, avatar } =
-        response.data;
+    const { ho, ten, id, name, active, role, class_list, avatar } = response.data;
     const profile: TProfile = {
-        id,
-        ho,
-        ten,
-        email,
-        name,
-        active,
-        role,
-        class_list,
-        avatar,
+      id,
+      ho,
+      ten,
+      email,
+      name,
+      active,
+      role,
+      class_list,
+      avatar,
     };
     profile.avatar = convertDriveUrl(profile.avatar);
     await saveProfileLocal(profile);
     await saveTokenLocal(response.data.token);
     return response.data;
-
   } catch (error: any) {
-    const errorResponse: ErrorResponse = error.rawError;
-    const { code, message } = errorResponse;
-
-    if (code === "1016") {
-      error.setTitle("Sai thông tin đăng nhập");
-      error.setContent("Email chưa được đăng ký trước đó");
-    } else if (code === "1017") {
-      error.setTitle("Sai thông tin đăng nhập");
-      error.setContent("Mật khẩu không chính xác");
+    if (error?.rawError) {
+      const errorResponse: ErrorResponse = error.rawError;
+      const { code, message } = errorResponse;
+      if (code === "1011") {
+        error.setTitle("Email không hợp lệ");
+        error.setContent("Vui lòng kiểm tra lại");
+      } else if (code === "1016") {
+        error.setTitle("Sai thông tin đăng nhập");
+        error.setContent("Email chưa được đăng ký trước đó");
+      } else if (code === "1017") {
+        error.setTitle("Sai thông tin đăng nhập");
+        error.setContent("Mật khẩu không chính xác");
+      }
     }
-
     throw error;
   }
 }
-
 
 type SignUpResponse = {
   code: string;
@@ -94,20 +94,25 @@ export async function signUp(signUpData: SignUpRequest) {
     const data: SignUpResponse = await instance.post("/it4788/signup", signUpData);
     console.log("Sign up successfully, verify now!");
     return data;
-
   } catch (error: any) {
-    const errorResponse: ErrorResponse = error.rawError;
-    const { code, message } = errorResponse;
+    if (error?.rawError) {
+      const errorResponse: ErrorResponse = error.rawError;
+      const { code, message } = errorResponse;
 
-    if (code === "9996") {
-      error.setTitle("Email đã được đăng ký từ trước");
-      error.setContent("Vui lòng nhập một Email khác");
+      if (code === "1011") {
+        error.setTitle("Email không hợp lệ");
+        error.setContent("Vui lòng kiểm tra lại");
+      } else if (code === "1015") {
+        error.setTitle("Mật khẩu không hợp lệ");
+        error.setContent("Mật khẩu không được chứa ký tự đặc biệt");
+      } else if (code === "9996") {
+        error.setTitle("Email đã được đăng ký từ trước");
+        error.setContent("Vui lòng nhập một Email khác");
+      }
     }
-
     throw error;
   }
 }
-
 
 type CheckVerifyCodeResponse = {
   code: string;
@@ -126,22 +131,22 @@ export async function CheckVerifyCode(checkVerifyCodeData: CheckVerifyCodeReques
     console.log(data);
     console.log("Verify successfully!");
     return data;
-
   } catch (error: any) {
-    const errorResponse: ErrorResponse = error.rawError;
-    const { code, message } = errorResponse;
+    if (error?.rawError) {
+      const errorResponse: ErrorResponse = error.rawError;
+      const { code, message } = errorResponse;
 
-    if (code === "1016") {
-      error.setTitle("Lỗi xác thực");
-      error.setContent("Email đã được xác thực trước đó");
-    } else if (code === "9990") {
-      error.setTitle("Lỗi email xác thực");
-      error.setContent("Email chưa được đăng ký trước đó");
-    } else if (code === "9993") {
-      error.setTitle("Lỗi mã xác thực");
-      error.setContent("Mã xác thực không hợp lệ");
+      if (code === "1016") {
+        error.setTitle("Lỗi xác thực");
+        error.setContent("Email đã được xác thực trước đó");
+      } else if (code === "9990") {
+        error.setTitle("Lỗi email xác thực");
+        error.setContent("Email chưa được đăng ký trước đó");
+      } else if (code === "9993") {
+        error.setTitle("Lỗi mã xác thực");
+        error.setContent("Mã xác thực không hợp lệ");
+      }
     }
-
     throw error;
   }
 }
@@ -158,24 +163,24 @@ export async function resendVerifyCode(email: string, password: string) {
     console.log("ResendVerifyCode success:", data);
     return data;
   } catch (error: any) {
-    const errorResponse: ErrorResponse = error.rawError;
-    const { code, message } = errorResponse;
+    if (error?.rawError) {
+      const errorResponse: ErrorResponse = error.rawError;
+      const { code, message } = errorResponse;
 
-    if (code === "1019") {
-      error.setTitle("Lỗi xác thực");
-      error.setContent("Email đã được xác thực trước đó");
-    } else if (code === "1020") {
-      error.setTitle("Lỗi gửi mã");
-      error.setContent("Yêu cầu quá thường xuyên. Vui lòng thử lại sau");
-    } else if (code === "9990") {
-      error.setTitle("Lỗi xác thực");
-      error.setContent("Email chưa được đăng ký trước đó");
+      if (code === "1019") {
+        error.setTitle("Lỗi xác thực");
+        error.setContent("Email đã được xác thực trước đó");
+      } else if (code === "1020") {
+        error.setTitle("Lỗi gửi mã");
+        error.setContent("Yêu cầu quá thường xuyên. Vui lòng thử lại sau");
+      } else if (code === "9990") {
+        error.setTitle("Lỗi xác thực");
+        error.setContent("Email chưa được đăng ký trước đó");
+      }
     }
-
     throw error;
   }
 }
-
 
 type ChangePasswordRequest = {
   old_password: string;
@@ -193,28 +198,29 @@ export async function changePassword(changePassWordRequest: ChangePasswordReques
     console.log(data);
     return data;
   } catch (error: any) {
-    const errorResponse: ErrorResponse = error.rawError;
-    const { code, message } = errorResponse;
+    if (error?.rawError) {
+      const errorResponse: ErrorResponse = error.rawError;
+      const { code, message } = errorResponse;
 
-    if (code === "1017") {
-      error.setTitle("Mật khẩu không chính xác");
-      error.setContent("Mật khẩu cũ không đúng");
-    } else if (code === "1018") {
-      error.setTitle("Mật khẩu mới gần giống mật khẩu cũ");
-      error.setContent("Vui lòng chọn mật khẩu mới khác");
+      if (code === "1017") {
+        error.setTitle("Mật khẩu không chính xác");
+        error.setContent("Mật khẩu cũ không đúng");
+      } else if (code === "1018") {
+        error.setTitle("Mật khẩu mới gần giống mật khẩu cũ");
+        error.setContent("Vui lòng chọn mật khẩu mới khác");
+      }
     }
-
     throw error;
   }
 }
 
 export async function logOut() {
-    try {
-        const token = await getTokenLocal();
-        if (!token) throw new UnauthorizedException();
-        return await instance.post('/it4788/logout', { token });
-    } catch (error) {
-        console.log('🚀 ~ logOut ~ error:', error);
-        throw error;
-    }
+  try {
+    const token = await getTokenLocal();
+    if (!token) throw new UnauthorizedException();
+    return await instance.post("/it4788/logout", { token });
+  } catch (error) {
+    console.log("🚀 ~ logOut ~ error:", error);
+    throw error;
+  }
 }
