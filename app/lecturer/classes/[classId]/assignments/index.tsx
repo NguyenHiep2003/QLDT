@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, TouchableOpacity, Text, FlatList, ActivityIndicator, StyleSheet, RefreshControl } from "react-native";
+import { View, TouchableOpacity, Text, FlatList, ActivityIndicator, StyleSheet, RefreshControl, ScrollView } from "react-native";
 import { fetchSurveys, Survey } from "@/services/api-calls/assignments";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useErrorContext } from "@/utils/ctx";
+import { InternalServerError, NetworkError } from "@/utils/exception";
 
 const SurveysScreen = () => {
   const { classId } = useLocalSearchParams() as { classId: string };
@@ -10,14 +11,20 @@ const SurveysScreen = () => {
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [errorState, setErrorState] = useState<string | null>(null); // Quản lý lỗi
 
   const loadSurveys = async () => {
     try {
+      setErrorState(null); // Reset lỗi trước khi load
       const fetchedSurveys = await fetchSurveys(classId);
       setSurveys(fetchedSurveys);
     } catch (err: any) {
-      console.log(err);
-      setUnhandledError(err);
+      if (err instanceof NetworkError) {
+        setErrorState("Không có kết nối mạng ...");
+      } else if (err instanceof InternalServerError) {
+        setErrorState("Không thể kết nối đến máy chủ");
+      }
+      setUnhandledError(err); // Lỗi khác không xác định
     } finally {
       setIsLoading(false);
     }
@@ -27,10 +34,17 @@ const SurveysScreen = () => {
     setRefreshing(true);
     try {
       const fetchedSurveys = await fetchSurveys(classId);
+      setErrorState(null); // Reset lỗi ngay sau khi load
       setSurveys(fetchedSurveys);
     } catch (err: any) {
-      console.log(err);
-      setUnhandledError(err);
+      if (err instanceof NetworkError) {
+        setErrorState("Không có kết nối mạng ...");
+      } else if (err instanceof InternalServerError) {
+        setErrorState("Không thể kết nối đến máy chủ");
+      } else {
+        setErrorState(null); // Reset lỗi ngay sau khi load
+      }
+      setUnhandledError(err); // Lỗi khác không xác định
     } finally {
       setRefreshing(false);
     }
@@ -51,14 +65,18 @@ const SurveysScreen = () => {
 
   const renderSurvey = ({ item }: { item: Survey }) => {
     const isExpired = new Date(item.deadline) < new Date();
-
     return (
       <TouchableOpacity
         style={[styles.surveyItem]}
         onPress={() =>
           router.push({
             pathname: "/lecturer/classes/[classId]/assignments/[assignmentId]",
-            params: { classId: classId, assignmentId: item.id, survey: JSON.stringify(item) },
+            params: {
+              classId: classId,
+              className: item.class_name,
+              assignmentId: item.id,
+              survey: JSON.stringify(item),
+            },
           })
         }
       >
@@ -101,20 +119,34 @@ const SurveysScreen = () => {
 
   if (surveys.length === 0) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.noDataText}>Chưa có bài tập nào</Text>
-        <TouchableOpacity style={styles.createButton} onPress={handleCreateSurvey}>
-          <Text style={styles.createButtonText}>Tạo bài tập mới</Text>
-        </TouchableOpacity>
+      <View style={{ flex: 1 }}>
+        <ScrollView
+          contentContainerStyle={styles.center}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
+        >
+          {errorState ? (
+            <Text style={styles.noDataText}>{errorState}</Text>
+          ) : (
+            <>
+              <Text style={styles.noDataText}>Chưa có bài tập nào</Text>
+              <TouchableOpacity style={styles.createButton} onPress={handleCreateSurvey}>
+                <Text style={styles.createButtonText}>Tạo bài tập mới</Text>
+              </TouchableOpacity>
+            </>
+          )}
+        </ScrollView>
       </View>
     );
   }
+  
 
   return (
     <View style={{ flex: 1 }}>
       <TouchableOpacity style={styles.createButton} onPress={handleCreateSurvey}>
         <Text style={styles.createButtonText}>Tạo bài tập mới</Text>
       </TouchableOpacity>
+      {errorState && <Text style={[styles.noDataText, {fontStyle: "italic", marginBottom: 5}]}>{errorState}</Text>}    
+      
       <FlatList
         data={surveys}
         keyExtractor={(item) => item.id.toString()}
@@ -182,6 +214,7 @@ const styles = StyleSheet.create({
   noDataText: {
     fontSize: 16,
     color: "#888",
+    textAlign: "center",
   },
   createButton: {
     backgroundColor: "#007bff", // Xanh lá

@@ -28,7 +28,7 @@ export default function TabLayout() {
         const response = await fetchAssignments("PASS_DUE");
         setHasOverdueAssignments(response.length > 0);
       } catch (err) {
-        console.error(err);
+        console.log(err);
       }
     };
     checkOverdueAssignments();

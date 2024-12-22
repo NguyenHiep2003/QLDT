@@ -3,16 +3,18 @@ import { connectSocket } from '@/services/sockets/connection';
 import { getProfileLocal } from '@/services/storages/profile';
 import { useSocketContext } from '@/utils/socket.ctx';
 import { Stack } from 'expo-router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { StyleSheet } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
 
 export default function StudentLayout() {
     const { setStompClient } = useSocketContext();
     useEffect(() => {
-        getProfileLocal().then((profile) => {
-            if (profile?.id) setStompClient(connectSocket(profile.id));
-        });
+        // NetInfo.addEventListener((state) => {
+        //     if (state.isConnected) setStompClient(connectSocket());
+        // });
+        setStompClient(connectSocket());
     }, []);
     return (
         <Stack
@@ -48,6 +50,23 @@ export default function StudentLayout() {
                     },
                     headerTitleAlign: 'center',
                     headerTitle: () => <Header title="Đổi mật khẩu"></Header>,
+                }}
+            ></Stack.Screen>
+            <Stack.Screen
+                name="openClasses"
+                options={{
+                    headerShown: true,
+                    headerStyle: {
+                        backgroundColor: '#c21c1c',
+                    },
+                    headerTintColor: '#fff',
+                    headerTitleStyle: {
+                        fontWeight: 'bold',
+                    },
+                    headerTitleAlign: 'center',
+                    headerTitle: () => (
+                        <Header title="Danh sách lớp mở"></Header>
+                    ),
                 }}
             ></Stack.Screen>
         </Stack>

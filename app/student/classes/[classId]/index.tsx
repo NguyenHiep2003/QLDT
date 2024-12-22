@@ -41,7 +41,9 @@ export default function StudentClassDetail() {
     useEffect(() => {
         setIsLoading(true);
         getClassInfo({ class_id: classId as string })
-            .then((response) => {setClassInfo(response.data)})
+            .then((response) => {
+                setClassInfo(response.data);
+            })
             .catch((err) => setUnhandledError(err))
             .finally(() => setIsLoading(false));
     }, []);
@@ -108,7 +110,7 @@ export default function StudentClassDetail() {
                                 onPress={() => router.push(val.link)}
                                 key={val.name}
                             >
-                                <View style={{ width: 135 }}>
+                                <View style={{ width: '100%' }}>
                                     <ServiceCard
                                         title={val.title}
                                         name={val.name}

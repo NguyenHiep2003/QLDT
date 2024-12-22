@@ -50,7 +50,7 @@ export async function fetchAssignments(typeOfAssignments: string, classId?: stri
             class_name: classInfoResponse.data.class_name, // Gắn `class_name` vào assignment
           };
         } catch (error) {
-          console.error(`Error fetching class info for class_id: ${assignment.class_id}`, error);
+          console.log(`Error fetching class info for class_id: ${assignment.class_id}`, error);
           return {
             ...assignment,
             class_name: "Lớp học không xác định", // Xử lý mặc định nếu lỗi
@@ -62,7 +62,7 @@ export async function fetchAssignments(typeOfAssignments: string, classId?: stri
     return assignmentsWithClassNames;
   } catch (error: any) {
     // Xử lý lỗi
-    console.error("Error fetching assignments:", error.message);
+    console.log("Error fetching assignments:", error.message);
     throw error;
   }
 }
@@ -77,7 +77,7 @@ export type Submission = {
   student_account: StudentAccount;
 };
 
-type StudentAccount = {
+export type StudentAccount = {
   account_id: string;
   last_name: string;
   first_name: string;
@@ -98,12 +98,14 @@ export async function fetchSubmission(assignment_id: string) {
 
     return submission;
   } catch (error: any) {
-    const errorResponse: ErrorResponse = error.rawError;
-    const { data, meta } = errorResponse;
-    const { code, message } = meta;
+    if (error?.rawError) {
+      const errorResponse: ErrorResponse = error.rawError;
+      const { data, meta } = errorResponse;
+      const { code, message } = meta;
 
-    if (code === "9994") {
-      error.setIsVisible(false);
+      if (code === "9994") {
+        error.setIsVisible(false);
+      }
     }
     throw error;
   }
@@ -131,18 +133,23 @@ export async function submitSurvey(formData: FormData) {
 
     return response.data;
   } catch (err: any) {
-    const errorResponse: ErrorResponse = err.rawError;
-    const { data, meta } = errorResponse;
-    const { code, message } = meta;
-    if (code === "9999") {
-      err.setTitle("Đã quá hạn nộp bài");
-      err.setContent("Bạn không thể nộp bài nữa");
+    if (err?.rawError) {
+      const errorResponse: ErrorResponse = err.rawError;
+      const { data, meta } = errorResponse;
+      const { code, message } = meta;
+      if (code === "9999") {
+        err.setTitle("Đã quá hạn nộp bài");
+        err.setContent("Bạn không thể nộp bài nữa");
+      }
     }
-    console.error(errorResponse);
     throw err;
   }
 }
-
+//
+//
+//
+//
+//
 //api-lecturer
 export type Survey = {
   id: number;
@@ -166,30 +173,30 @@ export async function fetchSurveys(classId: string) {
 
     // Gửi request đến API
     const response: SurveyResponse = await instance.post("/it5023e/get_all_surveys", requestBody);
-    const surveys = response.data.reverse();
+    var surveys = response.data.reverse();
 
     try {
       const classInfoResponse = await getClassInfo({ class_id: classId });
-      surveys.map((survey) => {
+      const className = classInfoResponse.data.class_name;
+      surveys = surveys.map((survey) => {
         return {
           ...survey,
-          class_name: classInfoResponse.data.class_name, // Gắn `class_name` vào survey
+          class_name: className, // Gắn `class_name` vào survey
         };
       });
-    } catch (error: any) {
-      surveys.map((survey) => {
+    } catch {
+      surveys = surveys.map((survey) => {
         return {
           ...survey,
           class_name: "",
         };
       });
     }
-    console.log(surveys.length)
 
     return surveys;
   } catch (error: any) {
     // Xử lý lỗi
-    console.error("Error fetching surveys:", error.message);
+    console.log("Error fetching surveys:", error.message);
     throw error;
   }
 }
@@ -215,13 +222,15 @@ export async function fetchSurveyResponses(surveyId: string, submissionId?: stri
 
     return surveyresponses;
   } catch (err: any) {
-    const errorResponse: ErrorResponse = err.rawError;
-    const { data, meta } = errorResponse;
-    const { code, message } = meta;
+    if (err?.rawError) {
+      const errorResponse: ErrorResponse = err.rawError;
+      const { data, meta } = errorResponse;
+      const { code, message } = meta;
 
-    if (code === "9999") {
-      err.setTitle("Không tìm thấy bài tập");
-      err.setContent("Bài tập này hiện không tồn tại hoặc đã bị xóa.");
+      if (code === "9999") {
+        err.setTitle("Không tìm thấy bài tập");
+        err.setContent("Bài tập này hiện không tồn tại hoặc đã bị xóa.");
+      }
     }
     throw err;
   }
@@ -246,15 +255,16 @@ export async function createSurvey(formData: FormData) {
 
     return response.data;
   } catch (err: any) {
-    const errorResponse: ErrorResponse = err.rawError;
-    const { data, meta } = errorResponse;
-    const { code, message } = meta;
+    if (err?.rawError) {
+      const errorResponse: ErrorResponse = err.rawError;
+      const { data, meta } = errorResponse;
+      const { code, message } = meta;
 
-    if (code === "1004") {
-      err.setTitle("Deadline không hợp lệ");
-      err.setContent("Thời gian kết thúc không được trước thời gian hiện tại.");
+      if (code === "1004") {
+        err.setTitle("Deadline không hợp lệ");
+        err.setContent("Thời gian kết thúc không được trước thời gian hiện tại.");
+      }
     }
-
     throw err;
   }
 }
@@ -278,17 +288,19 @@ export async function editSurvey(formData: FormData) {
 
     return response.data;
   } catch (err: any) {
-    const errorResponse: ErrorResponse = err.rawError;
-    const { data, meta } = errorResponse;
-    const { code, message } = meta;
-    if (code === "1004") {
-      err.setTitle("Deadline không hợp lệ");
-      err.setContent("Thời gian kết thúc không được trước thời gian hiện tại.");
-    }
+    if (err?.rawError) {
+      const errorResponse: ErrorResponse = err.rawError;
+      const { data, meta } = errorResponse;
+      const { code, message } = meta;
+      if (code === "1004") {
+        err.setTitle("Deadline không hợp lệ");
+        err.setContent("Thời gian kết thúc không được trước thời gian hiện tại.");
+      }
 
-    if (code === "9999") {
-      err.setTitle("Không thể sửa bài tập");
-      err.setContent("Bài tập này hiện không tồn tại hoặc đã bị xóa.");
+      if (code === "9999") {
+        err.setTitle("Không thể sửa bài tập");
+        err.setContent("Bài tập này hiện không tồn tại hoặc đã bị xóa.");
+      }
     }
     throw err;
   }
@@ -307,17 +319,19 @@ export async function deleteSurvey(surveyId: string) {
 
     return status;
   } catch (err: any) {
-    const errorResponse: ErrorResponse = err.rawError;
-    const { data, meta } = errorResponse;
-    const { code, message } = meta;
+    if (err?.rawError) {
+      const errorResponse: ErrorResponse = err.rawError;
+      const { data, meta } = errorResponse;
+      const { code, message } = meta;
 
-    if (code === "1004") {
-      err.setTitle("Không thể xóa bài tập");
-      err.setContent("Không thể xóa bài tập khi có người Đã nộp bài.");
-    }
-    if (code === "9999") {
-      err.setTitle("Không thể xóa bài tập");
-      err.setContent("Bài tập này hiện không tồn tại hoặc đã bị xóa.");
+      if (code === "1004") {
+        err.setTitle("Không thể xóa bài tập");
+        err.setContent("Không thể xóa bài tập khi có người Đã nộp bài.");
+      }
+      if (code === "9999") {
+        err.setTitle("Không thể xóa bài tập");
+        err.setContent("Bài tập này hiện không tồn tại hoặc đã bị xóa.");
+      }
     }
     throw err;
   }
