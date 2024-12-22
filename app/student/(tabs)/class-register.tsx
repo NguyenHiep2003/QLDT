@@ -247,7 +247,7 @@ const CreateClass = () => {
             </View>
 
             {/* Footer */}
-            <Link href={"/"} style={styles.footerText}>
+            <Link href={"/student/openClasses" as any} style={styles.footerText}>
                 Thông tin danh sách các lớp mở
             </Link>
         </View>

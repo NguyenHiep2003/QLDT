@@ -2,7 +2,7 @@ import { Stomp } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { TextEncoder } from 'text-encoding';
 global.TextEncoder = TextEncoder;
-export function connectSocket(id: string) {
+export function connectSocket() {
     const stompClient = Stomp.over(
         () => new SockJS(`${process.env.EXPO_PUBLIC_API_URL}/ws`)
     );
