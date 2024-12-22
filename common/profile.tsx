@@ -154,7 +154,7 @@ export function Profile({ role }: { role: string }) {
                                     size={17}
                                     style={{
                                         marginLeft: 10,
-                                        marginRight: 10,
+                                        marginRight: 5,
                                         marginTop: 4,
                                     }}
                                 ></Ionicons>
@@ -162,7 +162,7 @@ export function Profile({ role }: { role: string }) {
                                     style={{
                                         marginLeft: 0,
                                         marginBottom: 0,
-                                        fontSize: 19,
+                                        fontSize: 18,
                                         marginTop: 0,
                                     }}
                                 >
