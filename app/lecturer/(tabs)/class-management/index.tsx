@@ -46,7 +46,7 @@ const CreateClass = () => {
             }
         };
         fetchClasses();
-    }, [classCode]);
+    }, [classCode]));
 
 
     const handleFindClass = () => {

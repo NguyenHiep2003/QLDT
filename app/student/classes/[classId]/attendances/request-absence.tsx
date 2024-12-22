@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Text,
   TextInput,
   StyleSheet,
@@ -16,6 +16,8 @@ import {requestAbsence} from '@/services/api-calls/classes'
 import { useLocalSearchParams } from 'expo-router';
 import _ from 'lodash'
 import { useErrorContext } from '@/utils/ctx';
+import { sendNotification } from '@/services/api-calls/notification';
+import { getProfileLocal } from '@/services/storages/profile';
 
 export default function RequestAbsenceScreen() {
   const {setUnhandledError} = useErrorContext()
@@ -26,7 +28,8 @@ export default function RequestAbsenceScreen() {
   const [dateAbsence, setDateAbsence] = useState<Date>(new Date(Date.now())); 
   const [showDatepicker, setShowDatePicker] = useState(false);
   const [err, setErr] = useState('')
-  const { classId } = useLocalSearchParams();
+  const { classId, className, startDate, endDate, lecturerAccountId } = useLocalSearchParams();
+  const [studentName, setStudentName] = useState('');
 
   const getLocalDateString = (utcDate: Date) => {
     const localDate = new Date(utcDate); // Tạo đối tượng Date từ UTC
@@ -69,6 +72,37 @@ export default function RequestAbsenceScreen() {
     setSelectedFile(prevFiles => prevFiles.filter((_, i) => i !== index));
   };
 
+  const formatDate = (date: any) => date.toISOString().split('T')[0];
+
+  const initialData = async () => {
+    const dateNow = formatDate(new Date(Date.now()))
+    if(dateNow < startDate){
+      setDateAbsence(new Date(startDate.toString()))
+    } else if(dateNow > endDate){
+      setDateAbsence(new Date(endDate.toString()))
+    }
+
+    try{
+      const profileLocal = await getProfileLocal()
+      setStudentName(profileLocal?.name ? profileLocal?.name : '')
+    } catch(error: any){
+      setUnhandledError(error)
+      throw error
+    }
+  }
+
+  useEffect(() => {
+    initialData()
+  }, [])
+
+  const sendPushNotification = async () => {
+    const message = `Sinh viên '${studentName}' lớp '${className}' xin nghỉ học ngày ${formatDate(dateAbsence)}`
+    const toUser = lecturerAccountId.toString()
+    console.log('toUser: ', toUser)
+    const type = 'ABSENCE'
+    await sendNotification({ message, toUser, type})
+  }
+
   const handleSubmit = async () => {
     const formData = new FormData()
     formData.append('title', textTitle)
@@ -90,6 +124,7 @@ export default function RequestAbsenceScreen() {
     setRequesting(true)
     try{
       const res = await requestAbsence(formData)
+      await sendPushNotification()
       Alert.alert( 'Thành công', 'Gửi yêu cầu xin nghỉ thành công' )
       onChangeTextTitle('')
       onChangeTextReason('')
@@ -250,9 +285,10 @@ export default function RequestAbsenceScreen() {
             {showDatepicker && (
                   <DateTimePicker
                       testID="dateTimePicker"
-                      value={dateAbsence == null ? new Date(Date.now()) : dateAbsence}
+                      value={ dateAbsence == null ? new Date(Date.now()) : dateAbsence }
                       mode={'date'}
-                      minimumDate={new Date(Date.now())} // giới hạn dưới bằng ngày bắt đầu lớp học
+                      minimumDate={new Date(startDate.toString())}
+                      maximumDate={new Date(endDate.toString())}
                       onChange={(event: any, selectedDate: any) => {
                         const currentDate = selectedDate;
                         setShowDatePicker(false);

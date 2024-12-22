@@ -13,7 +13,7 @@ import {
     ScrollView,
     RefreshControl
 } from 'react-native';
-import {reviewAbsenceRequest, getAttendanceList, getAbsenceRequests, setAttendanceStatus} from '@/services/api-calls/classes'
+import {reviewAbsenceRequest, getAttendanceList, getAbsenceRequests, setAttendanceStatus, getAttendanceDates} from '@/services/api-calls/classes'
 import { useLocalSearchParams } from 'expo-router';
 import {} from '@/services/api-calls/classes'
 import { useFocusEffect } from '@react-navigation/native';
@@ -23,11 +23,13 @@ import _ from 'lodash';
 import {Divider} from './index'
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Dropdown } from 'react-native-element-dropdown';
+import {getNotifications, getUnreadCount, markAsRead, sendNotification} from '@/services/api-calls/notification';
 
 const RequestAbsenceCard: React.FC<{
     status: any,
     name: any,
     MSSV: any,
+    account_id: any,
     title: any,
     reason: any,
     DateTime: any,
@@ -35,11 +37,12 @@ const RequestAbsenceCard: React.FC<{
     selectedItemId: any,
     onSelect: (id: any) => void,
     fileUrl: any,
-    whenReview: (id: any,studentId: any, status: any, dateTime: any) => void
+    whenReview: (id: any, studentId: any, account_id: any, status: any, dateTime: any) => void
 }> = ({
     status,
     name,
     MSSV,
+    account_id,
     title,
     reason,
     DateTime,
@@ -92,7 +95,7 @@ const RequestAbsenceCard: React.FC<{
                               },
                               {
                                 text: 'OK',
-                                onPress: () => {whenReview(id, MSSV,  'REJECTED', DateTime)}
+                                onPress: () => {whenReview(id, MSSV, account_id, 'REJECTED', DateTime)}
                               },
                             ],
                             { cancelable: false }
@@ -116,7 +119,7 @@ const RequestAbsenceCard: React.FC<{
                               },
                               {
                                 text: 'OK',
-                                onPress: () => {whenReview(id, MSSV, 'ACCEPTED', DateTime)}
+                                onPress: () => {whenReview(id, MSSV, account_id, 'ACCEPTED', DateTime)}
                               },
                             ],
                             { cancelable: false }
@@ -159,7 +162,7 @@ export default function AbsenceRequestScreen() {
     const [refreshing, setRefreshing] = React.useState(false);
 
     const page_size = '10'
-    const {classId, startDate,endDate } = useLocalSearchParams()
+    const {classId, startDate, endDate, className } = useLocalSearchParams()
     const dataDropdown = [
         { label: 'Tất cả', value: 'null' },
         { label: 'Chờ phê duyệt', value: 'PENDING' },
@@ -183,8 +186,6 @@ export default function AbsenceRequestScreen() {
                 setIsLoading(false)
             })  
     }
-
-    
 
     useEffect(() => {
         if(focused){
@@ -216,6 +217,7 @@ export default function AbsenceRequestScreen() {
     const handleSelectItem = (id: any) => {
         setSelectedItemId(prevId => (prevId === id ? null : id)); // Nếu thẻ đang mở được chọn lại thì đóng, nếu chọn thẻ khác thì mở thẻ đó
     }
+
     const handleSelectStatus = async (status: any) => {
         if(status == 'null') status = null
         setStatusSelected((preStatus) => {
@@ -244,32 +246,68 @@ export default function AbsenceRequestScreen() {
             })
     }
 
-    const handleReviewAbsenceRequest = async (id: any,studentId: any, status: any, dateTime: any) => {
+    const sendPushNotification = async (message: string, toUser: string, type: string) => {
+        await sendNotification({ message, toUser, type})
+    }
+
+    const handleReviewAbsenceRequest = async (id: any,studentId: any, account_id: any, status: any, dateTime: any) => {
         setRequesting(true)
         try{
             const res = await reviewAbsenceRequest(id.toString(), status)
-            setData((prevData) =>
-                prevData.map((item) =>
-                    item.id === id ? { ...item, status } : item // Cập nhật trạng thái nếu ID khớp
+            if(statusSelected == 'PENDING') {
+                setData((prevData) =>
+                    prevData.filter((item) => item.id !== id) // Loại bỏ phần tử có id khớp
+                );
+            } else {
+                setData((prevData) =>
+                    prevData.map((item) =>
+                        item.id === id ? { ...item, status } : item // Cập nhật trạng thái nếu ID khớp
+                    )
                 )
-            )
+            }
+            
             if(status == 'ACCEPTED'){ //gọi thêm API để ghi vào attendent record nếu có
                 try{
-                    const attendanceRecord = await getAttendanceList(classId, dateTime, null, null)
-                    const studentAbsence = attendanceRecord.attendance_student_details.find((record: any) => record.student_id == studentId && record.status == 'UNEXCUSED_ABSENCE')
-                    if(studentAbsence) await setAttendanceStatus('EXCUSED_ABSENCE', studentAbsence.attendance_id)
+                    const attendanceDates = await getAttendanceDates(classId)
+                    console.log('attendanceDates: ', attendanceDates)
+                    console.log('dateTime: ', dateTime)
+                    const hasRecord = attendanceDates.find((date: any) => date == dateTime)
+                    if(hasRecord) {
+                        const attendanceRecord = await getAttendanceList(classId, dateTime, null, null)
+                        const studentAbsence = attendanceRecord?.attendance_student_details.find((record: any) => record.student_id == studentId && record.status == 'UNEXCUSED_ABSENCE')
+                        if(studentAbsence) await setAttendanceStatus('EXCUSED_ABSENCE', studentAbsence.attendance_id)
+                    }
                 } catch(error: any) {
                     const errorCode = error.rawError?.meta?.code;
                     if(errorCode == 9994) return
                     else if(errorCode == 1004){
                         error.setTitle("Cảnh báo !");
                         error.setContent("Thời gian sinh viên xin nghỉ không thuộc thời gian mở lớp!");
+                        setUnhandledError(error)
                     } else {
                         error.setTitle("Lỗi đồng bộ !");
                         error.setContent("Đồng bộ xin nghỉ với bản ghi điểm danh thất bại!");
+                        setUnhandledError(error)
                     }
-                    setUnhandledError(error)
                 }
+            }
+
+            // send noti to student
+            console.log('sent noti to student')
+            try{
+                let message = ''
+                let type = ''
+                if(status == 'ACCEPTED') {
+                    message = `Đơn xin nghỉ học ngày ${dateTime} lớp '${className}' đã được đồng ý`
+                    type = 'ACCEPT_ABSENCE_REQUEST'
+                }
+                else {
+                    message = `Đơn xin nghỉ học ngày ${dateTime} lớp '${className}' đã bị từ chối`
+                    type = 'REJECT_ABSENCE_REQUEST'
+                }
+                await sendPushNotification(message, account_id, type)
+            }catch(error: any){
+                setUnhandledError(error)
             }
         } catch(error: any){
             setUnhandledError(error)
@@ -301,13 +339,6 @@ export default function AbsenceRequestScreen() {
             })
         }
     };
-
-
-    // const onRefresh = React.useCallback(() => {
-    //     setRefreshing(true);
-    //     getData()
-    //     setRefreshing(false);
-    // }, []);
 
     const onRefresh = async () => {
         setRefreshing(true);
@@ -344,19 +375,6 @@ export default function AbsenceRequestScreen() {
                     <ActivityIndicator size="large" color="#007BFF" />
                 </View>
             )}
-            {/* <View
-                style={{
-                    paddingVertical: 15,
-                    flexDirection: 'row',
-                    justifyContent: 'space-around'
-                }}
-            >
-                <StatusBar status={'PENDING'} statusSelected={statusSelected} onselect={handleSelectStatus}/>
-                <StatusBar status={'ACCEPTED'} statusSelected={statusSelected} onselect={handleSelectStatus}/>
-                <StatusBar status={'REJECTED'} statusSelected={statusSelected} onselect={handleSelectStatus}/>
-
-            </View> */}
-            {/* <Divider /> */}
 
             <View style={{flexDirection: 'row', justifyContent: 'space-between', padding: 15, paddingBottom: 4, alignItems: 'center'}}>
                 <View style={styles.container1}>
@@ -401,11 +419,7 @@ export default function AbsenceRequestScreen() {
                         />
                     </TouchableOpacity>
                 </View>
-
-                
             </View>
-            
-
             
             {isLoading && !requesting && (
                 <View style={{alignSelf: 'center',position: 'absolute', top: '40%'}}>
@@ -413,8 +427,6 @@ export default function AbsenceRequestScreen() {
                     <Text style={{fontSize: 18, marginBottom: '20%'}}>Đang tải</Text>
                 </View>
             )}
-
-            
 
             {!isLoading && !_.isEmpty(data) &&
                 <FlatList
@@ -425,6 +437,7 @@ export default function AbsenceRequestScreen() {
                             status={item.status}
                             name={`${item.student_account.first_name} ${item.student_account.last_name}`}
                             MSSV={`${item.student_account.student_id}`}
+                            account_id = {`${item.student_account.account_id}`}
                             title={item.title}
                             reason={item.reason}
                             DateTime={item.absence_date}
