@@ -98,6 +98,7 @@ export function ConversationDetail({
                         `/user/${profile?.id}/inbox`,
                         function (message) {
                             const msg = JSON.parse(message.body);
+                            if (msg.conversation_id != conversationId) return;
                             const name = msg.sender.name;
                             const split = name.split(' ');
                             const title =
@@ -133,7 +134,9 @@ export function ConversationDetail({
                     stompClient?.subscribe(
                         `/user/${profile?.id}/inbox/delete`,
                         function (message) {
-                            const id = JSON.parse(message.body).message_id;
+                            const msg = JSON.parse(message.body);
+                            const id = msg.message_id;
+                            if (msg.conversation_id != conversationId) return;
                             setMessages((previousMessages) =>
                                 previousMessages.map((message) => {
                                     if (message._id == id)

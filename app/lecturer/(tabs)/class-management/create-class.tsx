@@ -1,16 +1,25 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, SafeAreaView, ScrollView } from 'react-native';
+import {
+    View,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    StyleSheet,
+    Alert,
+    SafeAreaView,
+    ScrollView,
+} from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
-import { Link } from 'expo-router';
-import {createClass} from "@/services/api-calls/classes";
-import {createClassResponse} from "@/types/createClassRequest";
-import {useErrorContext} from "@/utils/ctx";
+import { Link, router } from 'expo-router';
+import { createClass } from '@/services/api-calls/classes';
+import { createClassResponse } from '@/types/createClassRequest';
+import { useErrorContext } from '@/utils/ctx';
 
 const CreateClassScreen = () => {
     const calculateEndDate = (start: any) => {
         const end = new Date(start);
-        end.setDate(end.getDate() + (17 * 7));
+        end.setDate(end.getDate() + 17 * 7);
         return end;
     };
 
@@ -22,14 +31,13 @@ const CreateClassScreen = () => {
     const [maxStudents, setMaxStudents] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [openClassType, setOpenClassType] = useState(false);
-    const {setUnhandledError} = useErrorContext()
+    const { setUnhandledError } = useErrorContext();
 
     const classTypeItems = [
         { label: 'LT', value: 'LT' },
         { label: 'BT', value: 'BT' },
-        { label: 'LT+BT', value: 'LT_BT' }
+        { label: 'LT+BT', value: 'LT_BT' },
     ];
-
 
     const showStartDatePicker = () => {
         DateTimePickerAndroid.open({
@@ -63,7 +71,7 @@ const CreateClassScreen = () => {
         return date.toLocaleDateString('vi-VN');
     };
 
-    const handleCreateClass = async() => {
+    const handleCreateClass = async () => {
         if (!className || !classId || !classType || !startDate || !endDate) {
             setErrorMessage('Vui lòng điền đầy đủ thông tin');
         } else if (startDate >= endDate) {
@@ -77,25 +85,30 @@ const CreateClassScreen = () => {
                 class_id: classId,
                 class_type: classType,
                 class_name: className,
-                start_date: startDate.toISOString().slice(0,10),
-                end_date: endDate.toISOString().slice(0,10),
-                max_student_amount: parseInt(maxStudents)
-            }).then((response: any) => {
-                if (response.meta.code === '1000') {
-                    Alert.alert('Thành công', 'Lớp học đã được tạo');
-                    setErrorMessage('');
-                }
-            }).catch((error: any) => {
-                const errorCode = error.rawError?.meta?.code;
-                if(errorCode == 1004){
-                    error.setTitle("Lỗi");
-                    error.setContent("Mã lớp đã tồn tại");
-                } else {
-                    error.setTitle("Lỗi");
-                    error.setContent("Có lỗi xảy ra, vui lòng thử lại sau");
-                }
-                setUnhandledError(error)
+                start_date: startDate.toISOString().slice(0, 10),
+                end_date: endDate.toISOString().slice(0, 10),
+                max_student_amount: parseInt(maxStudents),
             })
+                .then((response: any) => {
+                    if (response.meta.code === '1000') {
+                        Alert.alert('Thành công', 'Lớp học đã được tạo');
+                        setErrorMessage('');
+                        router.push(`/lecturer/(tabs)/class-management`);
+                    }
+                })
+                .catch((error: any) => {
+                    const errorCode = error.rawError?.meta?.code;
+                    if (errorCode == 1004) {
+                        error?.setTitle('Lỗi');
+                        error?.setContent('Mã lớp đã tồn tại');
+                    } else {
+                        error?.setTitle('Lỗi');
+                        error?.setContent(
+                            'Có lỗi xảy ra, vui lòng thử lại sau'
+                        );
+                    }
+                    setUnhandledError(error);
+                });
         }
     };
 

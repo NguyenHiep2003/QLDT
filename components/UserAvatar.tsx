@@ -7,14 +7,14 @@ export function UserAvatar({
     id,
     marginRight = 10,
     size = 40,
-    borderRadius = 100
+    borderRadius = 100,
 }: {
     link?: string;
     title: string;
     id?: string;
-    marginRight?: number,
+    marginRight?: number;
     size?: number;
-    borderRadius?: number
+    borderRadius?: number;
 }) {
     if (link)
         return (
@@ -29,7 +29,7 @@ export function UserAvatar({
                     height: size,
                     marginRight,
                     borderRadius: borderRadius,
-                    overflow:'hidden'
+                    overflow: 'hidden',
                 }}
             ></Avatar>
         );
@@ -41,14 +41,14 @@ export function UserAvatar({
                 rounded
                 containerStyle={{
                     backgroundColor: `${getColor(
-                        title ? title[0] + title[1]: '',
-                        id as string
+                        title ? title[0] + title[1] : '',
+                        (id as any)?.toString()
                     )}`,
                     width: size,
                     height: size,
                     marginRight,
                     borderRadius: borderRadius,
-                    overflow:'hidden'
+                    overflow: 'hidden',
                 }}
             ></Avatar>
         );
