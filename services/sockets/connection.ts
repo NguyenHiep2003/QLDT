@@ -10,7 +10,6 @@ export function connectSocket() {
     // stompClient.appendMissingNULLonIncoming = true;
     stompClient.connect({}, function (frame: any) {
         console.log('Connected: ' + frame);
-        
     });
     return stompClient;
 }

@@ -3,10 +3,10 @@ import { UserAvatar } from '@/components/UserAvatar';
 import { getProfile } from '@/services/api-calls/profile';
 import { TProfile } from '@/types/profile';
 import { useErrorContext } from '@/utils/ctx';
+import { getTitleFromName } from '@/utils/getAvatarTitle';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import React from 'react';
-
 
 export default function LecturerConversationDetailScreen() {
     const { setUnhandledError } = useErrorContext();
@@ -25,17 +25,14 @@ export default function LecturerConversationDetailScreen() {
                 options={
                     partnerProfile
                         ? {
-                              title: `${
-                                  partnerProfile.ho + ' ' + partnerProfile.ten
-                              }`,
+                              title: `${partnerProfile.name}`,
                               headerBackVisible: true,
                               headerLeft: () => (
                                   <UserAvatar
                                       link={partnerProfile.avatar}
-                                      title={
-                                          partnerProfile.ho[0] +
-                                          partnerProfile.ten[0]
-                                      }
+                                      title={getTitleFromName(
+                                          partnerProfile.name
+                                      )}
                                       id={partnerId as string}
                                   ></UserAvatar>
                               ),

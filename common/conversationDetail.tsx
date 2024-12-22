@@ -10,8 +10,14 @@ import { useErrorContext } from '@/utils/ctx';
 import { useSocketContext } from '@/utils/socket.ctx';
 import { useFocusEffect } from 'expo-router';
 import React, { useCallback, useRef, useState } from 'react';
+import * as ImagePicker from 'expo-image-picker';
+
 import {
+    Actions,
+    ActionsProps,
     Bubble,
+    Composer,
+    ComposerProps,
     GiftedChat,
     IMessage,
     Message,
@@ -21,7 +27,7 @@ import {
     SendProps,
 } from 'react-native-gifted-chat';
 import * as Clipboard from 'expo-clipboard';
-import { MaterialIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import {
     TouchableOpacity,
     View,
@@ -29,6 +35,7 @@ import {
     StyleSheet,
     FlatList,
 } from 'react-native';
+import { Icon } from 'react-native-elements';
 
 export function ConversationDetail({
     conversationId,
@@ -76,10 +83,7 @@ export function ConversationDetail({
                                         ></UserAvatar>
                                     ),
                                 },
-                                createdAt: new Date(
-                                    new Date(message.created_at).getTime() +
-                                        7 * 3600 * 1000
-                                ),
+                                createdAt: new Date(message.created_at),
                                 deleted: message.message ? false : true,
                                 sent: true,
                             };
@@ -89,63 +93,68 @@ export function ConversationDetail({
                 .catch((err) => setUnhandledError(err));
             getProfileLocal().then((profile) => {
                 setProfile(profile);
-                stompClient?.subscribe(
-                    `/user/${profile?.id}/inbox`,
-                    function (message) {
-                        const msg = JSON.parse(message.body);
-                        const name = msg.sender.name;
-                        const split = name.split(' ');
-                        const title = split[0][0] + split[split.length - 1][0];
-                        const convertMessage = {
-                            _id: msg.id,
-                            text: msg.content,
-                            user: {
-                                _id: msg.sender.id,
-                                name: msg.sender.name,
-                                avatar: () => (
-                                    <UserAvatar
-                                        link={msg.sender.avatar}
-                                        title={title}
-                                        id={partnerId}
-                                        marginRight={0}
-                                        size={35}
-                                    ></UserAvatar>
-                                ),
-                            },
-                            createdAt: new Date(
-                                new Date(msg.created_at).getTime() +
-                                    7 * 3600 * 1000
-                            ),
-                            sent: true,
-                        };
-                        setMessages((previousMessages) =>
-                            GiftedChat.append(previousMessages, [
-                                convertMessage,
-                            ])
-                        );
-                    },
-                    { id: `sub-in-chat-details-${partnerId}` }
-                );
-                stompClient?.subscribe(
-                    `/user/${profile?.id}/inbox/delete`,
-                    function (message) {
-                        const id = JSON.parse(message.body).message_id;
-                        setMessages((previousMessages) =>
-                            previousMessages.map((message) => {
-                                if (message._id == id) message.deleted = true;
-                                return message;
-                            })
-                        );
-                    },
-                    { id: `sub-delete-in-chat-details-${partnerId}` }
-                );
+                if (stompClient?.connected)
+                    stompClient?.subscribe(
+                        `/user/${profile?.id}/inbox`,
+                        function (message) {
+                            const msg = JSON.parse(message.body);
+                            const name = msg.sender.name;
+                            const split = name.split(' ');
+                            const title =
+                                split[0][0] + split[split.length - 1][0];
+                            const convertMessage = {
+                                _id: msg.id,
+                                text: msg.content,
+                                user: {
+                                    _id: msg.sender.id,
+                                    name: msg.sender.name,
+                                    avatar: () => (
+                                        <UserAvatar
+                                            link={msg.sender.avatar}
+                                            title={title}
+                                            id={partnerId}
+                                            marginRight={0}
+                                            size={35}
+                                        ></UserAvatar>
+                                    ),
+                                },
+                                createdAt: new Date(msg.created_at),
+                                sent: true,
+                            };
+                            setMessages((previousMessages) =>
+                                GiftedChat.append(previousMessages, [
+                                    convertMessage,
+                                ])
+                            );
+                        },
+                        { id: `sub-in-chat-details-${partnerId}` }
+                    );
+                if (stompClient?.connected)
+                    stompClient?.subscribe(
+                        `/user/${profile?.id}/inbox/delete`,
+                        function (message) {
+                            const id = JSON.parse(message.body).message_id;
+                            setMessages((previousMessages) =>
+                                previousMessages.map((message) => {
+                                    if (message._id == id)
+                                        message.deleted = true;
+                                    return message;
+                                })
+                            );
+                        },
+                        { id: `sub-delete-in-chat-details-${partnerId}` }
+                    );
             });
             return () => {
-                stompClient?.unsubscribe(
-                    `sub-delete-in-chat-details-${partnerId}`
-                );
+                if (stompClient?.connected)
+                    stompClient?.unsubscribe(
+                        `sub-delete-in-chat-details-${partnerId}`
+                    );
 
-                stompClient?.unsubscribe(`sub-in-chat-details-${partnerId}`);
+                if (stompClient?.connected)
+                    stompClient?.unsubscribe(
+                        `sub-in-chat-details-${partnerId}`
+                    );
             };
         }, [])
     );
@@ -160,7 +169,8 @@ export function ConversationDetail({
                 sender: profile?.email,
                 token,
             };
-            stompClient?.send('/chat/message', {}, JSON.stringify(message));
+            if (stompClient?.connected)
+                stompClient?.send('/chat/message', {}, JSON.stringify(message));
             chatRef.current?.scrollToOffset({
                 offset: 0,
                 animated: true,
@@ -192,12 +202,16 @@ export function ConversationDetail({
                             deleteMessage(
                                 { partnerId, conversationId },
                                 message._id
-                            ).then(() => {
-                                message.deleted = true;
-                                setMessages((prev) =>
-                                    GiftedChat.append([], prev)
-                                );
-                            }).catch((err) => {setUnhandledError(err)});
+                            )
+                                .then(() => {
+                                    message.deleted = true;
+                                    setMessages((prev) =>
+                                        GiftedChat.append([], prev)
+                                    );
+                                })
+                                .catch((err) => {
+                                    setUnhandledError(err);
+                                });
                         break;
                 }
             }
@@ -216,6 +230,41 @@ export function ConversationDetail({
             </Send>
         );
     }, []);
+    const renderActions = (props: ActionsProps) => (
+        <Actions
+            {...props}
+            containerStyle={styles.actionsContainer}
+            icon={() => (
+                <Ionicons name="image-outline" size={24} color="gray" />
+            )}
+            onPressActionButton={async () =>
+                await ImagePicker.launchImageLibraryAsync({
+                    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                    // allowsEditing: true,
+                    quality: 1,
+                })
+            } // Custom pick image action
+        />
+    );
+    // const render = useCallback((props: ComposerProps) => {
+    //     return (
+    //         <View style={{ flexDirection: 'row', paddingLeft: 5 }}>
+    //             <Ionicons
+    //                 style={{ marginTop: 5 }}
+    //                 name="image-outline"
+    //                 size={30}
+    //                 onPress={async () =>
+    //                     await ImagePicker.launchImageLibraryAsync({
+    //                         mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    //                         // allowsEditing: true,
+    //                         quality: 1,
+    //                     })
+    //                 }
+    //             ></Ionicons>
+    //             <Composer {...props} />
+    //         </View>
+    //     );
+    // }, []);
     const renderBubble = (
         props: Bubble<IMessage & { deleted: boolean }>['props']
     ) => {
@@ -277,6 +326,7 @@ export function ConversationDetail({
             renderBubble={renderBubble}
             infiniteScroll={true}
             onLongPress={onLongPress}
+            renderActions={renderActions}
             renderSend={renderSend}
             onLoadEarlier={() => {
                 getConversationDetails(
@@ -311,12 +361,7 @@ export function ConversationDetail({
                                                 ></UserAvatar>
                                             ),
                                         },
-                                        createdAt: new Date(
-                                            new Date(
-                                                message.created_at
-                                            ).getTime() +
-                                                7 * 3600 * 1000
-                                        ),
+                                        createdAt: new Date(message.created_at),
                                         deleted: message.message ? false : true,
                                         sent: true,
                                     };
@@ -360,5 +405,8 @@ const styles = StyleSheet.create({
     },
     icon: {
         marginLeft: 8,
+    },
+    actionsContainer: {
+        marginLeft: 5,
     },
 });
