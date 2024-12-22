@@ -72,6 +72,29 @@ export default function TabLayout() {
                     ),
                 }}
             />
+                <Tabs.Screen
+                name="chat"
+                options={{
+                    unmountOnBlur: true,
+                    title: 'Trò chuyện',
+                    tabBarIcon: ({ color }) => (
+                        <FontAwesome size={28} name="wechat" color={color} />
+                        // <ChatIcon color={color}></ChatIcon>
+                    ),
+                    headerShown: false
+                    // headerStyle: {
+                    //     backgroundColor: '#c21c1c',
+                    // },
+                    // headerTintColor: '#fff',
+                    // headerTitleStyle: {
+                    //     fontWeight: 'bold',
+                    // },
+                    // headerTitleAlign: 'center',
+                    // headerTitle: () => (
+                    //     <Header title="Trò chuyện"></Header>
+                    // ),
+                }}
+            />
         </Tabs>
     );
 }

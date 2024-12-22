@@ -5,6 +5,7 @@ import {
     useState,
 } from 'react';
 import { CompatClient } from '@stomp/stompjs';
+import { connectSocket } from '@/services/sockets/connection';
 
 export const SocketContext = createContext<{
     stompClient: CompatClient | undefined;
@@ -14,6 +15,10 @@ export const SocketContext = createContext<{
 // This hook can be used to access the user info.
 export function useSocketContext() {
     const value = useContext(SocketContext);
+    if (!value.stompClient) {
+        const stompClient = connectSocket();
+        value.stompClient = stompClient;
+    }
     return value;
 }
 

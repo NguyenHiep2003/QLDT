@@ -7,7 +7,8 @@ import { Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import React from 'react';
 
-export default function StudentConversationDetailScreen() {
+
+export default function LecturerConversationDetailScreen() {
     const { setUnhandledError } = useErrorContext();
     const [partnerProfile, setPartnerProfile] = useState<TProfile>();
     const { partnerId, conversationId } = useLocalSearchParams();

@@ -16,7 +16,7 @@ import {
     registerClass,
     getOpenClassList,
     getOpenClassByFilter,
-} from "../../../services/api-calls/classes";
+} from "../../services/api-calls/classes";
 import RNPickerSelect from "react-native-picker-select";
 import {
     getClassInfoRequest,
@@ -26,7 +26,7 @@ import { set } from "lodash";
 import { Icon } from "react-native-elements";
 import { AntDesign, FontAwesome } from "@expo/vector-icons";
 
-const CreateClass = () => {
+const OpenClasses = () => {
     const headers = [
         "Mã lớp",
         "Tên lớp",
@@ -631,4 +631,4 @@ const pickerSelectStylesType = StyleSheet.create({
     },
 });
 
-export default CreateClass;
+export default OpenClasses;

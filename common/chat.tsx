@@ -11,6 +11,7 @@ import { getTitleFromName } from '@/utils/getAvatarTitle';
 import { TProfile } from '@/types/profile';
 import { getProfileLocal } from '@/services/storages/profile';
 import { useSocketContext } from '@/utils/socket.ctx';
+import { ROLES } from '@/constants/Roles';
 
 const ChatListItem = ({
     conversation,
@@ -80,7 +81,7 @@ const ChatListItem = ({
     );
 };
 
-export function Chat() {
+export function Chat({ role }: { role: ROLES }) {
     const { setUnhandledError } = useErrorContext();
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const { stompClient } = useSocketContext();
@@ -134,7 +135,9 @@ export function Chat() {
         <View style={{ flex: 1 }}>
             <SearchBar
                 onFocus={() => {
-                    router.push('/student/chat/search');
+                    if (role == ROLES.STUDENT)
+                        router.push('/student/chat/search');
+                    else router.push('/lecturer/chat/search');
                 }}
             ></SearchBar>
             <FlatList
@@ -148,9 +151,14 @@ export function Chat() {
                     <ChatListItem
                         conversation={item}
                         onPress={() => {
-                            router.push(
-                                `/student/(tabs)/chat/conversation?conversationId=${item.id}&partnerId=${item.partner.id}`
-                            );
+                            if (role == ROLES.STUDENT)
+                                router.push(
+                                    `/student/(tabs)/chat/conversation?conversationId=${item.id}&partnerId=${item.partner.id}`
+                                );
+                            else
+                                router.push(
+                                    `/lecturer/(tabs)/chat/conversation?conversationId=${item.id}&partnerId=${item.partner.id}`
+                                );
                         }}
                         userId={profile?.id}
                     />

@@ -50,6 +50,23 @@ export default function LecturerLayout() {
                     headerTitle: () => <Header title="Đổi mật khẩu"></Header>,
                 }}
             ></Stack.Screen>
+            <Stack.Screen
+                name="openClasses"
+                options={{
+                    headerShown: true,
+                    headerStyle: {
+                        backgroundColor: '#c21c1c',
+                    },
+                    headerTintColor: '#fff',
+                    headerTitleStyle: {
+                        fontWeight: 'bold',
+                    },
+                    headerTitleAlign: 'center',
+                    headerTitle: () => (
+                        <Header title="Danh sách lớp mở"></Header>
+                    ),
+                }}
+            ></Stack.Screen>
         </Stack>
     );
 }
