@@ -2,7 +2,6 @@ import { UnauthorizedException } from "@/utils/exception";
 import { getTokenLocal } from "../storages/token";
 import instance from "./axios";
 import { getClassInfo } from "./classes";
-import { sendNotification } from "@/services/api-calls/notification";
 
 export type Assignment = {
   id: number;
@@ -99,12 +98,14 @@ export async function fetchSubmission(assignment_id: string) {
 
     return submission;
   } catch (error: any) {
-    const errorResponse: ErrorResponse = error.rawError;
-    const { data, meta } = errorResponse;
-    const { code, message } = meta;
+    if (error?.rawError) {
+      const errorResponse: ErrorResponse = error.rawError;
+      const { data, meta } = errorResponse;
+      const { code, message } = meta;
 
-    if (code === "9994") {
-      error.setIsVisible(false);
+      if (code === "9994") {
+        error.setIsVisible(false);
+      }
     }
     throw error;
   }
@@ -132,14 +133,15 @@ export async function submitSurvey(formData: FormData) {
 
     return response.data;
   } catch (err: any) {
-    const errorResponse: ErrorResponse = err.rawError;
-    const { data, meta } = errorResponse;
-    const { code, message } = meta;
-    if (code === "9999") {
-      err.setTitle("Đã quá hạn nộp bài");
-      err.setContent("Bạn không thể nộp bài nữa");
+    if (err?.rawError) {
+      const errorResponse: ErrorResponse = err.rawError;
+      const { data, meta } = errorResponse;
+      const { code, message } = meta;
+      if (code === "9999") {
+        err.setTitle("Đã quá hạn nộp bài");
+        err.setContent("Bạn không thể nộp bài nữa");
+      }
     }
-    console.log(errorResponse);
     throw err;
   }
 }
@@ -190,7 +192,7 @@ export async function fetchSurveys(classId: string) {
         };
       });
     }
-    
+
     return surveys;
   } catch (error: any) {
     // Xử lý lỗi
@@ -220,13 +222,15 @@ export async function fetchSurveyResponses(surveyId: string, submissionId?: stri
 
     return surveyresponses;
   } catch (err: any) {
-    const errorResponse: ErrorResponse = err.rawError;
-    const { data, meta } = errorResponse;
-    const { code, message } = meta;
+    if (err?.rawError) {
+      const errorResponse: ErrorResponse = err.rawError;
+      const { data, meta } = errorResponse;
+      const { code, message } = meta;
 
-    if (code === "9999") {
-      err.setTitle("Không tìm thấy bài tập");
-      err.setContent("Bài tập này hiện không tồn tại hoặc đã bị xóa.");
+      if (code === "9999") {
+        err.setTitle("Không tìm thấy bài tập");
+        err.setContent("Bài tập này hiện không tồn tại hoặc đã bị xóa.");
+      }
     }
     throw err;
   }
@@ -251,15 +255,16 @@ export async function createSurvey(formData: FormData) {
 
     return response.data;
   } catch (err: any) {
-    const errorResponse: ErrorResponse = err.rawError;
-    const { data, meta } = errorResponse;
-    const { code, message } = meta;
+    if (err?.rawError) {
+      const errorResponse: ErrorResponse = err.rawError;
+      const { data, meta } = errorResponse;
+      const { code, message } = meta;
 
-    if (code === "1004") {
-      err.setTitle("Deadline không hợp lệ");
-      err.setContent("Thời gian kết thúc không được trước thời gian hiện tại.");
+      if (code === "1004") {
+        err.setTitle("Deadline không hợp lệ");
+        err.setContent("Thời gian kết thúc không được trước thời gian hiện tại.");
+      }
     }
-
     throw err;
   }
 }
@@ -283,17 +288,19 @@ export async function editSurvey(formData: FormData) {
 
     return response.data;
   } catch (err: any) {
-    const errorResponse: ErrorResponse = err.rawError;
-    const { data, meta } = errorResponse;
-    const { code, message } = meta;
-    if (code === "1004") {
-      err.setTitle("Deadline không hợp lệ");
-      err.setContent("Thời gian kết thúc không được trước thời gian hiện tại.");
-    }
+    if (err?.rawError) {
+      const errorResponse: ErrorResponse = err.rawError;
+      const { data, meta } = errorResponse;
+      const { code, message } = meta;
+      if (code === "1004") {
+        err.setTitle("Deadline không hợp lệ");
+        err.setContent("Thời gian kết thúc không được trước thời gian hiện tại.");
+      }
 
-    if (code === "9999") {
-      err.setTitle("Không thể sửa bài tập");
-      err.setContent("Bài tập này hiện không tồn tại hoặc đã bị xóa.");
+      if (code === "9999") {
+        err.setTitle("Không thể sửa bài tập");
+        err.setContent("Bài tập này hiện không tồn tại hoặc đã bị xóa.");
+      }
     }
     throw err;
   }
@@ -312,17 +319,19 @@ export async function deleteSurvey(surveyId: string) {
 
     return status;
   } catch (err: any) {
-    const errorResponse: ErrorResponse = err.rawError;
-    const { data, meta } = errorResponse;
-    const { code, message } = meta;
+    if (err?.rawError) {
+      const errorResponse: ErrorResponse = err.rawError;
+      const { data, meta } = errorResponse;
+      const { code, message } = meta;
 
-    if (code === "1004") {
-      err.setTitle("Không thể xóa bài tập");
-      err.setContent("Không thể xóa bài tập khi có người Đã nộp bài.");
-    }
-    if (code === "9999") {
-      err.setTitle("Không thể xóa bài tập");
-      err.setContent("Bài tập này hiện không tồn tại hoặc đã bị xóa.");
+      if (code === "1004") {
+        err.setTitle("Không thể xóa bài tập");
+        err.setContent("Không thể xóa bài tập khi có người Đã nộp bài.");
+      }
+      if (code === "9999") {
+        err.setTitle("Không thể xóa bài tập");
+        err.setContent("Bài tập này hiện không tồn tại hoặc đã bị xóa.");
+      }
     }
     throw err;
   }
