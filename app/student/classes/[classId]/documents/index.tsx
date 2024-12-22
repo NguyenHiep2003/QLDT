@@ -25,12 +25,16 @@ import {
     AntDesign,
     MaterialIcons,
 } from "@expo/vector-icons";
+import { Dialog } from "react-native-elements";
+import { set } from "lodash";
 
 export default function ViewDocumentScreen() {
     const { classId } = useLocalSearchParams();
     const [documents, setDocuments] = useState<any[]>([]);
     const [isModalVisible, setModalVisible] = useState(false);
     const [selectedDocument, setSelectedDocument] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
     const slideAnim = useRef(new Animated.Value(0)).current;
 
     const fetchDocuments = async () => {
@@ -38,85 +42,25 @@ export default function ViewDocumentScreen() {
             const data = await getMaterialList(classId as string);
             setDocuments(data.data);
         } catch (error) {
-            console.error("Lỗi khi lấy danh sách tài liệu:", error);
+            Alert.alert("Lỗi khi lấy danh sách tài liệu");
+        } finally {
+            setIsLoading(false);
         }
     };
+
     useEffect(() => {
+        setIsLoading(true);
         fetchDocuments();
-    }, [classId, documents]);
-
-    const handleUploadDocument = async () => {
-        try {
-            const result = await DocumentPicker.getDocumentAsync({
-                type: "*/*",
-                copyToCacheDirectory: true,
-            });
-            const token = await getTokenLocal();
-            if (!result.canceled) {
-                console.log("first result", result);
-
-                const formData = new FormData();
-                formData.append("file", {
-                    uri: result.assets[0].uri,
-                    name: result.assets[0].name,
-                    type:
-                        result.assets[0].mimeType || "application/octet-stream",
-                } as any);
-
-                formData.append("token", token as string);
-                formData.append("classId", classId as string);
-                formData.append("title", result.assets[0].name.split(".")[0]);
-                formData.append(
-                    "description",
-                    result.assets[0].name.split(".")[0]
-                );
-                formData.append(
-                    "materialType",
-                    result.assets[0].name.split(".")[1]
-                );
-
-                const response = await uploadMaterial(formData);
-                console.log("first response", response);
-
-                if (!response) {
-                    throw new Error("Failed to upload document");
-                }
-                Alert.alert("Tải lên tài liệu thành công");
-                fetchDocuments();
-            }
-        } catch (error) {
-            console.error("Lỗi khi upload tài liệu:", error);
-        }
-    };
+    }, [classId]);
 
     const handleOpenDocument = (document: any) => {
         if (document?.material_link) {
             Linking.openURL(document.material_link).catch((err) =>
-                console.error("Lỗi khi mở tài liệu:", err)
+                Alert.alert("Lỗi khi mở tài liệu")
             );
         } else {
             console.log("Không có liên kết tài liệu để mở");
         }
-    };
-
-    const handleDeleteDocument = () => {
-        Alert.alert("Xóa tài liệu", "Bạn có chắc chắn muốn xóa tài liệu này?", [
-            {
-                text: "Hủy",
-                style: "cancel",
-            },
-            {
-                text: "Xóa",
-                onPress: () => {
-                    deleteMaterial(selectedDocument.id);
-                    Alert.alert("Đã xóa tài liệu");
-                    fetchDocuments();
-                    closeModal();
-                    console.log("Đã xóa tài liệu:", selectedDocument);
-                },
-                style: "destructive",
-            },
-        ]);
     };
 
     const handleShareDocument = async () => {
@@ -126,7 +70,7 @@ export default function ViewDocumentScreen() {
                 url: selectedDocument?.material_link,
             });
         } catch (error) {
-            console.error("Lỗi khi chia sẻ tài liệu:", error);
+            Alert.alert("Lỗi khi chia sẻ tài liệu:");
         }
     };
 
@@ -205,15 +149,13 @@ export default function ViewDocumentScreen() {
 
     return (
         <View style={styles.container}>
-            <TouchableOpacity
-                style={styles.uploadButton}
-                onPress={handleUploadDocument}
-            >
-                <Text style={styles.buttonText}>Upload Tài liệu</Text>
-            </TouchableOpacity>
             <Text style={styles.title}>Danh sách tài liệu</Text>
 
-            {documents.length > 0 ? (
+            {isLoading ? (
+                <Dialog isVisible={isLoading}>
+                    <Dialog.Loading />
+                </Dialog>
+            ) : documents.length > 0 ? (
                 <FlatList
                     data={documents}
                     keyExtractor={(item) => item.id.toString()}
@@ -286,9 +228,7 @@ export default function ViewDocumentScreen() {
                         >
                             <Text style={styles.modalOption}>Mở</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={handleDeleteDocument}>
-                            <Text style={styles.modalOption}>Xóa</Text>
-                        </TouchableOpacity>
+
                         <TouchableOpacity onPress={handleShareDocument}>
                             <Text style={styles.modalOption}>Chia sẻ</Text>
                         </TouchableOpacity>
