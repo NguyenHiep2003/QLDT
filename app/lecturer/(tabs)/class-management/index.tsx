@@ -39,15 +39,15 @@ const CreateClass = () => {
                 try {
                     const data = await getClassList(ROLES.LECTURER);
 
-                setClasses(data.page_content);
-                setIsLoading(false);
-            } catch (error) {
-                Alert.alert("Thông báo", "Tải dữ liệu thất bại");
-            }
-        };
-        fetchClasses();
-    }, [classCode]);
-
+                    setClasses(data.page_content);
+                    setIsLoading(false);
+                } catch (error) {
+                    Alert.alert('Thông báo', 'Tải dữ liệu thất bại');
+                }
+            };
+            fetchClasses();
+        }, [classCode])
+    );
 
     const handleFindClass = () => {
         if (classCode) {
@@ -60,8 +60,7 @@ const CreateClass = () => {
                 Keyboard.dismiss();
             } catch (error) {
                 Keyboard.dismiss();
-                Alert.alert("Thông báo", "Không tìm thấy lớp học");
-
+                Alert.alert('Thông báo', 'Không tìm thấy lớp học');
             }
         }
     };

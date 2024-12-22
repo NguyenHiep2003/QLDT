@@ -1,25 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import {View, Text, FlatList, TouchableOpacity, Modal, Alert, StyleSheet, Button} from 'react-native';
+import {
+    View,
+    Text,
+    FlatList,
+    TouchableOpacity,
+    Modal,
+    Alert,
+    StyleSheet,
+    Button,
+} from 'react-native';
 import { useUnreadCount } from '@/context/UnreadCountContext';
-import {getNotifications, getUnreadCount, markAsRead, sendNotification} from '@/services/api-calls/notification';
+import {
+    getNotifications,
+    getUnreadCount,
+    markAsRead,
+    sendNotification,
+} from '@/services/api-calls/notification';
 import { getProfile } from '@/services/api-calls/profile';
 
 interface Notification {
-    id: number,
-    message: string,
-    status: string,
-    from_user: number,
-    to_user: number,
-    type: string,
-    recipient_id: null,
-    sent_time: string
+    id: number;
+    message: string;
+    status: string;
+    from_user: number;
+    to_user: number;
+    type: string;
+    recipient_id: null;
+    sent_time: string;
 }
 
 const NotificationScreen = () => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
+    const [selectedNotification, setSelectedNotification] =
+        useState<Notification | null>(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [user, setUser] = useState<{ [key: number]: string }>({});
     const { setUnreadCount } = useUnreadCount();
@@ -27,13 +42,13 @@ const NotificationScreen = () => {
     const [unread, setUnread] = useState(0);
 
     useEffect(() => {
-        fetchNotifications()
+        fetchNotifications();
         getUnreadCount().then((response: any) => {
-            console.log("Initial unread: " + response.data)
+            console.log('Initial unread: ' + response.data);
             const initialUnread = response.data;
-            console.log("Initial unread: " + initialUnread)
-            setUnread(initialUnread)
-        })
+            console.log('Initial unread: ' + initialUnread);
+            setUnread(initialUnread);
+        });
     }, []);
 
     const fetchSenderName = async (senderId: number) => {
@@ -44,7 +59,7 @@ const NotificationScreen = () => {
         try {
             const response = await getProfile(senderId.toString());
             const fullName = response.name;
-            setUser(prevUser => ({ ...prevUser, [senderId]: fullName }));
+            setUser((prevUser) => ({ ...prevUser, [senderId]: fullName }));
             return fullName;
         } catch (err) {
             console.log(err);
@@ -57,16 +72,27 @@ const NotificationScreen = () => {
             setIsLoading(true);
             setError(null);
 
-            const response: any = await getNotifications({ index: 0, count: 50 });
+            const response: any = await getNotifications({
+                index: 0,
+                count: 50,
+            });
             const notifications = response.data;
             for (const notification of notifications) {
-                notification.from_user = await fetchSenderName(notification.from_user);
+                notification.from_user = await fetchSenderName(
+                    notification.from_user
+                );
             }
             setNotifications(notifications);
-            const unreadCount = notifications.filter((n: { status: string; }) => n.status === 'UNREAD').length;
+            const unreadCount = notifications.filter(
+                (n: { status: string }) => n.status === 'UNREAD'
+            ).length;
             setUnreadCount(unreadCount);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to fetch notifications');
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : 'Failed to fetch notifications'
+            );
             Alert.alert('Error', 'Failed to load notifications');
         } finally {
             setIsLoading(false);
@@ -79,14 +105,14 @@ const NotificationScreen = () => {
 
         if (notification.status === 'UNREAD') {
             try {
-                console.log("Unread: " + unread)
+                console.log('Unread: ' + unread);
                 const updatedUnread = unread - 1;
                 setUnread(updatedUnread);
                 setUnreadCount(updatedUnread);
-                console.log("Unread: " + unread)
+                console.log('Unread: ' + unread);
                 await markAsRead({ notification_id: notification.id });
-                setNotifications(prevNotifications =>
-                    prevNotifications.map(n =>
+                setNotifications((prevNotifications) =>
+                    prevNotifications.map((n) =>
                         n.id === notification.id ? { ...n, status: 'READ' } : n
                     )
                 );
@@ -99,15 +125,27 @@ const NotificationScreen = () => {
 
     const renderNotification = ({ item }: { item: Notification }) => (
         <TouchableOpacity onPress={() => handleNotificationClick(item)}>
-            <View style={[
-                styles.notificationItem,
-                item.status === 'READ' ? styles.readNotification : styles.unreadNotification
-            ]}>
+            <View
+                style={[
+                    styles.notificationItem,
+                    item.status === 'READ'
+                        ? styles.readNotification
+                        : styles.unreadNotification,
+                ]}
+            >
                 <View style={styles.notificationHeader}>
                     <Text style={styles.senderName}>{item.from_user}</Text>
-                    <Text style={styles.timestamp}>{formatDate(item.sent_time)}</Text>
+                    <Text style={styles.timestamp}>
+                        {formatDate(item.sent_time)}
+                    </Text>
                 </View>
-                <Text style={styles.content} numberOfLines={2} ellipsizeMode={"tail"}>{item.message}</Text>
+                <Text
+                    style={styles.content}
+                    numberOfLines={2}
+                    ellipsizeMode={'tail'}
+                >
+                    {item.message}
+                </Text>
                 {item.status === 'UNREAD' && <View style={styles.unreadDot} />}
             </View>
         </TouchableOpacity>
@@ -126,21 +164,20 @@ const NotificationScreen = () => {
 
     const sendPushNoti = async () => {
         await sendNotification({
-            message: 'Đã có điểm bài kiểm tra môn Lập trình ứng dụng cho thiết bị di động',
+            message:
+                'Đã có điểm bài kiểm tra môn Lập trình ứng dụng cho thiết bị di động',
             toUser: '109',
             type: 'ABSENCE',
-        })
-    }
+        });
+    };
 
     return (
         <View style={styles.container}>
-            <Button title="Send" onPress={() => sendPushNoti()}>
-
-            </Button>
+            {/* <Button title="Send" onPress={() => sendPushNoti()}></Button> */}
             <FlatList
                 data={notifications}
                 renderItem={renderNotification}
-                keyExtractor={item => item.id.toString()}
+                keyExtractor={(item) => item.id.toString()}
                 style={styles.list}
                 contentContainerStyle={styles.listContent}
                 onRefresh={fetchNotifications}
@@ -155,12 +192,21 @@ const NotificationScreen = () => {
             >
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Chi tiết thông báo</Text>
+                        <Text style={styles.modalTitle}>
+                            Chi tiết thông báo
+                        </Text>
                         {selectedNotification && (
                             <>
-                                <Text style={styles.modalText}>Người gửi: {selectedNotification.from_user}</Text>
-                                <Text style={styles.modalText}>Thời gian: {formatDate(selectedNotification.sent_time)}</Text>
-                                <Text style={styles.modalText}>Nội dung: {selectedNotification.message}</Text>
+                                <Text style={styles.modalText}>
+                                    Người gửi: {selectedNotification.from_user}
+                                </Text>
+                                <Text style={styles.modalText}>
+                                    Thời gian:{' '}
+                                    {formatDate(selectedNotification.sent_time)}
+                                </Text>
+                                <Text style={styles.modalText}>
+                                    Nội dung: {selectedNotification.message}
+                                </Text>
                             </>
                         )}
                         <TouchableOpacity
