@@ -25,12 +25,16 @@ import {
     AntDesign,
     MaterialIcons,
 } from "@expo/vector-icons";
+import { Dialog } from "react-native-elements";
+import { set } from "lodash";
 
 export default function ViewDocumentScreen() {
     const { classId } = useLocalSearchParams();
     const [documents, setDocuments] = useState<any[]>([]);
     const [isModalVisible, setModalVisible] = useState(false);
     const [selectedDocument, setSelectedDocument] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
     const slideAnim = useRef(new Animated.Value(0)).current;
 
     const fetchDocuments = async () => {
@@ -38,14 +42,19 @@ export default function ViewDocumentScreen() {
             const data = await getMaterialList(classId as string);
             setDocuments(data.data);
         } catch (error) {
-            console.error("Lỗi khi lấy danh sách tài liệu:", error);
+            Alert.alert("Lỗi khi lấy danh sách tài liệu");
+        } finally {
+            setIsLoading(false);
         }
     };
+
     useEffect(() => {
+        setIsLoading(true);
         fetchDocuments();
-    }, [classId, documents]);
+    }, [classId]);
 
     const handleUploadDocument = async () => {
+        setIsLoading(true);
         try {
             const result = await DocumentPicker.getDocumentAsync({
                 type: "*/*",
@@ -85,14 +94,14 @@ export default function ViewDocumentScreen() {
                 fetchDocuments();
             }
         } catch (error) {
-            console.error("Lỗi khi upload tài liệu:", error);
+            Alert.alert("Lỗi khi tải lên tài liệu");
         }
     };
 
     const handleOpenDocument = (document: any) => {
         if (document?.material_link) {
             Linking.openURL(document.material_link).catch((err) =>
-                console.error("Lỗi khi mở tài liệu:", err)
+                Alert.alert("Lỗi khi mở tài liệu")
             );
         } else {
             console.log("Không có liên kết tài liệu để mở");
@@ -108,6 +117,7 @@ export default function ViewDocumentScreen() {
             {
                 text: "Xóa",
                 onPress: () => {
+                    setIsLoading(true);
                     deleteMaterial(selectedDocument.id);
                     Alert.alert("Đã xóa tài liệu");
                     fetchDocuments();
@@ -126,7 +136,7 @@ export default function ViewDocumentScreen() {
                 url: selectedDocument?.material_link,
             });
         } catch (error) {
-            console.error("Lỗi khi chia sẻ tài liệu:", error);
+            Alert.alert("Lỗi khi chia sẻ tài liệu:");
         }
     };
 
@@ -213,7 +223,11 @@ export default function ViewDocumentScreen() {
             </TouchableOpacity>
             <Text style={styles.title}>Danh sách tài liệu</Text>
 
-            {documents.length > 0 ? (
+            {isLoading ? (
+                <Dialog isVisible={isLoading}>
+                    <Dialog.Loading />
+                </Dialog>
+            ) : documents.length > 0 ? (
                 <FlatList
                     data={documents}
                     keyExtractor={(item) => item.id.toString()}
