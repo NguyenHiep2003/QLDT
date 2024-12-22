@@ -112,7 +112,7 @@ export default function LecturerClassDetail() {
                                 onPress={() => router.push(val.link)}
                                 key={val.name}
                             >
-                                <View style={{ width: 135 }}>
+                                <View style={{ width: '100%' }}>
                                     <ServiceCard
                                         title={val.title}
                                         name={val.name}

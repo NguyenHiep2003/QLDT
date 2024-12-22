@@ -44,10 +44,7 @@ const ChatListItem = ({
                     </Text>
                     <Text style={styles.timestamp}>
                         {new Date(
-                            new Date(
-                                conversation.last_message?.created_at
-                            ).getTime() +
-                                7 * 3600 * 1000
+                            conversation.last_message?.created_at
                         ).toLocaleString('vi')}
                     </Text>
                 </View>
@@ -105,7 +102,7 @@ export function Chat({ role }: { role: ROLES }) {
         React.useCallback(() => {
             getProfileLocal().then((profile) => {
                 setProfile(profile);
-                stompClient?.subscribe(
+                if(stompClient?.connected) stompClient?.subscribe(
                     `/user/${profile?.id}/inbox`,
                     function () {
                         getConversation(0, count)
@@ -127,7 +124,7 @@ export function Chat({ role }: { role: ROLES }) {
                 })
                 .catch((err) => setUnhandledError(err));
             return () => {
-                stompClient?.unsubscribe('subscribe in chat');
+                if(stompClient?.connected) stompClient?.unsubscribe('subscribe in chat');
             };
         }, [])
     );
