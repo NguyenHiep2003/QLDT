@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {View, Text, FlatList, TouchableOpacity, Modal, Alert, StyleSheet, Button} from 'react-native';
 import { useUnreadCount } from '@/context/UnreadCountContext';
-import { getNotifications, markAsRead, sendNotification } from '@/services/api-calls/notification';
+import {getNotifications, getUnreadCount, markAsRead, sendNotification} from '@/services/api-calls/notification';
 import { getProfile } from '@/services/api-calls/profile';
 
 interface Notification {
@@ -24,8 +24,16 @@ const NotificationScreen = () => {
     const [user, setUser] = useState<{ [key: number]: string }>({});
     const { setUnreadCount } = useUnreadCount();
 
+    const [unread, setUnread] = useState(0);
+
     useEffect(() => {
         fetchNotifications()
+        getUnreadCount().then((response: any) => {
+            console.log("Initial unread: " + response.data)
+            const initialUnread = response.data;
+            console.log("Initial unread: " + initialUnread)
+            setUnread(initialUnread)
+        })
     }, []);
 
     const fetchSenderName = async (senderId: number) => {
@@ -71,8 +79,11 @@ const NotificationScreen = () => {
 
         if (notification.status === 'UNREAD') {
             try {
-                const unreadCount = notifications.filter((n: { status: string; }) => n.status === 'UNREAD').length;
-                setUnreadCount(unreadCount);
+                console.log("Unread: " + unread)
+                const updatedUnread = unread - 1;
+                setUnread(updatedUnread);
+                setUnreadCount(updatedUnread);
+                console.log("Unread: " + unread)
                 await markAsRead({ notification_id: notification.id });
                 setNotifications(prevNotifications =>
                     prevNotifications.map(n =>
