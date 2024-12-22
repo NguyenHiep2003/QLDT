@@ -27,7 +27,7 @@ export default function ClassManagementLayout() {
                     headerTitleAlign: 'center',
                     headerStyle: { backgroundColor: '#c21c1c' },
                     headerTitle: (props) => (
-                        <Text style={styles.header}>CHỈNH SỬA THÔNG TIN LỚP HỌC</Text>
+                        <Text style={styles.header}>CHỈNH SỬA LỚP HỌC</Text>
                     ),
                 }}
                 name="[classId]"
