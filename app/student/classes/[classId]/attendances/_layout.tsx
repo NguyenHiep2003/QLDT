@@ -9,6 +9,7 @@ import {
 import { useEffect, useState } from "react";
 import { getProfileLocal } from "@/services/storages/profile";
 import { ActivityIndicator, View } from "react-native";
+import { getClassInfo } from "@/services/api-calls/classes";
   
   const { Navigator } = createMaterialTopTabNavigator();
   
@@ -26,11 +27,10 @@ import { ActivityIndicator, View } from "react-native";
     const [endDate, setEndDate] = useState()
     useEffect(() => {
       const findClassInfo = async () => {
-        const profile = await getProfileLocal()
-        const thisClass = profile?.class_list.find((classItem) => classItem.class_id == classId)
-        setClassName(thisClass.class_name)
-        setStartDate(thisClass.start_date)
-        setEndDate(thisClass.end_date)
+        const classInfo: any = await getClassInfo({class_id: classId.toString()})
+        setClassName(classInfo.data.class_name)
+        setStartDate(classInfo.data.start_date)
+        setEndDate(classInfo.data.end_date)
       }
       findClassInfo()
     }, [classId])
