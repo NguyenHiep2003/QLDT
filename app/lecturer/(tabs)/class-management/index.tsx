@@ -41,7 +41,7 @@ const CreateClass = () => {
                 setClasses(data.page_content);
                 setIsLoading(false);
             } catch (error) {
-                console.error("Lấy danh sách lớp thất bại:", error);
+                Alert.alert("Thông báo", "Tải dữ liệu thất bại");
             }
         };
         fetchClasses();
@@ -58,7 +58,7 @@ const CreateClass = () => {
                 Keyboard.dismiss();
             } catch (error) {
                 Keyboard.dismiss();
-                console.error("Tìm kiếm lớp thất bại:", error);
+                Alert.alert("Thông báo", "Không tìm thấy lớp học");
             }
         }
     };
