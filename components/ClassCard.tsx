@@ -19,14 +19,23 @@ export const ClassCard = ({ data, onPress }: ClassCardProps) => {
                     activeOpacity={0.7}
                     rounded
                     containerStyle={{
-                        backgroundColor: `${getColor(avatarTitle,data.class_id)}`,
+                        backgroundColor: `${getColor(
+                            avatarTitle,
+                            data.class_id
+                        )}`,
                         width: 65,
                         height: 65,
                         marginRight: 10,
                         borderRadius: 10,
                     }}
                 ></Avatar>
-                <View style={{ marginTop: 10, marginBottom: 5 }}>
+                <View
+                    style={{
+                        marginTop: 10,
+                        marginBottom: 5,
+                        width: '80%',
+                    }}
+                >
                     <Text
                         numberOfLines={1}
                         style={styles.title}

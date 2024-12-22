@@ -60,8 +60,7 @@ const CreateClass = () => {
                 Keyboard.dismiss();
             } catch (error) {
                 Keyboard.dismiss();
-                Alert.alert("Thông báo", "Không tìm thấy lớp học");
-
+                Alert.alert('Thông báo', 'Không tìm thấy lớp học');
             }
         }
     };

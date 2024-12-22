@@ -1,24 +1,33 @@
-import React, {useEffect, useState} from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, SafeAreaView, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+    View,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    StyleSheet,
+    Alert,
+    SafeAreaView,
+    ScrollView,
+} from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
-import {editClass, getClassInfo} from "@/services/api-calls/classes";
-import {DateTimePickerAndroid} from "@react-native-community/datetimepicker";
-import {useRoute} from "@react-navigation/core";
-import {router} from "expo-router";
-import {useErrorContext} from "@/utils/ctx";
+import { editClass, getClassInfo } from '@/services/api-calls/classes';
+import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
+import { useRoute } from '@react-navigation/core';
+import { router } from 'expo-router';
+import { useErrorContext } from '@/utils/ctx';
 
 type RouteParams = {
     classId: string;
 };
 
 const EditClassScreen = () => {
-    const route = useRoute()
-    const classId = route.params as RouteParams
+    const route = useRoute();
+    const classId = route.params as RouteParams;
     const statusList = [
         { label: 'Đã hoàn thành', value: 'COMPLETED' },
         { label: 'Mở đăng kí', value: 'UPCOMING' },
         { label: 'Đang diễn ra', value: 'ACTIVE' },
-    ]
+    ];
 
     useEffect(() => {
         const getInitialInfo = async () => {
@@ -28,11 +37,11 @@ const EditClassScreen = () => {
                 });
 
                 if (response.meta.code === '1000') {
-                    setNewClassName(response.data.class_name)
-                    setNewClassId(response.data.class_id)
-                    setNewStatus(response.data.status)
-                    setStartDate(new Date(response.data.start_date))
-                    setEndDate(new Date(response.data.end_date))
+                    setNewClassName(response.data.class_name);
+                    setNewClassId(response.data.class_id);
+                    setNewStatus(response.data.status);
+                    setStartDate(new Date(response.data.start_date));
+                    setEndDate(new Date(response.data.end_date));
                     setErrorMessage('');
                 } else {
                     setErrorMessage(response.meta.message);
@@ -40,10 +49,10 @@ const EditClassScreen = () => {
             } catch (error) {
                 setErrorMessage('Có lỗi xảy ra, vui lòng thử lại sau.');
             }
-        }
+        };
 
-        getInitialInfo().then(r => console.log(r))
-    }, [])
+        getInitialInfo().then((r) => console.log(r));
+    }, []);
 
     const [newClassName, setNewClassName] = useState('');
     const [newClassId, setNewClassId] = useState('');
@@ -58,18 +67,20 @@ const EditClassScreen = () => {
             class_id: newClassId,
             class_name: newClassName,
             status: newStatus,
-            start_date: startDate.toISOString().slice(0,10),
-            end_date: endDate.toISOString().slice(0,10),
-        }).then((response: any) => {
-            if (response.meta.code === '1000') {
-                Alert.alert('Thành công', 'Lớp học đã cập nhật');
-                setErrorMessage('');
-                router.push(`/lecturer/(tabs)`)
-            } else {
-                setErrorMessage(response.meta.message);
-            }
-        }).catch((error: any) => console.log(error))
-    }
+            start_date: startDate.toISOString().slice(0, 10),
+            end_date: endDate.toISOString().slice(0, 10),
+        })
+            .then((response: any) => {
+                if (response.meta.code === '1000') {
+                    Alert.alert('Thành công', 'Lớp học đã cập nhật');
+                    setErrorMessage('');
+                    router.push(`/lecturer/(tabs)/class-management`);
+                } else {
+                    setErrorMessage(response.meta.message);
+                }
+            })
+            .catch((error: any) => console.log(error));
+    };
 
     const showStartDatePicker = () => {
         DateTimePickerAndroid.open({
@@ -83,8 +94,8 @@ const EditClassScreen = () => {
                 }
             },
             mode: 'date',
-        })
-    }
+        });
+    };
 
     const showEndDatePicker = () => {
         DateTimePickerAndroid.open({
@@ -96,8 +107,8 @@ const EditClassScreen = () => {
             },
             mode: 'date',
             minimumDate: startDate,
-        })
-    }
+        });
+    };
 
     const formatDate = (date: Date) => {
         return date.toLocaleDateString('vi-VN');
@@ -125,8 +136,9 @@ const EditClassScreen = () => {
                     onChangeText={setNewClassName}
                 />
 
-
-                <View style={{zIndex: 3000, marginBottom: openStatus ? 120 : 0}}>
+                <View
+                    style={{ zIndex: 3000, marginBottom: openStatus ? 120 : 0 }}
+                >
                     <DropDownPicker
                         open={openStatus}
                         value={newStatus}
@@ -134,11 +146,18 @@ const EditClassScreen = () => {
                         setOpen={setOpenStatus}
                         setValue={setNewStatus}
                         placeholder="Trạng thái"
-                        style={[styles.dropdown, {marginBottom: 10, zIndex: 1000}]}
+                        style={[
+                            styles.dropdown,
+                            { marginBottom: 10, zIndex: 1000 },
+                        ]}
                         textStyle={styles.dropdownText}
                         dropDownContainerStyle={[
                             styles.dropdownContainer,
-                            {elevation: 5, shadowColor: '#000', shadowOpacity: 0.2}
+                            {
+                                elevation: 5,
+                                shadowColor: '#000',
+                                shadowOpacity: 0.2,
+                            },
                         ]}
                         listMode="MODAL"
                     />
@@ -175,8 +194,8 @@ const EditClassScreen = () => {
                 </TouchableOpacity>
             </ScrollView>
         </SafeAreaView>
-    )
-}
+    );
+};
 
 const styles = StyleSheet.create({
     safeArea: {
