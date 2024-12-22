@@ -8,12 +8,13 @@ import { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
 
 export default function LecturerLayout() {
-    // const { setStompClient } = useSocketContext();
-    // useEffect(() => {
-    //     getProfileLocal().then((profile) => {
-    //         if (profile?.id) setStompClient(connectSocket(profile.id));
-    //     });
-    // }, []);
+    const { setStompClient } = useSocketContext();
+    useEffect(() => {
+        // NetInfo.addEventListener((state) => {
+        //     if (state.isConnected) setStompClient(connectSocket());
+        // });
+        setStompClient(connectSocket());
+    }, []);
     return (
         <Stack
             screenOptions={{
@@ -48,6 +49,23 @@ export default function LecturerLayout() {
                     },
                     headerTitleAlign: 'center',
                     headerTitle: () => <Header title="Đổi mật khẩu"></Header>,
+                }}
+            ></Stack.Screen>
+            <Stack.Screen
+                name="openClasses"
+                options={{
+                    headerShown: true,
+                    headerStyle: {
+                        backgroundColor: '#c21c1c',
+                    },
+                    headerTintColor: '#fff',
+                    headerTitleStyle: {
+                        fontWeight: 'bold',
+                    },
+                    headerTitleAlign: 'center',
+                    headerTitle: () => (
+                        <Header title="Danh sách lớp mở"></Header>
+                    ),
                 }}
             ></Stack.Screen>
         </Stack>

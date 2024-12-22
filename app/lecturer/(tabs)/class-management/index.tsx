@@ -11,6 +11,7 @@ import {
     TextInput,
     TouchableOpacity,
     Keyboard,
+    Alert,
 } from "react-native";
 import {
     getClassInfoRequest,
@@ -74,7 +75,7 @@ const CreateClass = () => {
         if (selectedClass) {
             router.push(`/lecturer/(tabs)/class-management/${selectedClass}`);
         } else {
-            console.error("Không có lớp nào được chọn để chỉnh sửa");
+            Alert.alert("Thông báo", "Vui lòng chọn lớp cần chỉnh sửa");
         }
     };
 
@@ -219,7 +220,10 @@ const CreateClass = () => {
             </View>
 
             {/* Footer */}
-            <Link href={"/"} style={styles.footerText}>
+            <Link
+                href={"/lecturer/openClasses" as any}
+                style={styles.footerText}
+            >
                 Thông tin danh sách các lớp mở
             </Link>
         </View>

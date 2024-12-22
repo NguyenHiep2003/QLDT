@@ -19,6 +19,8 @@ import { Toast } from "toastify-react-native";
 import ToastContainer from "toastify-react-native";
 import { getClassInfo } from "@/services/api-calls/classes";
 import { StudentInfo } from "@/components/StudentList";
+import { sendNotification } from "@/services/api-calls/notification";
+import { InternalServerError, NetworkError } from "@/utils/exception";
 
 // Component hiển thị thông tin bài nộp
 const SubmissionItem = ({
@@ -33,7 +35,7 @@ const SubmissionItem = ({
   submission: Submission;
   isExpanded: boolean;
   toggleDetail: (id: string) => void;
-  handleGrade: (id: string) => void;
+  handleGrade: (id: string, account_id: string) => void;
   gradingInput: { [key: string]: string };
   setGradingInput: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>;
   isGrading: boolean;
@@ -105,7 +107,7 @@ const SubmissionItem = ({
             <TouchableOpacity
               disabled={isGrading}
               style={[styles.gradeButton, isGrading && styles.disabledButton]}
-              onPress={() => handleGrade(submission.id)}
+              onPress={() => handleGrade(submission.id, submission.student_account.account_id)}
             >
               {isGrading ? (
                 <ActivityIndicator color="#FFFFFF" />
@@ -126,8 +128,9 @@ const SubmissionItem = ({
 };
 
 const SurveyDetailsScreen = () => {
-  const { classId, assignmentId, survey } = useLocalSearchParams() as {
+  const { classId, className, assignmentId, survey } = useLocalSearchParams() as {
     classId: string;
+    className: string;
     assignmentId: string;
     survey: string;
   };
@@ -144,6 +147,7 @@ const SurveyDetailsScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<"all" | "graded" | "ungraded" | "not_submitted">("all");
   const [notSubmittedStudents, setNotSubmittedStudents] = useState<any[]>([]);
+  const [errorState, setErrorState] = useState<string | null>(null); // Quản lý lỗi
 
   const handleEditSurvey = () => {
     router.push({
@@ -160,11 +164,18 @@ const SurveyDetailsScreen = () => {
         style: "destructive",
         onPress: async () => {
           try {
-            // Thêm API xóa bài kiểm tra
-            await deleteSurvey(assignmentId); // Giả sử `deleteSurvey` là API xóa
+            await deleteSurvey(assignmentId);
+            setErrorState(null); // Reset lỗi ngay sau khi load
             Alert.alert("Thành công", "Bài kiểm tra đã được xóa.");
-            router.back(); // Điều hướng về danh sách lớp
+            router.back();
           } catch (err: any) {
+            if (err instanceof NetworkError) {
+              setErrorState("Không có kết nối mạng ...");
+            } else if (err instanceof InternalServerError) {
+              setErrorState("Không thể kết nối đến máy chủ");
+            } else {
+              setErrorState(null); // Reset lỗi ngay sau khi load
+            }
             setUnhandledError(err);
           }
         },
@@ -176,6 +187,7 @@ const SurveyDetailsScreen = () => {
     try {
       // Gọi API getClassInfo
       const response = await getClassInfo({ class_id: parsedSurvey.class_id });
+      setErrorState(null); // Reset lỗi ngay sau khi load
       const allStudents = response.data.student_accounts; // Danh sách tất cả sinh viên trong lớp
       const submittedStudentIds = submissions.map((sub) => sub.student_account.account_id);
 
@@ -184,6 +196,13 @@ const SurveyDetailsScreen = () => {
 
       setNotSubmittedStudents(notSubmitted);
     } catch (error: any) {
+      if (error instanceof NetworkError) {
+        setErrorState("Không có kết nối mạng ...");
+      } else if (error instanceof InternalServerError) {
+        setErrorState("Không thể kết nối đến máy chủ");
+      } else {
+        setErrorState(null); // Reset lỗi ngay sau khi load
+      }
       setUnhandledError(error);
     }
   }, [parsedSurvey.class_id, submissions]);
@@ -209,8 +228,16 @@ const SurveyDetailsScreen = () => {
   const fetchSubmissions = async () => {
     try {
       const response = await fetchSurveyResponses(assignmentId);
+      setErrorState(null); // Reset lỗi ngay sau khi load
       setSubmissions(response);
     } catch (err: any) {
+      if (err instanceof NetworkError) {
+        setErrorState("Không có kết nối mạng ...");
+      } else if (err instanceof InternalServerError) {
+        setErrorState("Không thể kết nối đến máy chủ");
+      } else {
+        setErrorState(null); // Reset lỗi ngay sau khi load
+      }
       setUnhandledError(err);
     } finally {
       setLoading(false);
@@ -220,9 +247,16 @@ const SurveyDetailsScreen = () => {
     setRefreshing(true);
     try {
       const response = await fetchSurveyResponses(assignmentId);
+      setErrorState(null); // Reset lỗi ngay sau khi load
       setSubmissions(response);
     } catch (err: any) {
-      console.log(err);
+      if (err instanceof NetworkError) {
+        setErrorState("Không có kết nối mạng ...");
+      } else if (err instanceof InternalServerError) {
+        setErrorState("Không thể kết nối đến máy chủ");
+      } else {
+        setErrorState(null); // Reset lỗi ngay sau khi load
+      }
       setUnhandledError(err);
     } finally {
       setRefreshing(false);
@@ -230,7 +264,13 @@ const SurveyDetailsScreen = () => {
   };
   useEffect(() => {
     fetchSubmissions();
-  }, [assignmentId]);
+  }, []);
+
+  useEffect(() => {
+    if (filter === "ungraded") {
+      fetchSubmissions();
+    }
+  }, [filter]);
 
   useFocusEffect(
     useCallback(() => {
@@ -241,7 +281,7 @@ const SurveyDetailsScreen = () => {
     setExpandedSubmissionId((prev) => (prev === id ? null : id));
   }, []);
 
-  const handleGradeSubmission = async (id: string) => {
+  const handleGradeSubmission = async (id: string, account_id: string) => {
     if (isGrading) return;
 
     const grade = gradingInput[id];
@@ -259,6 +299,7 @@ const SurveyDetailsScreen = () => {
 
     try {
       const updatedSubmissions = await fetchSurveyResponses(assignmentId, id, grade);
+      setErrorState(null); // Reset lỗi ngay sau khi load
       Toast.success(`Đã chấm điểm: ${grade}`);
 
       const currentIndex = submissions.findIndex((sub) => sub.id === id);
@@ -272,7 +313,20 @@ const SurveyDetailsScreen = () => {
         delete updated[id];
         return updated;
       });
+
+      await sendNotification({
+        message: `Đã có điểm bài tập ${title}, lớp ${className}`,
+        toUser: account_id,
+        type: "ASSIGNMENT_GRADE",
+      });
     } catch (error: any) {
+      if (error instanceof NetworkError) {
+        setErrorState("Không có kết nối mạng ...");
+      } else if (error instanceof InternalServerError) {
+        setErrorState("Không thể kết nối đến máy chủ");
+      } else {
+        setErrorState(null); // Reset lỗi ngay sau khi load
+      }
       setUnhandledError(error);
     } finally {
       setIsGrading(false);
@@ -331,7 +385,11 @@ const SurveyDetailsScreen = () => {
         </View>
         {filter === "not_submitted" ? (
           notSubmittedStudents.length === 0 ? (
-            <Text style={styles.noFile}>Tất cả sinh viên đã nộp bài</Text>
+            errorState ? (
+              <Text style={styles.noFile}>{errorState}</Text>
+            ) : (
+              <Text style={styles.noFile}>Tất cả sinh viên đã nộp bài</Text>
+            )
           ) : (
             notSubmittedStudents.map((student) => (
               <StudentInfo key={student.account_id.toString()} info={student}></StudentInfo>
@@ -340,20 +398,27 @@ const SurveyDetailsScreen = () => {
         ) : loading ? (
           <ActivityIndicator size="large" color="#0000ff" />
         ) : filteredSubmissions.length === 0 ? (
-          <Text style={styles.noFile}>Không có bài nộp nào</Text>
+          errorState ? (
+            <Text style={styles.noFile}>{errorState}</Text>
+          ) : (
+            <Text style={styles.noFile}>Không có bài nộp nào</Text>
+          )
         ) : (
-          filteredSubmissions.map((submission) => (
-            <SubmissionItem
-              key={submission.id}
-              submission={submission}
-              isExpanded={expandedSubmissionId === submission.id}
-              toggleDetail={toggleSubmissionDetail}
-              handleGrade={handleGradeSubmission}
-              gradingInput={gradingInput}
-              setGradingInput={setGradingInput}
-              isGrading={isGrading}
-            />
-          ))
+          <>
+            {errorState && <Text style={[styles.noFile, { marginBottom: 5 }]}>{errorState}</Text>}
+            {filteredSubmissions.map((submission) => (
+              <SubmissionItem
+                key={submission.id}
+                submission={submission}
+                isExpanded={expandedSubmissionId === submission.id}
+                toggleDetail={toggleSubmissionDetail}
+                handleGrade={handleGradeSubmission}
+                gradingInput={gradingInput}
+                setGradingInput={setGradingInput}
+                isGrading={isGrading}
+              />
+            ))}
+          </>
         )}
       </ScrollView>
     </View>

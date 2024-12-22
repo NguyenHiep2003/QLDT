@@ -1,4 +1,5 @@
 import SearchBar from '@/components/SearchBar';
+import { ROLES } from '@/constants/Roles';
 import { searchByEmail } from '@/services/api-calls/search';
 import { AccountSearch, SearchByMailResponse } from '@/types/search';
 import { useErrorContext } from '@/utils/ctx';
@@ -9,14 +10,19 @@ import { FlatList, SafeAreaView, TouchableOpacity, View } from 'react-native';
 import { StyleSheet, Text } from 'react-native';
 import { Divider } from 'react-native-elements';
 
-const renderItem = ({ item }: { item: AccountSearch }) => {
+const renderItem = ({ item, role }: { item: AccountSearch; role: ROLES }) => {
     return (
         <TouchableOpacity
-            onPress={() =>
-                router.push(
-                    `/student/(tabs)/chat/conversation?partnerId=${item.account_id}`
-                )
-            }
+            onPress={() => {
+                if (role == ROLES.STUDENT)
+                    router.push(
+                        `/student/(tabs)/chat/conversation?partnerId=${item.account_id}`
+                    );
+                else
+                    router.push(
+                        `/lecturer/(tabs)/chat/conversation?partnerId=${item.account_id}`
+                    );
+            }}
         >
             <View style={{ marginTop: 10, marginLeft: 15 }}>
                 <Text style={{ fontSize: 20 }}>
@@ -31,7 +37,7 @@ const renderItem = ({ item }: { item: AccountSearch }) => {
     );
 };
 
-export function ConversationSearch() {
+export function ConversationSearch({ role }: { role: ROLES }) {
     const [data, setData] = useState<AccountSearch[]>([]);
     const [search, setSearch] = useState('');
     const { setUnhandledError } = useErrorContext();
@@ -75,7 +81,7 @@ export function ConversationSearch() {
             <FlatList
                 data={data}
                 keyExtractor={(item) => item.account_id}
-                renderItem={renderItem}
+                renderItem={({ item }) => renderItem({ item, role })}
             ></FlatList>
         </View>
     );

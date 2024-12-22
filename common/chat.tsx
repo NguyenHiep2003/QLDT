@@ -11,6 +11,7 @@ import { getTitleFromName } from '@/utils/getAvatarTitle';
 import { TProfile } from '@/types/profile';
 import { getProfileLocal } from '@/services/storages/profile';
 import { useSocketContext } from '@/utils/socket.ctx';
+import { ROLES } from '@/constants/Roles';
 
 const ChatListItem = ({
     conversation,
@@ -43,10 +44,7 @@ const ChatListItem = ({
                     </Text>
                     <Text style={styles.timestamp}>
                         {new Date(
-                            new Date(
-                                conversation.last_message?.created_at
-                            ).getTime() +
-                                7 * 3600 * 1000
+                            conversation.last_message?.created_at
                         ).toLocaleString('vi')}
                     </Text>
                 </View>
@@ -80,7 +78,7 @@ const ChatListItem = ({
     );
 };
 
-export function Chat() {
+export function Chat({ role }: { role: ROLES }) {
     const { setUnhandledError } = useErrorContext();
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const { stompClient } = useSocketContext();
@@ -104,7 +102,7 @@ export function Chat() {
         React.useCallback(() => {
             getProfileLocal().then((profile) => {
                 setProfile(profile);
-                stompClient?.subscribe(
+                if(stompClient?.connected) stompClient?.subscribe(
                     `/user/${profile?.id}/inbox`,
                     function () {
                         getConversation(0, count)
@@ -126,7 +124,7 @@ export function Chat() {
                 })
                 .catch((err) => setUnhandledError(err));
             return () => {
-                stompClient?.unsubscribe('subscribe in chat');
+                if(stompClient?.connected) stompClient?.unsubscribe('subscribe in chat');
             };
         }, [])
     );
@@ -134,7 +132,9 @@ export function Chat() {
         <View style={{ flex: 1 }}>
             <SearchBar
                 onFocus={() => {
-                    router.push('/student/chat/search');
+                    if (role == ROLES.STUDENT)
+                        router.push('/student/chat/search');
+                    else router.push('/lecturer/chat/search');
                 }}
             ></SearchBar>
             <FlatList
@@ -148,9 +148,14 @@ export function Chat() {
                     <ChatListItem
                         conversation={item}
                         onPress={() => {
-                            router.push(
-                                `/student/(tabs)/chat/conversation?conversationId=${item.id}&partnerId=${item.partner.id}`
-                            );
+                            if (role == ROLES.STUDENT)
+                                router.push(
+                                    `/student/(tabs)/chat/conversation?conversationId=${item.id}&partnerId=${item.partner.id}`
+                                );
+                            else
+                                router.push(
+                                    `/lecturer/(tabs)/chat/conversation?conversationId=${item.id}&partnerId=${item.partner.id}`
+                                );
                         }}
                         userId={profile?.id}
                     />

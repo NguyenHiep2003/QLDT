@@ -1,4 +1,4 @@
-import { ClassInfo } from './generalClassInfor';
+import { ClassInfo, PageInfo}from './generalClassInfor';
 import { TStudentAccount } from './profile';
 
 export type createClassRequest = {
@@ -34,6 +34,17 @@ export type getClassInfoRequest = {
 
 export type getClassInfoResponse = {
     data: ClassInfo,
+    meta: {
+        code: string;
+        message: string;
+    };
+};
+
+export type getClassOpenResponse = {
+    data: {
+        page_content: ClassInfo[];
+        page_info: PageInfo;
+    };
     meta: {
         code: string;
         message: string;

@@ -264,7 +264,7 @@ export function Profile({ role }: { role: string }) {
                                     await logOut();
                                     await deleteProfile();
                                     await deleteToken();
-                                    stompClient?.deactivate();
+                                    if(stompClient?.connected) stompClient?.deactivate();
                                     router.navigate('/(auth)/sign-in');
                                 } catch (error: any) {
                                     setUnhandledError(error);
