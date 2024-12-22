@@ -5,6 +5,7 @@ import {editClass, getClassInfo} from "@/services/api-calls/classes";
 import {DateTimePickerAndroid} from "@react-native-community/datetimepicker";
 import {useRoute} from "@react-navigation/core";
 import {router} from "expo-router";
+import {useErrorContext} from "@/utils/ctx";
 
 type RouteParams = {
     classId: string;
@@ -26,7 +27,7 @@ const EditClassScreen = () => {
                     class_id: classId.classId,
                 });
 
-                if (response.meta.code === 1000) {
+                if (response.meta.code === '1000') {
                     setNewClassName(response.data.class_name)
                     setNewClassId(response.data.class_id)
                     setNewStatus(response.data.status)
@@ -53,25 +54,21 @@ const EditClassScreen = () => {
     const [openStatus, setOpenStatus] = useState(false);
 
     const handleEditClass = async () => {
-        const response = await editClass({
+        await editClass({
             class_id: newClassId,
             class_name: newClassName,
             status: newStatus,
             start_date: startDate.toISOString().slice(0,10),
             end_date: endDate.toISOString().slice(0,10),
-        })
-        try {
-            if (response.meta.code === 1000) {
+        }).then((response: any) => {
+            if (response.meta.code === '1000') {
                 Alert.alert('Thành công', 'Lớp học đã cập nhật');
                 setErrorMessage('');
                 router.push(`/lecturer/(tabs)`)
             } else {
                 setErrorMessage(response.meta.message);
             }
-        } catch (error) {
-            setErrorMessage(response.meta.message);
-            // setErrorMessage('Có lỗi xảy ra, vui lòng thử lại sau.');
-        }
+        }).catch((error: any) => console.log(error))
     }
 
     const showStartDatePicker = () => {
