@@ -17,7 +17,7 @@ export async function getClassList(role: ROLES) {
     const token = await getTokenLocal()
     console.log('token: ', token)
     if (!profile) throw new UnauthorizedException();
-    
+
     const response = await instance.post('/it5023e/get_class_list', {
         role,
         account_id: profile.id,
@@ -146,8 +146,18 @@ export async function createClass(request: createClassRequest) {
         });
 
         return response;
-    } catch (error) {
-        throw new Error('Error creating class');
+    } catch (error: any) {
+        if (error.rawError){
+            const errorCode = error.rawError?.meta?.code;
+            if(errorCode == "1004"){
+                error.setTitle("Lỗi");
+                error.setContent("Mã lớp đã tồn tại");
+            }
+        } else if(error.request){
+            error.setTitle("Lỗi");
+            error.setContent("Máy chủ không phản hồi!");
+        }
+        throw error
     }
 }
 
@@ -200,8 +210,18 @@ export async function editClass(request: editClassRequest) {
         })
 
         return response;
-    } catch (error) {
-        throw new Error('Error update class')
+    } catch (error: any) {
+        if (error.rawError){
+            const errorCode = error.rawError?.meta?.code;
+            if(errorCode == "1004"){
+                error.setTitle("Lỗi");
+                error.setContent("Mã lớp đã tồn tại");
+            }
+        } else if(error.request){
+            error.setTitle("Lỗi");
+            error.setContent("Máy chủ không phản hồi!");
+        }
+        throw error
     }
 }
 
@@ -342,7 +362,7 @@ export async function getStudentAbsenceRequests(class_id: any = null, page: any 
         }
         throw error
     }
-    
+
 }
 
 export async function reviewAbsenceRequest(requestId: any,status: any) {//SGHB - checked
@@ -394,17 +414,17 @@ export async function getOpenClassByFilter(request: any):  Promise<getClassOpenR
     console.log("request", request)
 
     try {
-        
+
         const response: getClassOpenResponse = await instance.post('/it5023e/get_classes_by_filter', {
         class_id: request.class_id,
         status: request.status,
         class_name: request.class_name,
-        class_type: request.class_type, 
+        class_type: request.class_type,
         pageable_request : request.pageable_request
         })
-        
+
         return response;
-    } catch (error) {    
+    } catch (error) {
         throw error
     }
 
