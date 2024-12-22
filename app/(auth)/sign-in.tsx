@@ -36,7 +36,7 @@ const SignInScreen: React.FC = () => {
 
     //Kiểm tra định dạng Email
     const isValidEmail = (email: string): boolean => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
         const validDomainRegex = /@(hust\.edu\.vn|soict\.hust\.edu\.vn)$/;
         return emailRegex.test(email) && validDomainRegex.test(email);
     };
