@@ -15,17 +15,15 @@ export type createClassResponse = {
         id: number;
         class_id: string;
         class_name: string;
-        schedule: null;
-        lecturer_id: number;
-        max_student_amount: number;
-        attached_code: null;
+        lecturer_id: string;
+        max_student_amount: string;
         class_type: string;
         start_date: string;
         end_date: string;
         status: string;
     };
     meta: {
-        code: number;
+        code: string;
         message: string;
     };
 };
@@ -37,7 +35,7 @@ export type getClassInfoRequest = {
 export type getClassInfoResponse = {
     data: ClassInfo,
     meta: {
-        code: number;
+        code: string;
         message: string;
     };
 };
