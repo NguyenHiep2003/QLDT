@@ -51,7 +51,7 @@ const CreateClass = () => {
                 Keyboard.dismiss();
             } catch (error) {
                 Keyboard.dismiss();
-                console.error("Lấy thông tin lớp thất bại:", error);
+                Alert.alert("Lấy thông tin lớp thất bại");
             }
         }
     };
@@ -83,9 +83,8 @@ const CreateClass = () => {
             Alert.alert("Gửi đăng ký thành công");
 
             updateClassStatusRegister(data);
-            console.log("Gửi đăng ký thành công:", registeredClasses);
         } catch (error) {
-            console.error("Gửi đăng ký thất bại:", error);
+            Alert.alert("Gửi đăng ký thất bại");
         }
     };
 
@@ -112,7 +111,7 @@ const CreateClass = () => {
             );
             if (found) {
                 console.log("found:", found);
-                return { ...cls, statusRegister: found.status }; // Update statusRegister
+                return { ...cls, statusRegister: found.status };
             }
             return cls;
         });
@@ -158,7 +157,7 @@ const CreateClass = () => {
                         ))}
                         <View style={styles.CheckboxHeaderCell}>
                             <Checkbox
-                                color={"#fcf"}
+                                color={isAllSelected ? "green" : "white"}
                                 value={isAllSelected}
                                 onValueChange={handleSelectAll}
                                 style={styles.checkbox}
@@ -247,7 +246,10 @@ const CreateClass = () => {
             </View>
 
             {/* Footer */}
-            <Link href={"/student/openClasses" as any} style={styles.footerText}>
+            <Link
+                href={"/student/openClasses" as any}
+                style={styles.footerText}
+            >
                 Thông tin danh sách các lớp mở
             </Link>
         </View>
