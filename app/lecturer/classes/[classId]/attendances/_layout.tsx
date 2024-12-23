@@ -51,7 +51,7 @@ import { useErrorContext } from "@/utils/ctx";
     }
     return (
       <MaterialTopTabs>
-        <MaterialTopTabs.Screen name="index" options={{ title: "Điểm danh" }} initialParams={{ classId }} />
+        <MaterialTopTabs.Screen name="index" options={{ title: "Điểm danh" }} initialParams={{ classId, className }} />
         <MaterialTopTabs.Screen name="history" options={{ title: "Lịch sử" }} initialParams={{ classId }} />
         <MaterialTopTabs.Screen name="absence-request" options={{ title: "Đơn xin nghỉ" }} initialParams={{ classId, startDate, endDate, className }} />
       </MaterialTopTabs>
