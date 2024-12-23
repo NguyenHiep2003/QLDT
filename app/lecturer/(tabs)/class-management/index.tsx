@@ -17,6 +17,9 @@ import {
     getClassInfoRequest,
     getClassInfoResponse,
 } from '@/types/createClassRequest';
+import { ClassInfo } from '@/types/generalClassInfor';
+import { NetworkError } from '@/utils/exception';
+import OfflineStatusBar from '@/components/OfflineBar';
 
 const CreateClass = () => {
     const headers = [
@@ -39,15 +42,18 @@ const CreateClass = () => {
                 try {
                     const data = await getClassList(ROLES.LECTURER);
 
-                setClasses(data.page_content);
-                setIsLoading(false);
-            } catch (error) {
-                Alert.alert("Thông báo", "Tải dữ liệu thất bại");
-            }
-        };
-        fetchClasses();
-    }, [classCode]));
-
+                    setClasses(data?.page_content as ClassInfo[]);
+                } catch (error) {
+                    if (error instanceof NetworkError)
+                        return setClasses(error.cache);
+                    Alert.alert('Thông báo', 'Tải dữ liệu thất bại');
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+            fetchClasses();
+        }, [classCode])
+    );
 
     const handleFindClass = () => {
         if (classCode) {
@@ -91,6 +97,9 @@ const CreateClass = () => {
 
     return (
         <View style={styles.container}>
+            <View style={{ margin: -16 }}>
+                <OfflineStatusBar></OfflineStatusBar>
+            </View>
             <View style={styles.inputContainer}>
                 <TextInput
                     style={styles.input}
@@ -243,7 +252,7 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-        marginTop: 40,
+        marginTop: 60,
         marginBottom: 20,
     },
 
