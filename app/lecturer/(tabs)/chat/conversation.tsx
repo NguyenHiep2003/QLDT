@@ -1,4 +1,5 @@
 import { ConversationDetail } from '@/common/conversationDetail';
+import OfflineStatusBar from '@/components/OfflineBar';
 import { UserAvatar } from '@/components/UserAvatar';
 import { getProfile } from '@/services/api-calls/profile';
 import { TProfile } from '@/types/profile';
@@ -40,6 +41,7 @@ export default function LecturerConversationDetailScreen() {
                         : undefined
                 }
             ></Stack.Screen>
+            <OfflineStatusBar></OfflineStatusBar>
             <ConversationDetail
                 partnerId={partnerId as string}
                 conversationId={conversationId as string}
