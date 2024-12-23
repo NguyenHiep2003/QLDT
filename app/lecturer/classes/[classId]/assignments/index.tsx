@@ -21,7 +21,7 @@ const SurveysScreen = () => {
     } catch (err: any) {
       if (err instanceof NetworkError) {
         setErrorState("Không có kết nối mạng ...");
-      } else if (err instanceof InternalServerError) {
+      } else if (!err?.rawError && err instanceof InternalServerError) {
         setErrorState("Không thể kết nối đến máy chủ");
       }
       setUnhandledError(err); // Lỗi khác không xác định
@@ -39,7 +39,7 @@ const SurveysScreen = () => {
     } catch (err: any) {
       if (err instanceof NetworkError) {
         setErrorState("Không có kết nối mạng ...");
-      } else if (err instanceof InternalServerError) {
+      } else if (!err?.rawError && err instanceof InternalServerError) {
         setErrorState("Không thể kết nối đến máy chủ");
       } else {
         setErrorState(null); // Reset lỗi ngay sau khi load
