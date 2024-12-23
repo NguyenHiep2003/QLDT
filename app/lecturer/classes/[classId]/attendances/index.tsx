@@ -20,6 +20,8 @@ import _ from 'lodash'
 import { useErrorContext } from '@/utils/ctx';
 import { useFocusEffect } from '@react-navigation/native';
 import { sendNotification } from '@/services/api-calls/notification';
+import { NetworkError } from '@/utils/exception';
+import OfflineStatusBar from '@/components/OfflineBar';
 
 const Note: React.FC<{ presentCount: any, ECAbsentCount: any, UECAbsentCount: any }> = ({ presentCount, ECAbsentCount, UECAbsentCount }) => (
   <View style={styles.note}>
@@ -112,7 +114,7 @@ export default function TakeAttendanceScreen() {
   const [statusShow, setStatusShow] = useState({
     showRecord: false,
     showErr: false,
-    isLoading: false
+    isLoading: true
   })
   const [presentCount, setPresentCount] = useState(0);
   const [ECAbsentCount, setECAbsentCount] = useState(0);
@@ -154,7 +156,7 @@ export default function TakeAttendanceScreen() {
     getClassInfo({ class_id: classId as string })
       .then((classInfo) => {
         if (_.isEmpty(classInfo.data.student_accounts)) {
-          setStatusShow({ showRecord: false, showErr: false, isLoading: false })
+          setStatusShow((prev) => ({ ...prev, showRecord: false, showErr: false }))
           return
         } else {
           getAttendanceDates(classId)
@@ -174,10 +176,12 @@ export default function TakeAttendanceScreen() {
                     setData(studentList)
                     setOriginalData(_.cloneDeep(studentList)); // Lưu dữ liệu ban đầu
                     setAttStatus('1')
-                    setStatusShow({ showRecord: true, showErr: false, isLoading: false })
+                    setStatusShow((prev) => ({ ...prev, showRecord: true, showErr: false }))
                   })
                   .catch((error: any) => {
-                    setStatusShow({ showRecord: false, showErr: false, isLoading: false })
+                    setStatusShow((prev) => ({ ...prev, showRecord: false, showErr: false }))
+                    if(error instanceof NetworkError) 
+                      setStatusShow((prev) => ({ ...prev, showRecord: false, showErr: true }))
                     setUnhandledError(error)
                   })
               } else {// hôm nay chưa điểm danh
@@ -191,19 +195,29 @@ export default function TakeAttendanceScreen() {
                 setData(studentList)
                 setOriginalData(_.cloneDeep(studentList)); // Lưu dữ liệu ban đầu
                 setAttStatus('0')
-                setStatusShow({ showRecord: true, showErr: false, isLoading: false })
+                setStatusShow((prev) => ({ ...prev, showRecord: true, showErr: false }))
               }
             })
             .catch((error: any) => {
-              setStatusShow({ showRecord: false, showErr: false, isLoading: false })
+              setStatusShow((prev) => ({ ...prev, showRecord: false, showErr: false }))
+              if(error instanceof NetworkError)
+                setStatusShow((prev) => ({ ...prev, showRecord: false, showErr: true }))
               setUnhandledError(error)
             })
         }
       })
       .catch((error: any) => {
-        setStatusShow({ showRecord: false, showErr: false, isLoading: false })
+        setStatusShow((prev) => ({ ...prev, showRecord: false, showErr: false }))
+        if(error instanceof NetworkError) 
+          setStatusShow((prev) => ({ ...prev, showRecord: false, showErr: true }))
         setUnhandledError(error)
       })
+      .finally(() =>  {
+        setStatusShow((prev) => ({
+          ...prev,
+          isLoading: false
+        }))
+      }) 
   }
 
   useEffect(() => {
@@ -363,6 +377,7 @@ export default function TakeAttendanceScreen() {
   }
 
   const onRefresh = async () => {
+    setStatusShow((prev) => ({ ...prev, showErr: false }))
     setRefreshing(true);
     await getStudentList()
     setRefreshing(false)
@@ -370,6 +385,7 @@ export default function TakeAttendanceScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <OfflineStatusBar></OfflineStatusBar>
       {requesting && (
         <View style={styles.overlay}>
           <ActivityIndicator size="large" color="#007BFF" />
@@ -463,12 +479,14 @@ export default function TakeAttendanceScreen() {
           <Text style={{fontSize: 18, marginBottom: '20%'}}>{err}</Text>
         </View>
       )} */}
-      {!requesting && !statusShow.isLoading && _.isEmpty(data) && (
+      {statusShow.showRecord && !requesting && !statusShow.isLoading && _.isEmpty(data) && (
         <ScrollView
           contentContainerStyle={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        >
-          <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: '20%' }}>Lớp học chưa có sinh viên nào!</Text>
+        > 
+          {!statusShow.showErr &&
+            <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: '20%' }}>Lớp học chưa có sinh viên nào!</Text>
+          }
         </ScrollView>
       )}
     </SafeAreaView>

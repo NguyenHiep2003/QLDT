@@ -23,6 +23,8 @@ import {
 import { useErrorContext } from '@/utils/ctx';
 import _ from 'lodash';
 import { useFocusEffect } from '@react-navigation/native';
+import { NetworkError } from '@/utils/exception';
+import OfflineStatusBar from '@/components/OfflineBar';
 
 const Item: React.FC<{ name: any; MSSV: any; status: any; index: any }> = ({
     name,
@@ -79,6 +81,7 @@ export default function ViewAttendanceHistoryScreen() {
     const [show, setShow] = useState(false);
     const [dateLookUp, setDateLookUp] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [statusError, setStatusError] = useState(false)
     const [data, setData] = useState<any[]>([]);
     const [historyAttendance, setHistoryAttendance] = useState<any[]>([])
     const [selectedItem, setSelectedItem] = useState<string | null>(null);
@@ -92,11 +95,14 @@ export default function ViewAttendanceHistoryScreen() {
             const res = await getAttendanceDates(classId)
             setHistoryAttendance(res)
         } catch (error: any) {
+            if(error instanceof NetworkError) 
+                setStatusError(true)
             setUnhandledError(error)
         } finally { setIsLoading(false) }
     }
 
     const onRefresh = async () => {
+        setStatusError(false)
         setRefreshing(true);
         await attendanceDates()
         setRefreshing(false);
@@ -104,6 +110,7 @@ export default function ViewAttendanceHistoryScreen() {
 
     useEffect(() => {
         if (focused) {
+            setStatusError(false)
             setIsLoading(true)
             setFocused(false)
             attendanceDates()
@@ -193,6 +200,7 @@ export default function ViewAttendanceHistoryScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
+            <OfflineStatusBar></OfflineStatusBar>
             {isLoading &&
                 <View style={styles.overlay}></View>
             }
@@ -259,7 +267,9 @@ export default function ViewAttendanceHistoryScreen() {
                         contentContainerStyle={{ flex: 1 }}
                         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                     >
-                        <Text style={{ fontSize: 16, color: 'blue', alignSelf: 'center', marginTop: 20 }}>Lớp học chưa điểm danh buổi nào</Text>
+                        {!statusError &&
+                            <Text style={{ fontSize: 16, color: 'blue', alignSelf: 'center', marginTop: 20 }}>Lớp học chưa điểm danh buổi nào</Text>
+                        }
                     </ScrollView>
                 }
                 {!_.isEmpty(historyAttendance) &&
