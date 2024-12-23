@@ -63,17 +63,6 @@ export default function ViewDocumentScreen() {
         }
     };
 
-    const handleShareDocument = async () => {
-        try {
-            await Share.share({
-                message: `Tài liệu: ${selectedDocument?.name}`,
-                url: selectedDocument?.material_link,
-            });
-        } catch (error) {
-            Alert.alert("Lỗi khi chia sẻ tài liệu:");
-        }
-    };
-
     const handleCopyLink = () => {
         Clipboard.setString(selectedDocument?.material_link);
         Alert.alert("Đã sao chép liên kết vào clipboard");
@@ -229,9 +218,6 @@ export default function ViewDocumentScreen() {
                             <Text style={styles.modalOption}>Mở</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity onPress={handleShareDocument}>
-                            <Text style={styles.modalOption}>Chia sẻ</Text>
-                        </TouchableOpacity>
                         <TouchableOpacity onPress={handleCopyLink}>
                             <Text style={styles.modalOption}>
                                 Sao chép liên kết
