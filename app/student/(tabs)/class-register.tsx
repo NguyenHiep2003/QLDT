@@ -41,6 +41,15 @@ const CreateClass = () => {
 
     const handleRegister = async () => {
         if (classCode) {
+            const classExists = registeredClasses.some(
+                (cls) => cls.class_id === classCode
+            );
+
+            if (classExists) {
+                Alert.alert("Lớp đã tồn tại trong danh sách đăng ký");
+                return;
+            }
+
             try {
                 const data: getClassInfoResponse = await getBasicClassInfo({
                     class_id: classCode,
@@ -51,7 +60,7 @@ const CreateClass = () => {
                 Keyboard.dismiss();
             } catch (error) {
                 Keyboard.dismiss();
-                Alert.alert("Lấy thông tin lớp thất bại");
+                Alert.alert("Lớp không tồn tại");
             }
         }
     };
