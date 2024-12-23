@@ -44,7 +44,7 @@ const SubmissionItem = ({
     <View key={submission.id}>
       {!isExpanded ? (
         <TouchableOpacity
-          style={[styles.submissionBox, submission.grade ? styles.gradedSubmissionBox : undefined]}
+          style={[styles.submissionBox, submission.grade !== null && submission.grade !== undefined ? styles.gradedSubmissionBox : undefined]}
           onPress={() => toggleDetail(submission.id)}
         >
           <View style={styles.submissionHeader}>
@@ -148,6 +148,7 @@ const SurveyDetailsScreen = () => {
   const [filter, setFilter] = useState<"all" | "graded" | "ungraded" | "not_submitted">("all");
   const [notSubmittedStudents, setNotSubmittedStudents] = useState<any[]>([]);
   const [errorState, setErrorState] = useState<string | null>(null); // Quản lý lỗi
+  const [isDeleting, SetIsDeleting] = useState<boolean>(false);
 
   const handleEditSurvey = () => {
     router.push({
@@ -164,6 +165,8 @@ const SurveyDetailsScreen = () => {
         style: "destructive",
         onPress: async () => {
           try {
+            if (isDeleting) return;
+            SetIsDeleting(true);
             await deleteSurvey(assignmentId);
             setErrorState(null); // Reset lỗi ngay sau khi load
             Alert.alert("Thành công", "Bài kiểm tra đã được xóa.");
@@ -171,12 +174,14 @@ const SurveyDetailsScreen = () => {
           } catch (err: any) {
             if (err instanceof NetworkError) {
               setErrorState("Không có kết nối mạng ...");
-            } else if (err instanceof InternalServerError) {
+            } else if (!err?.rawError && err instanceof InternalServerError) {
               setErrorState("Không thể kết nối đến máy chủ");
             } else {
               setErrorState(null); // Reset lỗi ngay sau khi load
             }
             setUnhandledError(err);
+          } finally {
+            SetIsDeleting(false);
           }
         },
       },
@@ -198,7 +203,7 @@ const SurveyDetailsScreen = () => {
     } catch (error: any) {
       if (error instanceof NetworkError) {
         setErrorState("Không có kết nối mạng ...");
-      } else if (error instanceof InternalServerError) {
+      } else if (!error?.rawError && error instanceof InternalServerError) {
         setErrorState("Không thể kết nối đến máy chủ");
       } else {
         setErrorState(null); // Reset lỗi ngay sau khi load
@@ -233,7 +238,7 @@ const SurveyDetailsScreen = () => {
     } catch (err: any) {
       if (err instanceof NetworkError) {
         setErrorState("Không có kết nối mạng ...");
-      } else if (err instanceof InternalServerError) {
+      } else if (!err?.rawError && err instanceof InternalServerError) {
         setErrorState("Không thể kết nối đến máy chủ");
       } else {
         setErrorState(null); // Reset lỗi ngay sau khi load
@@ -252,7 +257,7 @@ const SurveyDetailsScreen = () => {
     } catch (err: any) {
       if (err instanceof NetworkError) {
         setErrorState("Không có kết nối mạng ...");
-      } else if (err instanceof InternalServerError) {
+      } else if (!err?.rawError && err instanceof InternalServerError) {
         setErrorState("Không thể kết nối đến máy chủ");
       } else {
         setErrorState(null); // Reset lỗi ngay sau khi load
@@ -267,7 +272,7 @@ const SurveyDetailsScreen = () => {
   }, []);
 
   useEffect(() => {
-    if (filter === "ungraded") {
+    if (filter === "ungraded" || filter === "not_submitted") {
       fetchSubmissions();
     }
   }, [filter]);
@@ -290,7 +295,7 @@ const SurveyDetailsScreen = () => {
       return;
     }
 
-    if (!/^[0-9]+(\.[0-9]+)?$/.test(grade)) {
+    if (!/^-?[0-9]+(\.[0-9]+)?$/.test(grade)) {
       Alert.alert("Lỗi", "Vui lòng nhập điểm hợp lệ.");
       return;
     }
@@ -322,7 +327,7 @@ const SurveyDetailsScreen = () => {
     } catch (error: any) {
       if (error instanceof NetworkError) {
         setErrorState("Không có kết nối mạng ...");
-      } else if (error instanceof InternalServerError) {
+      } else if (!error?.rawError && error instanceof InternalServerError) {
         setErrorState("Không thể kết nối đến máy chủ");
       } else {
         setErrorState(null); // Reset lỗi ngay sau khi load
@@ -374,8 +379,16 @@ const SurveyDetailsScreen = () => {
           <TouchableOpacity style={styles.editButton} onPress={handleEditSurvey}>
             <Text style={styles.editButtonText}>Sửa bài tập</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteSurvey}>
-            <Text style={styles.deleteButtonText}>Xóa bài tập</Text>
+          <TouchableOpacity
+            style={[styles.deleteButton, isDeleting && styles.disabledButton]}
+            disabled={isDeleting}
+            onPress={handleDeleteSurvey}
+          >
+            {isDeleting ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.deleteButtonText}>Xóa bài tập</Text>
+            )}
           </TouchableOpacity>
         </View>
         <Text style={styles.sectionTitle}>Danh sách bài nộp:</Text>
