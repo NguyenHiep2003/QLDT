@@ -265,10 +265,10 @@ export function Profile({ role }: { role: string }) {
                             title="Đồng ý"
                             onPress={async () => {
                                 try {
-                                    await logOut();
-                                    await deleteProfile();
-                                    await deleteToken();
-                                    await AsyncStorage.clear();
+                                    logOut();
+                                    deleteProfile();
+                                    deleteToken();
+                                    AsyncStorage.clear();
                                     if (stompClient?.connected)
                                         stompClient?.deactivate();
                                     router.navigate('/(auth)/sign-in');

@@ -2,7 +2,7 @@ import Header from '@/components/Header';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Tabs } from 'expo-router';
 import { StyleSheet } from 'react-native';
-import NotificationBell from "@/components/navigation/NotificationBell";
+import NotificationBell from '@/components/navigation/NotificationBell';
 
 export default function TabLayout() {
     return (
@@ -27,9 +27,7 @@ export default function TabLayout() {
                     },
                     headerTitleAlign: 'center',
                     headerTitle: () => <Header></Header>,
-                    headerRight: () => (
-                        NotificationBell()
-                    )
+                    headerRight: () => NotificationBell(),
                 }}
             />
             <Tabs.Screen
@@ -47,7 +45,7 @@ export default function TabLayout() {
                         fontWeight: 'bold',
                     },
                     headerTitleAlign: 'center',
-                    headerShown: false
+                    headerShown: false,
                 }}
             />
             <Tabs.Screen
@@ -83,12 +81,8 @@ export default function TabLayout() {
                         fontWeight: 'bold',
                     },
                     headerTitleAlign: 'center',
-                    headerTitle: () => (
-                        <Header title="Thông tin tài khoản"></Header>
-                    ),
-                    headerRight: () => (
-                        NotificationBell()
-                    )
+                    headerTitle: () => <Header title="Tài khoản"></Header>,
+                    headerRight: () => NotificationBell(),
                 }}
             />
             <Tabs.Screen
@@ -100,7 +94,7 @@ export default function TabLayout() {
                         <FontAwesome size={28} name="wechat" color={color} />
                         // <ChatIcon color={color}></ChatIcon>
                     ),
-                    headerShown: false
+                    headerShown: false,
                     // headerStyle: {
                     //     backgroundColor: '#c21c1c',
                     // },

@@ -17,6 +17,13 @@ import {
     sendNotification,
 } from '@/services/api-calls/notification';
 import { getProfile } from '@/services/api-calls/profile';
+import {
+    cacheNotification,
+    getNotificationCache,
+} from '@/services/storages/notifications';
+import { NetworkError } from '@/utils/exception';
+import OfflineStatusBar from '@/components/OfflineBar';
+import { useErrorContext } from '@/utils/ctx';
 
 interface Notification {
     id: number;
@@ -38,17 +45,21 @@ const NotificationScreen = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [user, setUser] = useState<{ [key: number]: string }>({});
     const { setUnreadCount } = useUnreadCount();
-
+    const { setUnhandledError } = useErrorContext();
     const [unread, setUnread] = useState(0);
 
     useEffect(() => {
         fetchNotifications();
-        getUnreadCount().then((response: any) => {
-            console.log('Initial unread: ' + response.data);
-            const initialUnread = response.data;
-            console.log('Initial unread: ' + initialUnread);
-            setUnread(initialUnread);
-        });
+        getUnreadCount()
+            .then((response: any) => {
+                console.log('Initial unread: ' + response.data);
+                const initialUnread = response.data;
+                console.log('Initial unread: ' + initialUnread);
+                setUnread(initialUnread);
+            })
+            .catch((err) => {
+                setUnhandledError(err);
+            });
     }, []);
 
     const fetchSenderName = async (senderId: number) => {
@@ -82,12 +93,15 @@ const NotificationScreen = () => {
                     notification.from_user
                 );
             }
+            cacheNotification(notifications);
             setNotifications(notifications);
             const unreadCount = notifications.filter(
                 (n: { status: string }) => n.status === 'UNREAD'
             ).length;
             setUnreadCount(unreadCount);
         } catch (err) {
+            if (err instanceof NetworkError)
+                return setNotifications(await getNotificationCache());
             setError(
                 err instanceof Error
                     ? err.message
@@ -118,6 +132,7 @@ const NotificationScreen = () => {
                 );
             } catch (err) {
                 console.log(err);
+                if (err instanceof NetworkError) return;
                 Alert.alert('Error', 'Failed to mark notification as read');
             }
         }
@@ -174,6 +189,7 @@ const NotificationScreen = () => {
     return (
         <View style={styles.container}>
             {/* <Button title="Send" onPress={() => sendPushNoti()}></Button> */}
+            <OfflineStatusBar></OfflineStatusBar>
             <FlatList
                 data={notifications}
                 renderItem={renderNotification}

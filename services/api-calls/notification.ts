@@ -27,7 +27,8 @@ export async function getNotifications(request: getNotificationRequest) {
 
         return response;
     } catch (error) {
-        console.log("🚀 ~ getNotifications ~ error:", error)
+        console.log("🚀 ~ getNotifications ~ error:", error);
+        throw error
     }
 }
 
@@ -57,7 +58,8 @@ export async function sendNotification(request: sendNotificationRequest) {
 
         return response;
     } catch (error) {
-        console.log("🚀 ~ sendNotification ~ error:", error)
+        console.log("🚀 ~ sendNotification ~ error:", error);
+        throw error;
     }
 }
 
@@ -72,7 +74,8 @@ export async function markAsRead(request: markAsReadRequest) {
 
         return response;
     } catch (error) {
-        console.log("🚀 ~ markAsRead ~ error:", error)
+        console.log("🚀 ~ markAsRead ~ error:", error);
+        throw error;
     }
 }
 
@@ -86,5 +89,6 @@ export async function getUnreadCount() {
         return response;
     } catch (error) {
         console.log("🚀 ~ getUnreadCount ~ error:", error)
+        throw error;
     }
 }
