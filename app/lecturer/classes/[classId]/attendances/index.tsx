@@ -18,14 +18,16 @@ import {
 } from 'react-native';
 import _ from 'lodash'
 import { useErrorContext } from '@/utils/ctx';
+import { useFocusEffect } from '@react-navigation/native';
+import { sendNotification } from '@/services/api-calls/notification';
 
-const Note: React.FC<{presentCount: any, ECAbsentCount: any, UECAbsentCount: any}> = ({presentCount, ECAbsentCount, UECAbsentCount}) => (
-  <View style= {styles.note}> 
-    <View > 
-      <Text style= {{fontSize: 18}}>
+const Note: React.FC<{ presentCount: any, ECAbsentCount: any, UECAbsentCount: any }> = ({ presentCount, ECAbsentCount, UECAbsentCount }) => (
+  <View style={styles.note}>
+    <View >
+      <Text style={{ fontSize: 18 }}>
         <Text>Có mặt: </Text>
         <Image
-          style={{width: 20, height: 20}}
+          style={{ width: 20, height: 20 }}
           source={require('@assets/images/correct.png')}
         />
       </Text>
@@ -36,26 +38,26 @@ const Note: React.FC<{presentCount: any, ECAbsentCount: any, UECAbsentCount: any
 
     <View style={styles.separator} />
 
-    <View> 
-      <Text style= {{fontSize: 18}}>
+    <View>
+      <Text style={{ fontSize: 18 }}>
         <Text>Vắng CP: </Text>
         <Image
-          style={{width: 20, height: 20}}
+          style={{ width: 20, height: 20 }}
           source={require('@assets/images/VangCP.png')}
         />
       </Text>
       <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{ fontSize: 18}}>{ECAbsentCount}</Text>
+        <Text style={{ fontSize: 18 }}>{ECAbsentCount}</Text>
       </View>
     </View>
 
     <View style={styles.separator} />
 
-    <View> 
-      <Text style= {{fontSize: 18}}>
+    <View>
+      <Text style={{ fontSize: 18 }}>
         <Text>Vắng: </Text>
         <Image
-          style={{width: 20, height: 20}}
+          style={{ width: 20, height: 20 }}
           source={require('@assets/images/Vang.png')}
         />
       </Text>
@@ -66,30 +68,30 @@ const Note: React.FC<{presentCount: any, ECAbsentCount: any, UECAbsentCount: any
   </View>
 )
 
-const Item:  React.FC<{ name: any, MSSV: any, status: any, index: any, toggleStatus: (MSSV: any) => void }> = ({name, MSSV, status, index, toggleStatus}) => (
+const Item: React.FC<{ name: any, MSSV: any, status: any, index: any, toggleStatus: (MSSV: any) => void }> = ({ name, MSSV, status, index, toggleStatus }) => (
   <View>
-    <View style= {styles.containerItem}>
+    <View style={styles.containerItem}>
       <View style={styles.item}>
         <Text style={styles.index}>{index + 1}.</Text>
         <View>
           <Text style={styles.name}>{name}</Text>
-          <Text style= {{color: '#7f8c8d'}}> {MSSV} </Text> 
+          <Text style={{ color: '#7f8c8d' }}> {MSSV} </Text>
           {/* <Text style= {{marginTop: 4}}> Vắng: 0 | Vắng CP: 0 </Text>  */}
         </View>
       </View>
       <TouchableOpacity
-          style={[styles.circleButton, {backgroundColor: status == 'PRESENT' ? '#007BFF' : (status == 'EXCUSED_ABSENCE') ? '#f6c500':'#ff4141'}]}
-          onPress={() => toggleStatus(MSSV)}
-        >
-          {status == 'PRESENT' && (<Image
-            style={styles.checked}
-            source={require('@assets/images/checks.png')}
-          />)}
-          {(status == 'UNEXCUSED_ABSENCE' || status == 'EXCUSED_ABSENCE') && (<Image
-            style={styles.absent}
-            source={require('@assets/images/vvang.png')}
-          />)}
-        </TouchableOpacity>
+        style={[styles.circleButton, { backgroundColor: status == 'PRESENT' ? '#007BFF' : (status == 'EXCUSED_ABSENCE') ? '#f6c500' : '#ff4141' }]}
+        onPress={() => toggleStatus(MSSV)}
+      >
+        {status == 'PRESENT' && (<Image
+          style={styles.checked}
+          source={require('@assets/images/checks.png')}
+        />)}
+        {(status == 'UNEXCUSED_ABSENCE' || status == 'EXCUSED_ABSENCE') && (<Image
+          style={styles.absent}
+          source={require('@assets/images/vvang.png')}
+        />)}
+      </TouchableOpacity>
     </View>
     <Divider />
   </View>
@@ -118,11 +120,12 @@ export default function TakeAttendanceScreen() {
   const [requesting, setRequesting] = useState(false)
   const [refreshing, setRefreshing] = React.useState(false);
   const [searching, setSearching] = useState(false)
+  const [focused, setFocused] = useState(true)
 
-  const { classId } = useLocalSearchParams();
-  
+  const { classId, className } = useLocalSearchParams();
+
   // console.log('originalData: ', originalData)
- 
+
 
   const getLocalDateString = (utcDate: Date) => {
     const localDate = new Date(utcDate); // Tạo đối tượng Date từ UTC
@@ -147,66 +150,78 @@ export default function TakeAttendanceScreen() {
     setUECAbsentCount(UECAbsent);
   };
 
-  const getStudentList = async() => {
-    getClassInfo({class_id: classId as string} )
-    .then((classInfo) => {
-      if(_.isEmpty(classInfo.data.student_accounts)){
-        setStatusShow({ showRecord: false, showErr: false, isLoading: false })
-        return
-      } else{
-        getAttendanceDates(classId)
-        .then((AttendanceDateList) => {
-          if(!_.isEmpty(AttendanceDateList) && AttendanceDateList.find((date: any) => date == dateNow)){// hôm nay đã điểm danh
-            getAttendanceList(classId, dateNow, null, null)
-            .then((attendanceRecord) => {
-              const studentList = classInfo.data.student_accounts.map((student: any) => {
-                const attendance = attendanceRecord.attendance_student_details.find((att: any) => att.student_id === student.student_id)
-                return {
+  const getStudentList = async () => {
+    getClassInfo({ class_id: classId as string })
+      .then((classInfo) => {
+        if (_.isEmpty(classInfo.data.student_accounts)) {
+          setStatusShow({ showRecord: false, showErr: false, isLoading: false })
+          return
+        } else {
+          getAttendanceDates(classId)
+            .then((AttendanceDateList) => {
+              if (!_.isEmpty(AttendanceDateList) && AttendanceDateList.find((date: any) => date == dateNow)) {// hôm nay đã điểm danh
+                getAttendanceList(classId, dateNow, null, null)
+                  .then((attendanceRecord) => {
+                    const studentList = classInfo.data.student_accounts.map((student: any) => {
+                      const attendance = attendanceRecord.attendance_student_details.find((att: any) => att.student_id === student.student_id)
+                      return {
+                        ...student,
+                        status: attendance ? attendance.status : null, // nếu sinh viên có trong lớp mà ko có bản ghi điểm danh thì mặc định là null
+                        attendance_id: attendance ? attendance.attendance_id : null
+                      }
+                    })
+                    countAttendance(studentList)
+                    setData(studentList)
+                    setOriginalData(_.cloneDeep(studentList)); // Lưu dữ liệu ban đầu
+                    setAttStatus('1')
+                    setStatusShow({ showRecord: true, showErr: false, isLoading: false })
+                  })
+                  .catch((error: any) => {
+                    setStatusShow({ showRecord: false, showErr: false, isLoading: false })
+                    setUnhandledError(error)
+                  })
+              } else {// hôm nay chưa điểm danh
+                const studentList = classInfo.data.student_accounts.map((student: any) => {
+                  return {
                     ...student,
-                    status: attendance ? attendance.status : null, // nếu sinh viên có trong lớp mà ko có bản ghi điểm danh thì mặc định là null
-                    attendance_id: attendance ? attendance.attendance_id: null
-                }
-              })
-              countAttendance(studentList)
-              setData(studentList)
-              setOriginalData(_.cloneDeep(studentList)); // Lưu dữ liệu ban đầu
-              setAttStatus('1')
-              setStatusShow({ showRecord: true, showErr: false, isLoading: false })
+                    status: 'PRESENT'
+                  }
+                })
+                countAttendance(studentList)
+                setData(studentList)
+                setOriginalData(_.cloneDeep(studentList)); // Lưu dữ liệu ban đầu
+                setAttStatus('0')
+                setStatusShow({ showRecord: true, showErr: false, isLoading: false })
+              }
             })
             .catch((error: any) => {
               setStatusShow({ showRecord: false, showErr: false, isLoading: false })
               setUnhandledError(error)
             })
-          } else {// hôm nay chưa điểm danh
-            const studentList =  classInfo.data.student_accounts.map((student: any) => {
-              return {
-                  ...student,
-                  status: 'PRESENT'
-              }
-            })
-            countAttendance(studentList)
-            setData(studentList)
-            setOriginalData(_.cloneDeep(studentList)); // Lưu dữ liệu ban đầu
-            setAttStatus('0')
-            setStatusShow({ showRecord: true, showErr: false, isLoading: false })
-          }
-        })
-        .catch((error: any) => { 
-          setStatusShow({ showRecord: false, showErr: false, isLoading: false })
-          setUnhandledError(error) 
-        })
-      }
-    })
-    .catch((error: any) => {
-      setStatusShow({ showRecord: false, showErr: false, isLoading: false })
-      setUnhandledError(error)
-    })
+        }
+      })
+      .catch((error: any) => {
+        setStatusShow({ showRecord: false, showErr: false, isLoading: false })
+        setUnhandledError(error)
+      })
   }
 
   useEffect(() => {
-    setStatusShow({ showRecord: false, showErr: false, isLoading: true })
-    getStudentList()
-  }, [requesting])
+    if (focused) {
+      setFocused(false)
+      setStatusShow({ showRecord: false, showErr: false, isLoading: true })
+      getStudentList()
+    }
+  }, [requesting, focused])
+
+  useFocusEffect(
+    React.useCallback(() => {
+      setFocused(true)
+      return () => {
+        setFocused(false)
+      };
+    }, [])
+  );
 
   const toggleStatus = (MSSV: any) => {
     setData(prevData => {
@@ -232,23 +247,36 @@ export default function TakeAttendanceScreen() {
   };
 
   const compareStudentStatuses = () => {
-      return data.every(studentDta => {
-          const studentOriginal = originalData.find(student => student.student_id === studentDta.student_id);
-          return studentOriginal ? studentDta.status === studentOriginal.status : false;
-      });
+    return data.every(studentDta => {
+      const studentOriginal = originalData.find(student => student.student_id === studentDta.student_id);
+      return studentOriginal ? studentDta.status === studentOriginal.status : false;
+    });
   };
+
+  const sendPushNotification = async (toUser: string) => {
+    const message = `Bạn đã vắng mắt lớp ${className} ngày ${getLocalDateString(new Date(Date.now()))}`
+    const type = 'ABSENCE'
+    await sendNotification({ message, toUser, type })
+  }
 
   const hanldeAttendance = async () => {
     setRequesting(true); // Bắt đầu tải
     try {
       if (attStatus === '0') {
-        const attendanceList = data.filter(student => student.status === 'UNEXCUSED_ABSENCE').map(student => student.student_id.toString());
-        await takeAttendance(classId, dateNow, attendanceList);
+        const attendanceList = data.filter(student => student.status === 'UNEXCUSED_ABSENCE');
+        const attendanceStudentIdList = attendanceList.map(student => student.student_id.toString())
+        const attendanceAccountIdList = attendanceList.map(student => student.account_id.toString())
+        await takeAttendance(classId, dateNow, attendanceStudentIdList);
+        // send noti to student ABSENCE 
+        const promises = attendanceAccountIdList.map(AccountId => {
+          sendPushNotification(AccountId)
+        });
+        await Promise.all(promises); 
         setAttStatus('1');
         const attendanceRecordList = await getAttendanceList(classId, dateNow, null, null)
-        const ECAbsenceRespone : any = await getAbsenceRequests(classId, null, null, 'ACCEPTED', dateNow) // danh sách các đơn xin nghỉ đã được xác nhận vao ngay diem danh
-        if(!_.isEmpty(attendanceRecordList.attendance_student_details) && !_.isEmpty(ECAbsenceRespone.page_content)){
-          const ECAbsenceList : any = attendanceRecordList.attendance_student_details
+        const ECAbsenceRespone: any = await getAbsenceRequests(classId, null, null, 'ACCEPTED', dateNow) // danh sách các đơn xin nghỉ đã được xác nhận vao ngay diem danh
+        if (!_.isEmpty(attendanceRecordList.attendance_student_details) && !_.isEmpty(ECAbsenceRespone.page_content)) {
+          const ECAbsenceList: any = attendanceRecordList.attendance_student_details
             .filter((recordAttendance: any) => {
               return (
                 recordAttendance.status === 'UNEXCUSED_ABSENCE' &&
@@ -256,16 +284,16 @@ export default function TakeAttendanceScreen() {
               )
             })
 
-          if(!_.isEmpty(ECAbsenceList)){
+          if (!_.isEmpty(ECAbsenceList)) {
             const promises = ECAbsenceList.map((ECAbsence: any) => setAttendanceStatus('EXCUSED_ABSENCE', ECAbsence.attendance_id));
-            try{
+            try {
               await Promise.all(promises);
-            } catch(error: any){
+            } catch (error: any) {
               const errorCode = error.rawError?.meta?.code;
-              if(errorCode == 9994){
+              if (errorCode == 9994) {
                 error.setTitle("Lỗi đồng bộ !");
                 error.setContent("Không tìm thấy bản ghi điểm danh để đồng bộ với đơn xin nghỉ phép !");
-              } else if(error.rawError){
+              } else if (error.rawError) {
                 error.setTitle("Lỗi đồng bộ !");
                 error.setContent("Đồng bộ bản ghi điểm danh với đơn xin nghỉ phép thất bại !");
               }
@@ -282,18 +310,25 @@ export default function TakeAttendanceScreen() {
         const attendanceUpdates = updatesNeeded.map(student => ({
           status: student.status,
           attendanceId: student.attendance_id,
-          studentId: student.student_id
+          studentId: student.student_id,
+          accountId: student.account_id
         }));
-        const ECAbsenceRespone : any = await getAbsenceRequests(classId, null, null, 'ACCEPTED', dateNow) // danh sách các đơn xin nghỉ đã được xác nhận vao ngay diem danh
+        const ECAbsenceRespone: any = await getAbsenceRequests(classId, null, null, 'ACCEPTED', dateNow) // danh sách các đơn xin nghỉ đã được xác nhận vao ngay diem danh
         attendanceUpdates.forEach((student) => {
-          if(student.status === "UNEXCUSED_ABSENCE"){
-            const matchedRecord  = ECAbsenceRespone.page_content.find(
-            (recordECAbsence: any) => recordECAbsence.student_account.student_id === student.studentId)
+          if (student.status === "UNEXCUSED_ABSENCE") {
+            const matchedRecord = ECAbsenceRespone.page_content.find(
+              (recordECAbsence: any) => recordECAbsence.student_account.student_id === student.studentId)
 
             if (matchedRecord) { student.status = "EXCUSED_ABSENCE"; }
           }
         });
-        const promises = attendanceUpdates.map(update => setAttendanceStatus(update.status, update.attendanceId));
+        const promises = attendanceUpdates.map(update => {
+          setAttendanceStatus(update.status, update.attendanceId)
+          // send noti to student ABSENCE
+          if(update.status != 'PRESENT'){
+            sendPushNotification(update.accountId)
+          }
+        });
         await Promise.all(promises);
         Alert.alert('Thành công', 'Cập nhật điểm danh thành công!');
       }
@@ -301,10 +336,10 @@ export default function TakeAttendanceScreen() {
       console.error('Error:', JSON.stringify(error));
       const errorCode = error.rawError.meta.code;
       // if(errorCode == 9994) 
-      if(errorCode == "1004"){
+      if (errorCode == "1004") {
         error.setTitle("Thông báo !");
         error.setContent("Thời gian điểm danh không thuộc thời gian mở lớp!");
-      } else if(error.rawError){
+      } else if (error.rawError) {
         error.setTitle("Lỗi !");
         error.setContent("Đã có lỗi xảy ra khi điểm danh, vui lòng thử lại sau!");
       }
@@ -315,14 +350,15 @@ export default function TakeAttendanceScreen() {
   };
 
   const handleSearch = (value: any) => {
-    if(!_.isEmpty(value)){
+    if (!_.isEmpty(value)) {
       setDataSearch(
         data.filter(student => {
-        const fullName = `${student.first_name} ${student.last_name}`.toLowerCase();
-        const mssv = student.student_id.toString();
-        return fullName.includes(value.toLowerCase())|| mssv.includes(value);
-      })
-    )}
+          const fullName = `${student.first_name} ${student.last_name}`.toLowerCase();
+          const mssv = student.student_id.toString();
+          return fullName.includes(value.toLowerCase()) || mssv.includes(value);
+        })
+      )
+    }
     else setDataSearch([])
   }
 
@@ -334,20 +370,20 @@ export default function TakeAttendanceScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-    {requesting && (
-      <View style={styles.overlay}>
-        <ActivityIndicator  size="large" color="#007BFF" />
-      </View>
-    )}
-      {statusShow.isLoading && (
-        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      {requesting && (
+        <View style={styles.overlay}>
           <ActivityIndicator size="large" color="#007BFF" />
-          <Text style={{fontSize: 18, marginBottom: '20%'}}>Đang tải</Text>
+        </View>
+      )}
+      {statusShow.isLoading && (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <ActivityIndicator size="large" color="#007BFF" />
+          <Text style={{ fontSize: 18, marginBottom: '20%' }}>Đang tải</Text>
         </View>
       )}
 
       {statusShow.showRecord && !_.isEmpty(data) && (<>
-        {!searching && <Note presentCount={presentCount} ECAbsentCount={ECAbsentCount}  UECAbsentCount={UECAbsentCount}/>}
+        {!searching && <Note presentCount={presentCount} ECAbsentCount={ECAbsentCount} UECAbsentCount={UECAbsentCount} />}
 
         <View
           style={{
@@ -358,24 +394,24 @@ export default function TakeAttendanceScreen() {
             marginRight: 10,
             marginTop: 10
           }}
-        > 
+        >
           <TextInput
-            style= {[styles.input, {backgroundColor: 'white', width: '60%', borderRadius: 10}]}
+            style={[styles.input, { backgroundColor: 'white', width: '60%', borderRadius: 10 }]}
             onFocus={() => setSearching(true)}
             onBlur={() => setSearching(false)}
             onChangeText={(value) => {
               setText(value);
               handleSearch(value);
             }}
-            value= {text}
-            placeholder= "Tìm kiếm..."
+            value={text}
+            placeholder="Tìm kiếm..."
           />
-        </View> 
+        </View>
 
         <FlatList
-          style = {{backgroundColor: 'white'}}
-          data= {_.isEmpty(text) ? data : dataSearch}
-          renderItem={({item, index}) => (
+          style={{ backgroundColor: 'white' }}
+          data={_.isEmpty(text) ? data : dataSearch}
+          renderItem={({ item, index }) => (
             <Item
               name={`${item.first_name} ${item.last_name}`}
               MSSV={item.student_id}
@@ -388,8 +424,8 @@ export default function TakeAttendanceScreen() {
           refreshing={refreshing}
           keyExtractor={item => item.student_id.toString()}
         />
-        
-        <View style={{paddingVertical: 10, paddingHorizontal: 50, backgroundColor: 'white'}}> 
+
+        <View style={{ paddingVertical: 10, paddingHorizontal: 50, backgroundColor: 'white' }}>
           <TouchableOpacity
             style={{
               backgroundColor: compareStudentStatuses() && attStatus === '1' ? 'gray' : '#007bff',
@@ -399,26 +435,26 @@ export default function TakeAttendanceScreen() {
               borderRadius: 50,
               marginHorizontal: '8%'
             }}
-            disabled={compareStudentStatuses()&& attStatus === '1'}
+            disabled={compareStudentStatuses() && attStatus === '1'}
             onPress={() => {
               Alert.alert(
                 `${attStatus === '1' ? 'Xác nhận cập nhật điểm danh' : 'Xác nhận điểm danh'}`,
-                `Bạn có chắc chắn muốn ${attStatus === '1' ? 'cập nhật': 'xác nhận'} điểm danh không?`,
+                `Bạn có chắc chắn muốn ${attStatus === '1' ? 'cập nhật' : 'xác nhận'} điểm danh không?`,
                 [
                   {
                     text: 'Cancel',
-                    onPress: () => {},
-                    style:'cancel'
+                    onPress: () => { },
+                    style: 'cancel'
                   },
                   {
                     text: 'OK',
-                    onPress: () => {hanldeAttendance()}
+                    onPress: () => { hanldeAttendance() }
                   },
                 ],
                 { cancelable: false } // Không cho phép đóng hộp thoại bằng cách nhấn ra ngoài
               );
             }}
-          ><Text style={{padding: 0, margin: 0, fontSize: 16, color: 'white'}}>{attStatus === '1' ? 'Cập nhật điểm danh' : 'Xác nhận điểm danh'}</Text></TouchableOpacity>
+          ><Text style={{ padding: 0, margin: 0, fontSize: 16, color: 'white' }}>{attStatus === '1' ? 'Cập nhật điểm danh' : 'Xác nhận điểm danh'}</Text></TouchableOpacity>
         </View>
       </>)}
 
@@ -427,12 +463,12 @@ export default function TakeAttendanceScreen() {
           <Text style={{fontSize: 18, marginBottom: '20%'}}>{err}</Text>
         </View>
       )} */}
-      {!requesting && !statusShow.isLoading && _.isEmpty(data) &&(
+      {!requesting && !statusShow.isLoading && _.isEmpty(data) && (
         <ScrollView
           contentContainerStyle={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
-          refreshControl={ <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> }
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
-          <Text style={{fontSize: 18, fontWeight: 'bold', marginBottom: '20%'}}>Lớp học chưa có sinh viên nào!</Text>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: '20%' }}>Lớp học chưa có sinh viên nào!</Text>
         </ScrollView>
       )}
     </SafeAreaView>
@@ -495,7 +531,7 @@ const styles = StyleSheet.create({
     height: 15,
   },
   note: {
-    backgroundColor: 'white', 
+    backgroundColor: 'white',
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingHorizontal: 20,
