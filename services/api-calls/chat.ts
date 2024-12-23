@@ -1,3 +1,8 @@
+import { NetworkError } from '@/utils/exception';
+import {
+    cacheConversation,
+    getConversationsCache,
+} from '../storages/conversation';
 import { getTokenLocal } from '../storages/token';
 import instance from './axios';
 export type Conversation = {
@@ -28,11 +33,19 @@ export type ConversationData = {
 export async function getConversation(
     index = 0,
     count = 1
-): Promise<ConversationData> {
-    return await instance.post('/it5023e/get_list_conversation', {
-        index,
-        count,
-    });
+): Promise<ConversationData | undefined> {
+    try {
+        const data = await instance.post('/it5023e/get_list_conversation', {
+            index,
+            count,
+        });
+        cacheConversation(data);
+        return data;
+    } catch (error) {
+        if (error instanceof NetworkError)
+            error.cache = await getConversationsCache();
+        throw error;
+    }
 }
 
 export type TMessage = {

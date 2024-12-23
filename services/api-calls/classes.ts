@@ -11,19 +11,32 @@ import {
     getClassInfoResponse,
     getClassOpenResponse,
 } from '@/types/createClassRequest';
-import { UnauthorizedException } from '@/utils/exception';
+import { NetworkError, UnauthorizedException } from '@/utils/exception';
+import { TClass } from '@/types/classes';
+import { getClassesCache, saveClassesLocal } from '../storages/class-list';
+import { ClassInfo } from '@/types/generalClassInfor';
 
-export async function getClassList(role: ROLES) {
-    const profile = await getProfileLocal();
-    const token = await getTokenLocal();
-    console.log('token: ', token);
-    if (!profile) throw new UnauthorizedException();
+export async function getClassList(
+    role: ROLES
+): Promise<{ page_content: TClass[] | ClassInfo[] } | undefined> {
+    try {
+        const profile = await getProfileLocal();
+        const token = await getTokenLocal();
+        console.log('token: ', token);
+        if (!profile) throw new UnauthorizedException();
 
-    const response = await instance.post('/it5023e/get_class_list', {
-        role,
-        account_id: profile.id,
-    });
-    return response.data;
+        const response = await instance.post('/it5023e/get_class_list', {
+            role,
+            account_id: profile.id,
+        });
+        saveClassesLocal(response.data?.page_content);
+        return response.data;
+    } catch (error) {
+        if (error instanceof NetworkError) {
+            error.cache = await getClassesCache();
+        }
+        throw error;
+    }
 }
 
 export async function getAttendanceList(

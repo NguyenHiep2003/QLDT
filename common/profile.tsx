@@ -20,6 +20,7 @@ import { convertDriveUrl } from '@/utils/convertDriveUrl';
 import { ROLES } from '@/constants/Roles';
 import { getColor } from '@/utils/getColor';
 import { useSocketContext } from '@/utils/socket.ctx';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export function Profile({ role }: { role: string }) {
     const [profile, setProfile] = useState<TProfile | undefined>(undefined);
@@ -267,6 +268,7 @@ export function Profile({ role }: { role: string }) {
                                     await logOut();
                                     await deleteProfile();
                                     await deleteToken();
+                                    await AsyncStorage.clear();
                                     if (stompClient?.connected)
                                         stompClient?.deactivate();
                                     router.navigate('/(auth)/sign-in');

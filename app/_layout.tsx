@@ -1,11 +1,12 @@
 import { ErrorProvider } from '@/utils/ctx';
 import { SocketProvider } from '@/utils/socket.ctx';
 import { Slot } from 'expo-router';
-import { NotificationProvider } from "@/context/NotificationContext";
-import { UnreadCountProvider } from "@/context/UnreadCountContext";
+import { NotificationProvider } from '@/context/NotificationContext';
+import { UnreadCountProvider } from '@/context/UnreadCountContext';
 // import { TextEncoder } from 'text-encoding';
-import * as Notifications from "expo-notifications";
-import * as TaskManager from "expo-task-manager";
+import * as Notifications from 'expo-notifications';
+import * as TaskManager from 'expo-task-manager';
+import { NetworkProvider } from '@/context/NetworkContext';
 // import { LogBox } from 'react-native';
 
 // LogBox.ignoreAllLogs();
@@ -19,22 +20,21 @@ Notifications.setNotificationHandler({
     }),
 });
 
-const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
+const BACKGROUND_NOTIFICATION_TASK = 'BACKGROUND-NOTIFICATION-TASK';
 
 TaskManager.defineTask(
     BACKGROUND_NOTIFICATION_TASK,
     ({ data, error, executionInfo }): Promise<any> => {
-        console.log("✅ Received a notification in the background!", {
+        console.log('✅ Received a notification in the background!', {
             data,
             error,
             executionInfo,
         });
-        return Promise.resolve("Completed to handle notification");
+        return Promise.resolve('Completed to handle notification');
     }
 );
 
 Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
-
 
 export default function Root() {
     // Set up the auth context and render our layout inside of it.
@@ -43,7 +43,9 @@ export default function Root() {
             <UnreadCountProvider>
                 <ErrorProvider>
                     <SocketProvider>
-                        <Slot />
+                        <NetworkProvider>
+                            <Slot />
+                        </NetworkProvider>
                     </SocketProvider>
                 </ErrorProvider>
             </UnreadCountProvider>

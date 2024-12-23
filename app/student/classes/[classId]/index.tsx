@@ -102,6 +102,7 @@ export default function StudentClassDetail() {
                             flexDirection: 'row',
                             flexWrap: 'wrap',
                             justifyContent: 'space-between',
+                            paddingHorizontal: 5,
                         }}
                     >
                         {servicesCardConfig.map((val) => (
