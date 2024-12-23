@@ -1,5 +1,6 @@
 import Header from '@/components/Header';
 import { Stack } from 'expo-router';
+import NotificationBell from "@/components/navigation/NotificationBell";
 
 export default function ChatLayout() {
     return (
@@ -16,6 +17,9 @@ export default function ChatLayout() {
                     },
                     headerTitleAlign: 'center',
                     headerTitle: () => <Header title="Trò chuyện"></Header>,
+                    headerRight: () => (
+                        NotificationBell()
+                    )
                 }}
             ></Stack.Screen>
             <Stack.Screen

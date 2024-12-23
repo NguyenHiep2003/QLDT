@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import { Stack } from "expo-router";
+import NotificationBell from "@/components/navigation/NotificationBell";
 
 export default function AssignmentLayout() {
   return (
@@ -15,7 +16,10 @@ export default function AssignmentLayout() {
             fontWeight: "bold",
           },
           headerTitleAlign: "center",
-          headerTitle: () => <Header title="Danh sách bài tập"></Header>,
+          headerTitle: () => <Header title="Bài tập"></Header>,
+            headerRight: () => (
+                NotificationBell()
+            )
         }}
       ></Stack.Screen>
       <Stack.Screen

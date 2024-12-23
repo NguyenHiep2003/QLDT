@@ -29,35 +29,44 @@ export default function Header({ title = 'HUST' }: { title?: string }) {
     return (
         <View style={styles.header}>
             <Text style={styles.headerTitle}>{title}</Text>
-            <View style={{ position: 'relative' }}>
-                <Ionicons
-                    style={styles.icon}
-                    name="notifications-outline"
-                    size={24}
-                    color="white"
-                    onPress={() =>
-                        router.navigate(`/(notification)` as Href<string>)
-                    }
-                />
-                {unreadCount > 0 && (
-                    <View style={styles.unreadBadge}>
-                        <Text style={styles.unreadCount}>{unreadCount}</Text>
-                    </View>
-                )}
-            </View>
+            {/*<View style={styles.iconContainer}>*/}
+            {/*    <Ionicons*/}
+            {/*        style={styles.icon}*/}
+            {/*        name="notifications-outline"*/}
+            {/*        size={24}*/}
+            {/*        color="white"*/}
+            {/*        onPress={() =>*/}
+            {/*            router.navigate(`/(notification)` as Href<string>)*/}
+            {/*        }*/}
+            {/*    />*/}
+            {/*    {unreadCount > 0 && (*/}
+            {/*        <View style={styles.unreadBadge}>*/}
+            {/*            <Text style={styles.unreadCount}>{unreadCount}</Text>*/}
+            {/*        </View>*/}
+            {/*    )}*/}
+            {/*</View>*/}
         </View>
     );
 }
 
 const styles = StyleSheet.create({
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 0,
+        height: 60,
+    },
     headerTitle: {
         color: 'white',
         fontWeight: 'bold',
         fontSize: 30,
+        // width: '97%',
         textAlign: 'center',
     },
-    header: {
+    iconContainer: {
         flexDirection: 'row',
+        alignItems: 'center',
     },
     icon: {
         marginRight: 0,
