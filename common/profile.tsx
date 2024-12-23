@@ -265,12 +265,13 @@ export function Profile({ role }: { role: string }) {
                             title="Đồng ý"
                             onPress={async () => {
                                 try {
-                                    logOut();
+                                    await logOut();
                                     deleteProfile();
                                     deleteToken();
                                     AsyncStorage.clear();
                                     if (stompClient?.connected)
                                         stompClient?.deactivate();
+                                    setDialogLogoutVisible(false);
                                     router.navigate('/(auth)/sign-in');
                                 } catch (error: any) {
                                     setUnhandledError(error);
