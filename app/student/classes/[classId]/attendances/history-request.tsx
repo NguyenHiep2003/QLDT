@@ -21,6 +21,7 @@ import _ from 'lodash';
 import {Divider} from '@/app/lecturer/classes/[classId]/attendances/index'
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Dropdown } from 'react-native-element-dropdown';
+import OfflineStatusBar from '@/components/OfflineBar';
 
 const RequestAbsenceCard: React.FC<{
     status: any,
@@ -211,6 +212,7 @@ export default function AbsenceRequestScreen() {
     };
     return (
         <SafeAreaView style={styles.container}>
+            <OfflineStatusBar></OfflineStatusBar>
             {requesting && (
                 <View style={styles.overlay}>
                     <ActivityIndicator size="large" color="#007BFF" />

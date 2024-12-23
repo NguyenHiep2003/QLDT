@@ -11,6 +11,7 @@ import { getProfileLocal } from "@/services/storages/profile";
 import { ActivityIndicator, View } from "react-native";
 import { getClassInfo } from "@/services/api-calls/classes";
 import { useErrorContext } from "@/utils/ctx";
+import { NetworkError } from "@/utils/exception";
   
   const { Navigator } = createMaterialTopTabNavigator();
   
@@ -23,26 +24,30 @@ import { useErrorContext } from "@/utils/ctx";
   
   export default function TabLayout() {
     const { classId } = useLocalSearchParams();
-    const [className, setClassName] = useState()
-    const [startDate, setStartDate] = useState()
-    const [endDate, setEndDate] = useState()
-    const [lecturerAccountId, setLecturerAccountId] = useState()
+    const [isLoading, setIsLoading] = useState(true)
+    const [className, setClassName] = useState('')
+    const [startDate, setStartDate] = useState('')
+    const [endDate, setEndDate] = useState('')
+    const [lecturerAccountId, setLecturerAccountId] = useState('')
     const {setUnhandledError} = useErrorContext()
     useEffect(() => {
       const findClassInfo = async () => {
         try{
+          setIsLoading(true)
           const classInfo: any = await getClassInfo({class_id: classId.toString()})
           setClassName(classInfo.data.class_name)
           setStartDate(classInfo.data.start_date)
           setEndDate(classInfo.data.end_date)
           setLecturerAccountId(classInfo.data.lecturer_account_id)
         } catch (error: any) {
-          setUnhandledError(error)
+          if(!(error instanceof NetworkError)) setUnhandledError(error)
+        } finally{
+          setIsLoading(false)
         }
       }
       findClassInfo()
     }, [classId])
-    if (!className || !startDate || !endDate || !lecturerAccountId) {
+    if (isLoading) {
       return (
         <View style={{alignSelf: 'center',position: 'absolute', top: '40%'}}>
           <ActivityIndicator size="large" color="#007BFF" />
