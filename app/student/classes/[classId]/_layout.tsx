@@ -1,5 +1,6 @@
 import Header from '@/components/Header';
 import { Stack } from 'expo-router';
+import NotificationBell from "@/components/navigation/NotificationBell";
 
 export default function ClassLayout() {
     return (
@@ -22,6 +23,9 @@ export default function ClassLayout() {
                     },
                     headerTitleAlign: 'center',
                     headerTitle: () => <Header title="Điểm danh"></Header>,
+                    headerRight: () => (
+                        NotificationBell()
+                    )
                 }}
             ></Stack.Screen>
             <Stack.Screen
@@ -50,6 +54,9 @@ export default function ClassLayout() {
                     },
                     headerTitleAlign: 'center',
                     headerTitle: () => <Header title="Lớp học"></Header>,
+                    headerRight: () => (
+                        NotificationBell()
+                    )
                 }}
             ></Stack.Screen>
         </Stack>
