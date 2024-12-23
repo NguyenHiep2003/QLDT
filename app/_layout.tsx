@@ -1,6 +1,6 @@
 import { ErrorProvider } from '@/utils/ctx';
 import { SocketProvider } from '@/utils/socket.ctx';
-import { Slot } from 'expo-router';
+import { Slot, Stack } from 'expo-router';
 import { NotificationProvider } from '@/context/NotificationContext';
 import { UnreadCountProvider } from '@/context/UnreadCountContext';
 // import { TextEncoder } from 'text-encoding';
@@ -44,7 +44,9 @@ export default function Root() {
                 <ErrorProvider>
                     <SocketProvider>
                         <NetworkProvider>
-                            <Slot />
+                            <Stack screenOptions={{ headerShown: false }}>
+                                <Slot />
+                            </Stack>
                         </NetworkProvider>
                     </SocketProvider>
                 </ErrorProvider>
