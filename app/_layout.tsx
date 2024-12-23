@@ -7,9 +7,9 @@ import { UnreadCountProvider } from '@/context/UnreadCountContext';
 import * as Notifications from 'expo-notifications';
 import * as TaskManager from 'expo-task-manager';
 import { NetworkProvider } from '@/context/NetworkContext';
-// import { LogBox } from 'react-native';
+import { LogBox } from 'react-native';
 
-// LogBox.ignoreAllLogs();
+LogBox.ignoreAllLogs();
 // global.TextEncoder = TextEncoder;
 
 Notifications.setNotificationHandler({
