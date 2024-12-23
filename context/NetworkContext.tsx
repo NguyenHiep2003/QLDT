@@ -6,6 +6,8 @@ import {
     useEffect,
 } from 'react';
 import * as NetInfo from '@react-native-community/netinfo';
+import { useSocketContext } from '@/utils/socket.ctx';
+import { connectSocket } from '@/services/sockets/connection';
 
 export const NetworkContext = createContext<{
     disconnect: boolean;
@@ -20,9 +22,11 @@ export function useNetworkContext() {
 
 export function NetworkProvider({ children }: PropsWithChildren) {
     const [disconnect, setDisconnect] = useState<boolean>(false);
+    const { setStompClient } = useSocketContext();
     useEffect(() => {
         const unsubscribe = NetInfo.addEventListener((state) => {
             setDisconnect(!state.isInternetReachable);
+            if (!state.isInternetReachable) setStompClient(connectSocket());
         });
 
         return () => unsubscribe();

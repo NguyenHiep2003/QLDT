@@ -7,7 +7,9 @@ const OfflineStatusBar = () => {
     if (!disconnect) return;
     return (
         <View style={styles.offlineBanner}>
-            <Text style={styles.offlineText}>You are offline</Text>
+            <Text style={styles.offlineText}>
+                Bạn đang không có kết nối Internet
+            </Text>
         </View>
     );
 };
