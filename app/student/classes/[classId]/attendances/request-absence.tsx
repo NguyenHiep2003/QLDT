@@ -18,6 +18,7 @@ import _ from 'lodash'
 import { useErrorContext } from '@/utils/ctx';
 import { sendNotification } from '@/services/api-calls/notification';
 import { getProfileLocal } from '@/services/storages/profile';
+import OfflineStatusBar from '@/components/OfflineBar';
 
 export default function RequestAbsenceScreen() {
   const {setUnhandledError} = useErrorContext()
@@ -139,6 +140,7 @@ export default function RequestAbsenceScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
+      <OfflineStatusBar></OfflineStatusBar>
       {requesting && (
       <View style={styles.overlay}>
         <ActivityIndicator size="large" color="#007BFF" />
