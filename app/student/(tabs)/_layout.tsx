@@ -2,6 +2,7 @@ import Header from '@/components/Header';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Tabs } from 'expo-router';
 import { StyleSheet } from 'react-native';
+import NotificationBell from "@/components/navigation/NotificationBell";
 
 export default function TabLayout() {
     return (
@@ -26,6 +27,9 @@ export default function TabLayout() {
                     },
                     headerTitleAlign: 'center',
                     headerTitle: () => <Header></Header>,
+                    headerRight: () => (
+                        NotificationBell()
+                    )
                 }}
             />
             <Tabs.Screen
@@ -82,6 +86,9 @@ export default function TabLayout() {
                     headerTitle: () => (
                         <Header title="Thông tin tài khoản"></Header>
                     ),
+                    headerRight: () => (
+                        NotificationBell()
+                    )
                 }}
             />
             <Tabs.Screen

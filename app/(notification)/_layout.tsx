@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router';
 import Header from "@/components/Header";
 import { StyleSheet, Text } from 'react-native';
+import NotificationBell from "@/components/navigation/NotificationBell";
 
 export default function NotificationScreen() {
     return (
@@ -14,7 +15,11 @@ export default function NotificationScreen() {
                     headerShown: true,
                     headerTitleAlign: 'center',
                     headerStyle: { backgroundColor: '#c21c1c' },
+                    headerTintColor: 'white',
                     headerTitle: () => <Header title="Thông báo"></Header>,
+                    headerRight: () => (
+                        NotificationBell()
+                    )
                 }}
                 name="index"
             />
