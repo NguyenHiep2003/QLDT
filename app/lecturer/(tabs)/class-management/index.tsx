@@ -39,15 +39,15 @@ const CreateClass = () => {
                 try {
                     const data = await getClassList(ROLES.LECTURER);
 
-                    setClasses(data.page_content);
-                    setIsLoading(false);
-                } catch (error) {
-                    Alert.alert('Thông báo', 'Tải dữ liệu thất bại');
-                }
-            };
-            fetchClasses();
-        }, [classCode])
-    );
+                setClasses(data.page_content);
+                setIsLoading(false);
+            } catch (error) {
+                Alert.alert("Thông báo", "Tải dữ liệu thất bại");
+            }
+        };
+        fetchClasses();
+    }, [classCode]));
+
 
     const handleFindClass = () => {
         if (classCode) {
