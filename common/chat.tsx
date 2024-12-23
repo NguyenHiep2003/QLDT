@@ -1,6 +1,6 @@
 import SearchBar from '@/components/SearchBar';
 import { router, useFocusEffect } from 'expo-router';
-import { Text, View } from 'react-native';
+import { RefreshControl, Text, View } from 'react-native';
 import { StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
 
 import React, { useState } from 'react';
@@ -12,6 +12,8 @@ import { TProfile } from '@/types/profile';
 import { getProfileLocal } from '@/services/storages/profile';
 import { useSocketContext } from '@/utils/socket.ctx';
 import { ROLES } from '@/constants/Roles';
+import { NetworkError } from '@/utils/exception';
+import OfflineStatusBar from '@/components/OfflineBar';
 
 const ChatListItem = ({
     conversation,
@@ -80,11 +82,31 @@ const ChatListItem = ({
 
 export function Chat({ role }: { role: ROLES }) {
     const { setUnhandledError } = useErrorContext();
-    const [conversations, setConversations] = useState<Conversation[]>([]);
+    const [conversations, setConversations] = useState<
+        Conversation[] | undefined
+    >([]);
     const { stompClient } = useSocketContext();
     const [profile, setProfile] = useState<TProfile>();
-    // const [index, setIndex] = useState(0);
+
+    const [refreshing, setRefreshing] = React.useState(false);
     const count = 15;
+
+    const onRefresh = React.useCallback(() => {
+        setRefreshing(true);
+        getConversation(0, count)
+            .then((data) => {
+                // console.log(data.data.conversations);
+                setConversations(data?.data.conversations);
+            })
+            .catch((err) => {
+                if (err instanceof NetworkError)
+                    return setConversations(err.cache.data.conversations);
+                setUnhandledError(err);
+            })
+            .finally(() => setRefreshing(false));
+    }, []);
+
+    // const [index, setIndex] = useState(0);
     // function handleLoadMore() {
     //     getConversation(index + count, count)
     //         .then((data) => {
@@ -102,34 +124,40 @@ export function Chat({ role }: { role: ROLES }) {
         React.useCallback(() => {
             getProfileLocal().then((profile) => {
                 setProfile(profile);
-                if(stompClient?.connected) stompClient?.subscribe(
-                    `/user/${profile?.id}/inbox`,
-                    function () {
-                        getConversation(0, count)
-                            .then((data) => {
-                                // console.log(data.data.conversations);
+                if (stompClient?.connected)
+                    stompClient?.subscribe(
+                        `/user/${profile?.id}/inbox`,
+                        function () {
+                            getConversation(0, count)
+                                .then((data) => {
+                                    // console.log(data.data.conversations);
 
-                                setConversations(data.data.conversations);
-                            })
-                            .catch((err) => setUnhandledError(err));
-                    },
-                    { id: 'subscribe in chat' }
-                );
+                                    setConversations(data?.data.conversations);
+                                })
+                                .catch((err) => setUnhandledError(err));
+                        },
+                        { id: 'subscribe in chat' }
+                    );
             });
             getConversation(0, count)
                 .then((data) => {
                     // console.log(data.data.conversations);
-
-                    setConversations(data.data.conversations);
+                    setConversations(data?.data.conversations);
                 })
-                .catch((err) => setUnhandledError(err));
+                .catch((err) => {
+                    if (err instanceof NetworkError)
+                        return setConversations(err.cache.data.conversations);
+                    setUnhandledError(err);
+                });
             return () => {
-                if(stompClient?.connected) stompClient?.unsubscribe('subscribe in chat');
+                if (stompClient?.connected)
+                    stompClient?.unsubscribe('subscribe in chat');
             };
         }, [])
     );
     return (
         <View style={{ flex: 1 }}>
+            <OfflineStatusBar></OfflineStatusBar>
             <SearchBar
                 onFocus={() => {
                     if (role == ROLES.STUDENT)
@@ -138,6 +166,12 @@ export function Chat({ role }: { role: ROLES }) {
                 }}
             ></SearchBar>
             <FlatList
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                    />
+                }
                 onEndReachedThreshold={10}
                 // onEndReached={() => {
                 //     handleLoadMore();

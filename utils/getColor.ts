@@ -45,6 +45,6 @@ export function getColor(title: string, id: string) {
     for (let i = 0; i < id.length; i++) {
         unique += id.charCodeAt(i);
     }
-    const index = (title.charCodeAt(0) + title.charCodeAt(1) + unique) % 40;
+    const index = (title.charCodeAt(0) + title.charCodeAt(1) + unique) % 39;
     return distinguishableColor[index];
 }

@@ -15,8 +15,15 @@ export default function Header({ title = 'HUST' }: { title?: string }) {
     );
 
     async function getUnreadNotificationCount() {
-        const response: any = await getUnreadCount();
-        setUnreadCount(response.data);
+        try {
+            const response: any = await getUnreadCount();
+            setUnreadCount(response.data);
+        } catch (error) {
+            console.log(
+                '🚀 ~ file: Header.tsx:22 ~ getUnreadNotificationCount ~ error:',
+                error
+            );
+        }
     }
 
     return (
@@ -28,7 +35,9 @@ export default function Header({ title = 'HUST' }: { title?: string }) {
                     name="notifications-outline"
                     size={24}
                     color="white"
-                    onPress={() => router.navigate(`/(notification)` as Href<string>)}
+                    onPress={() =>
+                        router.navigate(`/(notification)` as Href<string>)
+                    }
                 />
                 {unreadCount > 0 && (
                     <View style={styles.unreadBadge}>
