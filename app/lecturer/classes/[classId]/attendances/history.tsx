@@ -22,6 +22,7 @@ import {
 } from '@/services/api-calls/classes';
 import { useErrorContext } from '@/utils/ctx';
 import _ from 'lodash';
+import { useFocusEffect } from '@react-navigation/native';
 
 const Item: React.FC<{ name: any; MSSV: any; status: any; index: any }> = ({
     name,
@@ -30,7 +31,7 @@ const Item: React.FC<{ name: any; MSSV: any; status: any; index: any }> = ({
     index,
 }) => (
     <View style={styles.containerItem}>
-        <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10}}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10 }}>
             <View style={styles.item}>
                 <Text style={styles.index}>{index + 1}.</Text>
                 <View>
@@ -59,7 +60,7 @@ const Item: React.FC<{ name: any; MSSV: any; status: any; index: any }> = ({
     </View>
 );
 
-const HistoryAttendanceCard: React.FC<{date: any, search: (date: any) => void, selectedItem: any, onSelect: (date: any) => void}> = ({date, search, selectedItem, onSelect}) => (
+const HistoryAttendanceCard: React.FC<{ date: any, search: (date: any) => void, selectedItem: any, onSelect: (date: any) => void }> = ({ date, search, selectedItem, onSelect }) => (
     <TouchableOpacity
         style={styles.historyAttendanceCard}
         onPress={() => {
@@ -67,8 +68,8 @@ const HistoryAttendanceCard: React.FC<{date: any, search: (date: any) => void, s
             search(date)
         }}
     >
-        {(selectedItem !== date) &&<Text style={{color: '#007bff', fontSize: 16, textAlign: 'center'}}>{date.split('-').reverse().join('-')}</Text>}
-        {(selectedItem == date) && <ActivityIndicator style={{paddingHorizontal: 15}}  size="small" color="#007BFF" />}
+        {(selectedItem !== date) && <Text style={{ color: '#007bff', fontSize: 16, textAlign: 'center' }}>{date.split('-').reverse().join('-')}</Text>}
+        {(selectedItem == date) && <ActivityIndicator style={{ paddingHorizontal: 15 }} size="small" color="#007BFF" />}
     </TouchableOpacity>
 )
 
@@ -83,28 +84,40 @@ export default function ViewAttendanceHistoryScreen() {
     const [selectedItem, setSelectedItem] = useState<string | null>(null);
     const { setUnhandledError } = useErrorContext();
     const [refreshing, setRefreshing] = React.useState(false);
-
+    const [focused, setFocused] = useState(true)
     const { classId } = useLocalSearchParams();
 
     const attendanceDates = async () => {
-        try{
+        try {
             const res = await getAttendanceDates(classId)
             setHistoryAttendance(res)
-        } catch(error: any){
+        } catch (error: any) {
             setUnhandledError(error)
-        } finally{ setIsLoading(false)}
+        } finally { setIsLoading(false) }
     }
 
     const onRefresh = async () => {
         setRefreshing(true);
         await attendanceDates()
         setRefreshing(false);
-      }
+    }
 
     useEffect(() => {
-        setIsLoading(true)
-        attendanceDates()
-    }, [])
+        if (focused) {
+            setIsLoading(true)
+            setFocused(false)
+            attendanceDates()
+        }
+    }, [focused])
+
+    useFocusEffect(
+        React.useCallback(() => {
+            setFocused(true)
+            return () => {
+                setFocused(false)
+            };
+        }, [])
+    );
 
     const handleSelectItem = (dateSelected: any) => {
         setSelectedItem(dateSelected);
@@ -114,7 +127,7 @@ export default function ViewAttendanceHistoryScreen() {
         setIsLoading(true)
         setDateLookUp(dateLookup)
         try {
-            const attendanceRecord = await getAttendanceList( classId, dateLookup, null, null);
+            const attendanceRecord = await getAttendanceList(classId, dateLookup, null, null);
             const response = await getClassInfo({ class_id: classId as string });
             response.data.student_accounts = response.data.student_accounts.map(
                 (student: any) => {
@@ -137,7 +150,7 @@ export default function ViewAttendanceHistoryScreen() {
             if (error.rawError) {
                 // Yêu cầu đã được gửi và máy chủ đã phản hồi với mã trạng thái khác 2xx
                 const errorCode = error.rawError.meta.code;
-                if (errorCode == "9994"){
+                if (errorCode == "9994") {
                     // setErr( `Không có lịch sử điểm danh\nvào ngày ${dateLookup.split('-').reverse().join('-')}!` );
                     error.setTitle("Thông báo");
                     error.setContent(`Không có lịch sử điểm danh vào ngày ${dateLookup.split('-').reverse().join('-')}!`);
@@ -180,7 +193,7 @@ export default function ViewAttendanceHistoryScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            {isLoading && 
+            {isLoading &&
                 <View style={styles.overlay}></View>
             }
             <View
@@ -210,7 +223,7 @@ export default function ViewAttendanceHistoryScreen() {
                             {' '}
                             {date == null
                                 ? 'Chọn ngày tra cứu'
-                                :date.toLocaleDateString('vi-VN')}{' '}
+                                : date.toLocaleDateString('vi-VN')}{' '}
                         </Text>
                     </View>
                     <Image source={require('@assets/images/calendar.png')} />
@@ -225,10 +238,10 @@ export default function ViewAttendanceHistoryScreen() {
                         // marginHorizontal: '40%',
                         alignItems: 'center',
                     }}
-                    onPress={() =>  {handleLookup(getLocalDateString(date))}}
+                    onPress={() => { handleLookup(getLocalDateString(date)) }}
                 >
-                    {(!isLoading || (isLoading && selectedItem))&& <Text style={{ color: 'white' }}>Tra cứu</Text>}
-                    {isLoading && !selectedItem &&<ActivityIndicator style={{paddingHorizontal: 15}}  size="small" color="white" />}
+                    {(!isLoading || (isLoading && selectedItem)) && <Text style={{ color: 'white' }}>Tra cứu</Text>}
+                    {isLoading && !selectedItem && <ActivityIndicator style={{ paddingHorizontal: 15 }} size="small" color="white" />}
                 </TouchableOpacity>
             </View>
 
@@ -239,23 +252,23 @@ export default function ViewAttendanceHistoryScreen() {
                     paddingHorizontal: 10
                 }}
             >
-                <Text style={{fontSize: 18, fontWeight: 'bold'}}>Lịch sử các ngày điểm danh</Text>
+                <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Lịch sử các ngày điểm danh</Text>
                 <Divider />
                 {_.isEmpty(historyAttendance) &&
-                <ScrollView
-                    contentContainerStyle={{ flex: 1}}
-                    refreshControl={ <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> }
-                >
-                    <Text style={{fontSize: 16, color: 'blue', alignSelf: 'center', marginTop: 20}}>Lớp học chưa điểm danh buổi nào</Text>
-                </ScrollView>
+                    <ScrollView
+                        contentContainerStyle={{ flex: 1 }}
+                        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+                    >
+                        <Text style={{ fontSize: 16, color: 'blue', alignSelf: 'center', marginTop: 20 }}>Lớp học chưa điểm danh buổi nào</Text>
+                    </ScrollView>
                 }
                 {!_.isEmpty(historyAttendance) &&
                     <FlatList
-                        style={{marginTop: 10}}
+                        style={{ marginTop: 10 }}
                         data={historyAttendance}
-                        renderItem={({item, index}) => (
+                        renderItem={({ item, index }) => (
                             <HistoryAttendanceCard
-                                date= {item}
+                                date={item}
                                 search={handleLookup}
                                 selectedItem={selectedItem}
                                 onSelect={handleSelectItem}
@@ -278,10 +291,10 @@ export default function ViewAttendanceHistoryScreen() {
                 }}>
                 <View style={styles.centeredView}>
                     <View style={styles.modalView} >
-                            <Text style={{fontWeight: 'bold', fontSize: 16, marginTop: 15, marginBottom: 10, alignSelf: 'center'}}>
-                                BẢN GHI ĐIỂM DANH NGÀY {dateLookUp.split('-').reverse().join('-')}
-                            </Text>
-                            <ScrollView contentContainerStyle={{ alignItems: 'center' }}>
+                        <Text style={{ fontWeight: 'bold', fontSize: 16, marginTop: 15, marginBottom: 10, alignSelf: 'center' }}>
+                            BẢN GHI ĐIỂM DANH NGÀY {dateLookUp.split('-').reverse().join('-')}
+                        </Text>
+                        <ScrollView contentContainerStyle={{ alignItems: 'center' }}>
                             {data.map((item, index) => (
                                 <Item
                                     name={`${item.first_name} ${item.last_name}`}
@@ -291,20 +304,20 @@ export default function ViewAttendanceHistoryScreen() {
                                     key={index}
                                 />
                             ))}
-                            </ScrollView>
+                        </ScrollView>
 
-                            <TouchableOpacity
-                                style={{
-                                    paddingVertical: 10,
-                                    marginHorizontal: '30%',
-                                    marginVertical: 5,
-                                    backgroundColor: '#007bff',
-                                    borderRadius: 20
-                                }}
-                                onPress={() => setModalVisible(!modalVisible)}
-                            >
-                                <Text style={{fontSize: 16, fontWeight: 'bold', color: 'white', alignSelf: 'center'}}>OKE</Text>
-                            </TouchableOpacity>
+                        <TouchableOpacity
+                            style={{
+                                paddingVertical: 10,
+                                marginHorizontal: '30%',
+                                marginVertical: 5,
+                                backgroundColor: '#007bff',
+                                borderRadius: 20
+                            }}
+                            onPress={() => setModalVisible(!modalVisible)}
+                        >
+                            <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'white', alignSelf: 'center' }}>OKE</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
             </Modal>
@@ -389,5 +402,5 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 1000, // Đảm bảo lớp phủ nằm trên các thành phần khác
-      }
+    }
 });

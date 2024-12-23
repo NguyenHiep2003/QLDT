@@ -269,8 +269,6 @@ export default function AbsenceRequestScreen() {
             if(status == 'ACCEPTED'){ //gọi thêm API để ghi vào attendent record nếu có
                 try{
                     const attendanceDates = await getAttendanceDates(classId)
-                    console.log('attendanceDates: ', attendanceDates)
-                    console.log('dateTime: ', dateTime)
                     const hasRecord = attendanceDates.find((date: any) => date == dateTime)
                     if(hasRecord) {
                         const attendanceRecord = await getAttendanceList(classId, dateTime, null, null)
@@ -293,7 +291,6 @@ export default function AbsenceRequestScreen() {
             }
 
             // send noti to student
-            console.log('sent noti to student')
             try{
                 let message = ''
                 let type = ''
