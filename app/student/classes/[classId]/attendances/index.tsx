@@ -13,6 +13,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { useErrorContext } from '@/utils/ctx';
 import { useFocusEffect } from '@react-navigation/native';
 import { color } from '@rneui/base';
+import OfflineStatusBar from '@/components/OfflineBar';
 
 export default function AttendanceHistory() {
     const { setUnhandledError } = useErrorContext()
@@ -64,6 +65,7 @@ export default function AttendanceHistory() {
     }
     return (
         <>
+            <OfflineStatusBar></OfflineStatusBar>
             {isLoading &&
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <ActivityIndicator size="large" color="#007BFF" />

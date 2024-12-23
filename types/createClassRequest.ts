@@ -78,3 +78,17 @@ export type editClassResponse = {
         message: string;
     };
 };
+
+export type deleteClassRequest = {
+    role: string;
+    account_id: string;
+    class_id: string;
+};
+
+export type deleteClassResponse = {
+    data: any;
+    meta: {
+        code: string;
+        message: string;
+    };
+};
