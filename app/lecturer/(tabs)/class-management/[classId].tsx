@@ -10,7 +10,7 @@ import {
     ScrollView,
 } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
-import { editClass, getClassInfo } from '@/services/api-calls/classes';
+import { deleteClass, editClass, getClassInfo } from '@/services/api-calls/classes';
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { useRoute } from '@react-navigation/core';
 import { router } from 'expo-router';
@@ -74,13 +74,26 @@ const EditClassScreen = () => {
                 if (response.meta.code === '1000') {
                     Alert.alert('Thành công', 'Lớp học đã cập nhật');
                     setErrorMessage('');
-                    router.push(`/lecturer/(tabs)/class-management`);
+                    router.back();
                 } else {
                     setErrorMessage(response.meta.message);
                 }
             })
-            .catch((error: any) => console.log(error));
+            .catch((error: any) => setUnhandledError(error));
     };
+
+    const { setUnhandledError } = useErrorContext();
+    const handleDeleteClass = async () => {
+        await deleteClass(classId.classId).then((response: any) => {
+            if (response.meta.code === '1000') {
+                Alert.alert('Thành công', 'Lớp học đã được xóa');
+                setErrorMessage('');
+                router.back();
+            } else {
+                setErrorMessage(response.meta.message);
+            }
+        }).catch((error: any) => setUnhandledError(error));
+    }
 
     const showStartDatePicker = () => {
         DateTimePickerAndroid.open({
@@ -192,6 +205,30 @@ const EditClassScreen = () => {
                 >
                     <Text style={styles.buttonText}>Chỉnh sửa lớp học</Text>
                 </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={[styles.deleteButton]}
+                    onPress={() =>
+                        Alert.alert(
+                            "Xác nhận xóa",
+                            "Bạn có chắc chắn muốn xóa lớp này không?",
+                            [
+                                {
+                                    text: "Hủy",
+                                    style: "cancel",
+                                },
+                                {
+                                    text: "Đồng ý",
+                                    onPress: handleDeleteClass,
+                                    style: "destructive",
+                                },
+                            ]
+                        )
+                    }
+                >
+                    <Text style={styles.buttonText}>Xóa lớp học</Text>
+                </TouchableOpacity>
+
             </ScrollView>
         </SafeAreaView>
     );
@@ -292,6 +329,16 @@ const styles = StyleSheet.create({
     },
     dateText: {
         color: '#c21c1c',
+    },
+    deleteButton: {
+        backgroundColor: '#ff6347',
+        padding: 15,
+        borderRadius: 5,
+        alignItems: 'center',
+        marginTop: 10,
+        marginBottom: 20,
+        width: '50%',
+        alignSelf: 'center',
     },
 });
 
