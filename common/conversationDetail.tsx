@@ -98,7 +98,14 @@ export function ConversationDetail({
                         `/user/${profile?.id}/inbox`,
                         function (message) {
                             const msg = JSON.parse(message.body);
-                            if (msg.conversation_id != conversationId) return;
+                            if (
+                                (conversationId &&
+                                    msg.conversation_id != conversationId) ||
+                                (partnerId &&
+                                    partnerId != msg.receiver?.id &&
+                                    partnerId != msg.sender?.id)
+                            )
+                                return;
                             const name = msg.sender.name;
                             const split = name.split(' ');
                             const title =
@@ -136,7 +143,14 @@ export function ConversationDetail({
                         function (message) {
                             const msg = JSON.parse(message.body);
                             const id = msg.message_id;
-                            if (msg.conversation_id != conversationId) return;
+                            if (
+                                (conversationId &&
+                                    msg.conversation_id != conversationId) ||
+                                (partnerId &&
+                                    partnerId != msg.receiver?.id &&
+                                    partnerId != msg.sender?.id)
+                            )
+                                return;
                             setMessages((previousMessages) =>
                                 previousMessages.map((message) => {
                                     if (message._id == id)
