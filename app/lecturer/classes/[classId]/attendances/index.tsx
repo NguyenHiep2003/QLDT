@@ -221,7 +221,7 @@ export default function TakeAttendanceScreen() {
   }
 
   useEffect(() => {
-    if (focused) {
+    if (focused||requesting) {
       setFocused(false)
       setStatusShow({ showRecord: false, showErr: false, isLoading: true })
       getStudentList()
