@@ -98,7 +98,6 @@ export default function RequestAbsenceScreen() {
   const sendPushNotification = async () => {
     const message = `Sinh viên '${studentName}' lớp '${className}' xin nghỉ học ngày ${formatDate(dateAbsence)}`
     const toUser = lecturerAccountId.toString()
-    console.log('toUser: ', toUser)
     const type = 'ABSENCE'
     await sendNotification({ message, toUser, type})
   }
