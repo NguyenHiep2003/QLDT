@@ -229,7 +229,8 @@ export async function getBasicClassInfo(request: getClassInfoRequest) {
 
         return response;
     } catch (error) {
-        throw new Error('Error get class info');
+        
+        throw error;
     }
 }
 

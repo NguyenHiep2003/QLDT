@@ -26,6 +26,8 @@ import {
 import { set } from "lodash";
 import { Icon } from "react-native-elements";
 import { AntDesign, FontAwesome } from "@expo/vector-icons";
+import { useErrorContext } from "@/utils/ctx";
+import { NetworkError } from "@/utils/exception";
 
 const OpenClasses = () => {
     const headers = [
@@ -47,6 +49,7 @@ const OpenClasses = () => {
     const [totalPages, setTotalPages] = useState(0);
     const [selectedStatus, setSelectedStatus] = useState("");
     const [selectedClassType, setSelectedClassType] = useState("");
+    const { setUnhandledError } = useErrorContext();
 
     useEffect(() => {
         const fetchOpenClasses = async () => {
@@ -65,7 +68,11 @@ const OpenClasses = () => {
                     );
                 }
             } catch (error) {
-                console.error("Lấy danh sách lớp thất bại:", error);
+                if (error instanceof NetworkError) {
+                    setUnhandledError(error);
+                } else {
+                    Alert.alert("Thông báo", "Lấy dữ liệu lớp thất bại");
+                }
             }
         };
         fetchOpenClasses();
@@ -94,7 +101,11 @@ const OpenClasses = () => {
                     );
                 }
             } catch (error) {
-                console.error("Lấy danh sách lớp thất bại:", error);
+                if (error instanceof NetworkError) {
+                    setUnhandledError(error);
+                } else {
+                    Alert.alert("Thông báo", "Lấy dữ liệu lớp thất bại");
+                }
             }
         };
         fetchOpenClassesByFilter();
@@ -126,7 +137,11 @@ const OpenClasses = () => {
                 }
                 setCurrentPage(0);
             } catch (error) {
-                console.error("Lấy danh sách lớp thất bại:", error);
+                if (error instanceof NetworkError) {
+                    setUnhandledError(error);
+                } else {
+                    Alert.alert("Thông báo", "Lấy dữ liệu lớp thất bại");
+                }
             }
         }
     };

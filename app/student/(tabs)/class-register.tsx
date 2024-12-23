@@ -20,6 +20,9 @@ import {
     getClassInfoRequest,
     getClassInfoResponse,
 } from "@/types/createClassRequest";
+import { NetworkError } from "@/utils/exception";
+import { useErrorContext } from "@/utils/ctx";
+import { set } from "lodash";
 
 const CreateClass = () => {
     const headers = [
@@ -31,6 +34,8 @@ const CreateClass = () => {
         "Tình trạng",
         "Trạng thái",
     ];
+
+    const { setUnhandledError } = useErrorContext();
 
     const [classCode, setClassCode] = useState<string>("");
     const [registeredClasses, setRegisteredClasses] = useState<
@@ -46,7 +51,10 @@ const CreateClass = () => {
             );
 
             if (classExists) {
-                Alert.alert("Lớp đã tồn tại trong danh sách đăng ký");
+                Alert.alert(
+                    "Thông báo",
+                    "Lớp đã tồn tại trong danh sách đăng ký"
+                );
                 return;
             }
 
@@ -58,9 +66,17 @@ const CreateClass = () => {
                 setRegisteredClasses([...registeredClasses, newClass]);
                 setClassCode("");
                 Keyboard.dismiss();
-            } catch (error) {
+            } catch (error: any) {
+                console.log("error:", error);
                 Keyboard.dismiss();
-                Alert.alert("Lớp không tồn tại");
+                if (error instanceof NetworkError) {
+                    setUnhandledError(error);
+                } else {
+                    Alert.alert(
+                        "Thông báo",
+                        "Lớp không tồn tại, vui lòng nhập lại"
+                    );
+                }
             }
         }
     };
