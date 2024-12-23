@@ -5,6 +5,8 @@ import { getTokenLocal } from '@/services/storages/token';
 import {
     createClassRequest,
     createClassResponse,
+    deleteClassRequest,
+    deleteClassResponse,
     editClassRequest,
     editClassResponse,
     getClassInfoRequest,
@@ -257,6 +259,36 @@ export async function editClass(request: editClassRequest) {
             if (errorCode == '1004') {
                 error.setTitle('Lỗi');
                 error.setContent('Mã lớp đã tồn tại');
+            }
+        } else if (error.request) {
+            error.setTitle('Lỗi');
+            error.setContent('Máy chủ không phản hồi!');
+        }
+        throw error;
+    }
+}
+
+export async function deleteClass(class_id: string) {
+    const profile = await getProfileLocal();
+    if (!profile) throw new UnauthorizedException('Profile not found');
+
+    try {
+        const response: deleteClassResponse = await instance.post(
+            '/it5023e/delete_class',
+            {
+                role: ROLES.LECTURER,
+                account_id: profile.id,
+                class_id,
+            }
+        );
+
+        return response;
+    } catch (error: any) {
+        if (error.rawError) {
+            const errorCode = error.rawError?.meta?.code;
+            if (errorCode == '9999') {
+                error.setTitle('Lỗi');
+                error.setContent('Không thể xóa lớp này');
             }
         } else if (error.request) {
             error.setTitle('Lỗi');
